@@ -3,7 +3,7 @@ import random
 class Matrix:
     matrix = [2, 0, 0, 0, 
     2, 0, 0, 0, 
-    2, 0, 0, 0, 
+    0, 0, 0, 0, 
     2, 0, 0, 0]
     row_one = slice(0, 4)
     row_two = slice(4, 8)
@@ -42,44 +42,85 @@ class Board(Matrix):
         else:
             return True
     
+    def remove_from_list(self, this_list, value):
+        return [value for value in this_list if value != 0]
+
     def up_movement(self):
         for i in range(0, 4):
             curr_column = self.matrix[self.columns[i]]
-            new_values = curr_column
+            temp_column = curr_column
+            new_values = [0, 0, 0, 0]
             counter = 0
-            for j in range(1, 4):
-                if(curr_column[j] == 0):
-                    del new_values[j]
-                    new_values.append(0)
-            for k in range(1, 4):
-                if(new_values[k] == 0):
+            need_to_skip = False
+            #clears out 0s in the column
+            for j in range(0, 4):
+                if(temp_column[j] == 0):
+                    del curr_column[j]
+                    curr_column.append(0)
+            #checks for numbers that are the same that are next to each other
+            for k in range(0, 3):
+                #skips iteration in for loop.
+                if(need_to_skip):
+                    print("skipped")
+                    need_to_skip = False
                     continue
-                elif(curr_column[j] == curr_column[j + 1]):
-                    value = curr_column[j] * 2
-                    curr_column[j] = 0
-                    curr_column[j + 1] = 0
+                #0s are at the end, if hit then we are done with column
+                elif(curr_column[k] == 0):
+                    print("0 found in column: ", i, " position: ", k )
+                    break
+                #checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
+                elif(curr_column[k] == curr_column[k + 1]):
+                    print("Combining Same numbers at column: ", i, " in position: ", k, "and ", k+1)
+                    value = curr_column[k] * 2
+                    curr_column[k] = 0
+                    curr_column[k + 1] = 0
                     new_values[counter] = value
                     counter += 1
+                    need_to_skip = True
+                #number is unique so it is added without modification to the new values column
                 else:
-                    new_values[counter] = curr_column[j]
+                    print("unique number in column: ", i, " in position: ", k)
+                    new_values[counter] = curr_column[k]
+                    counter += 1
+            #assigns the new values to the board
             self.matrix[self.columns[i]] = new_values
         print("Completed Up Movement")
     
     def down_movement(self):
-        for i in reversed(range(0, 3)):
+        for i in range(0, 4):
             curr_column = self.matrix[self.columns[i]]
+            curr_column.reverse()
             new_values = [0, 0, 0, 0]
-            counter = 3
-            for j in range(0, 3):
-                if(curr_column[j] == 0):
+            counter = 0
+            need_to_skip = False
+            #clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problems
+            curr_column = self.remove_from_list(curr_column, 0)
+            #checks for numbers that are the same that are next to each other
+            for k in range(0, 3):
+                #skips iteration in for loop.
+                if(need_to_skip):
+                    print("skipped")
+                    need_to_skip = False
                     continue
+                #0s are at the end, if hit then we are done with column
+                elif(curr_column[k] == 0):
+                    print("0 found in column: ", i, " position: ", k )
+                    break
+                #checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
+                elif(curr_column[k] == curr_column[k + 1]):
+                    print("Combining Same numbers at column: ", i, " in position: ", k, "and ", k+1)
+                    value = curr_column[k] * 2
+                    curr_column[k] = 0
+                    curr_column[k + 1] = 0
+                    new_values[counter] = value
+                    counter += 1
+                    need_to_skip = True
+                #number is unique so it is added without modification to the new values column
                 else:
-                    if(curr_column[j] == curr_column[j - 1]):
-                        value = curr_column[j] * 2
-                        curr_column[j] = 0
-                        curr_column[j - 1] = 0
-                        new_values[counter] = value
-                        counter -= 1
+                    print("unique number in column: ", i, " in position: ", k)
+                    new_values[counter] = curr_column[k]
+                    counter += 1
+            #assigns the new values to the board
             self.matrix[self.columns[i]] = new_values
         print("Completed Down Movement")
 
@@ -117,7 +158,7 @@ def print_matrix_4_rows(m):
 
 B = Board()
 print_matrix_4_rows(B.matrix)
-B.down_movement()
-print_matrix_4_rows(B.matrix)
 B.up_movement()
+print_matrix_4_rows(B.matrix)
+B.down_movement()
 print_matrix_4_rows(B.matrix)
