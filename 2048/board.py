@@ -193,6 +193,7 @@ class Board(Matrix):
         below is the same then the numbers are combined and the result 
         is copied to a new array with the number below being deleted if
         not then the number is copied without modification. 0's are ignored.
+        The move is an up move with the column reversed.
         
         Args:
             None
@@ -236,6 +237,27 @@ class Board(Matrix):
             self.matrix[self.columns[i]] = new_values
 
     def left_movement(self):
+        '''
+        Performs a left movement, similar to the game 2048,
+        on the matrix within the board object. The movement will go 
+        through all rows in the matrix. The matrix is a list of 
+        length 16 and is arranged in a 4x4 grid with position 0 in the 
+        top left and the list extending right and ending with position 16
+        in the bottom right. For each row, the slice associated 
+        with has its 0's removed and not replaced. The row is then 
+        appended with 0's until the length is 4. Starting at the far 
+        right of the row, if the number to the left is the same then 
+        the numbers are combined and the result is copied to a new 
+        array with the number below being deleted if not then the number
+        is copied without modification. 0's are ignored.
+        
+        Args:
+            None
+        Returns:
+            None
+        Raises:
+            None
+        '''
         for i in range(0, 4):
             curr_column = self.matrix[self.rows[i]]
             curr_column = self.remove_from_list(curr_column, 0)
@@ -269,6 +291,29 @@ class Board(Matrix):
             self.matrix[self.rows[i]] = new_values
 
     def right_movement(self):
+        '''
+        Performs a right movement, similar to the game 2048,
+        on the matrix within the board object. The movement will go 
+        through all rows in the matrix. The matrix is a list of 
+        length 16 and is arranged in a 4x4 grid with position 0 in the 
+        top left and the list extending right and ending with position 16
+        in the bottom right. For each row, the slice associated 
+        with has its 0's removed and not replaced. The row is then 
+        appended with 0's until the length is 4. The row is then 
+        reversed. Starting at the far right of the row, if the number 
+        to the left is the same then the numbers are combined and the 
+        result is copied to a new array with the number below being 
+        deleted if not then the number is copied without 
+        modification. 0's are ignored. The move is a left move with 
+        the row reversed.
+        
+        Args:
+            None
+        Returns:
+            None
+        Raises:
+            None
+        '''
         for i in range(0, 4):
             curr_column = self.matrix[self.rows[i]]
             #reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
@@ -304,6 +349,18 @@ class Board(Matrix):
             self.matrix[self.rows[i]] = new_values
 
 def print_matrix_4_rows(m):
+    '''
+    Prints a 4x4 matrix that is in the form of a list of length 16.
+    The function slices the matrix into 4 slices each corressponding to
+    a row then prints the rows sequentially starting with first row.
+
+    Args:
+        list - length 16
+    Returns:
+        None
+    Raises:
+        None
+    '''
     row_one = slice(0, 4)
     row_two = slice(4, 8)
     row_three = slice(8, 12)
