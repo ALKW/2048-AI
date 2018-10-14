@@ -1,11 +1,15 @@
 import node
+import numpy
 
-class Network():
+class Network:
+
     def __init__(self):
         #generate inputs
-        self.inputs = [node.Node(label) for label in range(16)]
+        self.inputs = [x for x in range(16)]
+        #generate hidden layers
+        self.hidden_layers = [x for x in range(8)]
         #generate outputs
-        self.outputs = [node.Node(label) f or label in range(4)]
+        self.outputs = [x for x in range(4)]
 
     def breed(self):
         pass
@@ -15,3 +19,7 @@ class Network():
 
     def create_population(self, count):
         pop = []
+
+    
+
+    
