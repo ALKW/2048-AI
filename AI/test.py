@@ -1,5 +1,7 @@
-import node
-import neural_network
-import gameEnvironment.game
+from neural_network import Network
+
+network = Network(1)
+network.print_layers()
+print("*")
 
 
