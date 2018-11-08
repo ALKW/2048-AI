@@ -1,4 +1,4 @@
-import numpy
+import numpy as py
 
 class Network:
     def __init__(self, hidden_count):
@@ -11,9 +11,9 @@ class Network:
 
     def run(self, stimuli):
         #fill in the inputs layer with numbers based on game board
-        for i in range(0, len(stimuli))
+        for i in range(0, len(stimuli)):
             #equation for determining results from input. result is between 0 and 1
-            inputs[i] = stimuli[i]
+            self.inputs[i] = self.sigmoid(stimuli[i])
         
     def breed(self):
         pass
@@ -23,6 +23,9 @@ class Network:
 
     def create_population(self, count):
         pop = []
+
+    def sigmoid(self, x):
+        return 1 / (1 + py.exp(-x))
 
     def print_layers(self):
         print("inputs: ") 
