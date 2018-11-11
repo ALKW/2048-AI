@@ -46,28 +46,3 @@ def copy_length_16_matrix(matrix, new_matrix):
         new_matrix[i] = matrix[i]
     return new_matrix
 
-valid = False
-is_over = False
-game_board = board.Board()
-previous_board = board.Board()
-
-while(not is_over):
-    if(game_board.is_full()):
-        is_over = True
-        continue
-    game_board.spawn_number()
-    board.print_matrix_4_rows(game_board.matrix)
-    copy_length_16_matrix(game_board.matrix, previous_board.matrix)
-    while(not valid):
-        move = input("Input Movement: ")
-        valid = determine_move(move, game_board)
-        if(previous_board.matrix == game_board.matrix):
-            print("invalid move")
-            valid = False
-    board.print_matrix_4_rows(game_board.matrix)
-    print("Completed Move")
-    copy_length_16_matrix(game_board.matrix, previous_board.matrix)
-    valid = False
-
-print("Game Over")
-
