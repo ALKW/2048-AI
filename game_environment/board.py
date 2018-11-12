@@ -21,7 +21,7 @@ class Board(Matrix):
     score = 0
 
     def __init__(self):
-        self.matrix = [0, 0, 0, 8, 
+        self.matrix = [2, 0, 0, 8, 
         0, 0, 0, 2, 
         0, 0, 0, 4, 
         0, 0, 0, 2]

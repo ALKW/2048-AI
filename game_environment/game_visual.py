@@ -67,7 +67,7 @@ while not is_over:
     x, y = 1, 1
     for i in range(0, len(game_board.matrix)):
         if game_board.matrix[i] != 0:
-            pygame.draw.rect(screen, INIT_SQUARE_COLOR, [(x + 10) * i, y, 5, 5], 0)
+            pygame.draw.rect(screen, INIT_SQUARE_COLOR, [x + (((i % 4) * 107) + ((i % 4) * 14)) + 37, y + (((i // 4) * 107) + ((i // 4) * 14)) + 37, 107, 107], 0)
     pygame.display.flip()
 
 print("Game Over")
