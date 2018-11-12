@@ -1,48 +1,39 @@
 import board
+import pygame
+from pygame.locals import *
 
-def determine_move(move, board):
-    '''
-    Executes move based on user input, move must match and of the
-    strings below otherwise invalid move is printed
-    
-    Args: 
-        move (Str) valid options: "up", "left", "right", "down"
-        board (Board Object)
-    Returns:
-        Boolean - true if move is matches any provided move, false if
-        move does not match any provided move
-    Raises: 
-        None
-    '''
-    if(move == "up"):
-        board.up_movement()
-        return True
-    elif(move == "down"):
-        board.down_movement()
-        return True
-    elif(move == "left"):
-        board.left_movement()
-        return True
-    elif(move == "right"):
-        board.right_movement()
-        return True
-    else:
-        print("invalid move*")
-        return False
+#initialize classes
+pygame.init()
 
-def copy_length_16_matrix(matrix, new_matrix):
-    '''
-    Copies array of length 16 into another array of length 16
-    
-    Args: 
-        matrix (list of length 16) matrix to copy from
-        new_matrix (list of length 16) matrix to be copied to
-    Returns:
-        new_matrix
-    Raises: 
-        None
-    '''
-    for i in range(0, 16):
-        new_matrix[i] = matrix[i]
-    return new_matrix
+#Create the board
+valid = False
+is_over = False
+game_board = board.Board()
+previous_board = board.Board()
+
+#Spawn a number
+game_board.spawn_number()
+
+while not is_over:
+    if(game_board.is_full()):
+        is_over = True
+        continue
+    #Copy the matrix to make a previous board with the newly spawned number
+    board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
+
+    #Determine if the move is valid
+    #Make this a separate thread to allow the program to run faster
+    move = input("Move: ")
+    if(move == "E"):
+        break
+    board.determine_move(move, game_board)
+    #Determine if the resulting move did anything
+    if(previous_board.matrix != game_board.matrix):
+        #Copy the matrix to make a previous board with the newly completed move
+        board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
+        #Spawn a number
+        game_board.spawn_number()
+
+print("Score:", max(game_board.matrix))    
+print("Game Over")
 

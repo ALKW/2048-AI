@@ -100,8 +100,9 @@ while not is_over:
                 board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
                 #Spawn a number
                 game_board.spawn_number()
-            print("Score:", max(game_board.matrix))
     #Print board to screen
     update_board(screen, game_board)
+
+print("Score:", max(game_board.matrix))    
 print("Game Over")
 sys.exit()
