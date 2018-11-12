@@ -7,7 +7,8 @@ import math
 def update_board(screen, board):
     SEP_WIDTH = 14
     SQ_WIDTH = 107
-    WHITE_SPACE = 38
+    WHITE_SPACE_X = 38
+    WHITE_SPACE_Y = 37
     COLORS = ([255, 0, 0], [255, 85, 0], [255, 170, 0], [255, 255, 0],
                 [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255],
                 [0, 0, 255], [85, 0, 255], [170, 0, 255], [255, 0, 255],
@@ -22,12 +23,15 @@ def update_board(screen, board):
                 screen, 
                 COLORS[int(power_2) % 15], 
                 [ #Rectangle
-                    (((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE, 
-                    (((i // 4) * SQ_WIDTH) + ((i // 4) * SEP_WIDTH)) + WHITE_SPACE, 
+                    (((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X, 
+                    (((i // 4) * SQ_WIDTH) + ((i // 4) * SEP_WIDTH)) + WHITE_SPACE_Y, 
                     SQ_WIDTH, 
                     SQ_WIDTH
                 ],#Rectangle Border
                 0)
+            textsurface = myfont.render(str(game_board.matrix[i]), True, (255, 255, 255))
+            screen.blit(textsurface, ((((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X + 45, 
+                                    (((i // 4) * SQ_WIDTH) + ((i // 4) * SEP_WIDTH)) + WHITE_SPACE_Y + 30))
     pygame.display.flip()
 
 #initialize classes
@@ -45,6 +49,9 @@ INIT_SQUARE_COLOR = 0, 0, 0
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('2048-AI')
 pygame.display.set_icon(pygame.image.load("C:/Users/Alex/Documents/GitHub/2048-AI/game_environment/background_board.png"))
+
+#Set the font
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
 #Get the background image from a picture
 background_board = pygame.image.load("C:/Users/Alex/Documents/GitHub/2048-AI/game_environment/background_board.png")
@@ -93,8 +100,8 @@ while not is_over:
                 board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
                 #Spawn a number
                 game_board.spawn_number()
+            print("Score:", max(game_board.matrix))
     #Print board to screen
     update_board(screen, game_board)
-
 print("Game Over")
 sys.exit()
