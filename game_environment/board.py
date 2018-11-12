@@ -21,10 +21,10 @@ class Board(Matrix):
     score = 0
 
     def __init__(self):
-        self.matrix = [2, 0, 0, 8, 
-        0, 0, 0, 2, 
-        0, 0, 0, 4, 
-        0, 0, 0, 2]
+        self.matrix = [0, 0, 0, 0, 
+        0, 0, 0, 0, 
+        0, 0, 0, 0, 
+        0, 0, 0, 0]
 
     def choose(self):
         '''
@@ -397,7 +397,7 @@ def determine_move(move, board):
         board.right_movement()
         return True
     else:
-        print("invalid move*")
+        print("invalid move")
         return False
 
 def copy_length_16_matrix(matrix, new_matrix):
