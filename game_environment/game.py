@@ -26,6 +26,9 @@ while not is_over:
     move = input("Move: ")
     if(move == "E"):
         break
+    if(move == "P"):
+        board.print_matrix_4_rows(game_board.matrix)
+        continue
     board.determine_move(move, game_board)
     #Determine if the resulting move did anything
     if(previous_board.matrix != game_board.matrix):
