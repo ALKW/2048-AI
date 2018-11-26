@@ -2,7 +2,7 @@ import numpy as np
 import random 
  
 class Network:
-    def __init__(self, hidden_count, hidden_width, act_func):
+    def __init__(self, hidden_count, hidden_width, act_num):
         '''
         Parameters of Neural Network:
             -Number of hidden layers
@@ -19,9 +19,9 @@ class Network:
         #generate outputs
         self.outputs = np.array([0 for x in range(4)])
         #choose activation function
-        self.act = act_func
+        self.act = act_num
         #network parameters
-        self.param = [hidden_count, hidden_width, act_func]
+        self.param = [hidden_count, hidden_width, act_num]
         #fitness
         self.fitness = 0
 
@@ -61,7 +61,25 @@ class Network:
 
     def breed(self, other_parent):
         #Child has traits from both parents, weights are updated using a optimizer from the most successful parent
-        pass
+        num_traits_from_self = random.randInt(1,2)
+        num_traits_from_other = 3 - num_traits_from_self 
+
+        trait_marks = [0, 0, 0]
+        traits = [0, 0, 0]
+
+        #1 indicates trait comes from self, 0 indicates trait comes from other parent
+        for i in range(num_traits_from_self):
+            index = random.randInt(0,2)
+            trait_marks[index] = 1
+
+        for i in range(len(traits)):
+            if(trait_marks[i] == 1):
+                traits[i] = self.param[i]
+            else:
+                traits[i] = self.param[i]
+        
+        child = network(traits[0], traits[1], traits[2])
+        return child
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
@@ -75,7 +93,48 @@ class Network:
         print("Outputs: ")
         print(self.outputs)
 
+
+
+def mutate(network):
+    '''
+    Returns a mutation of the network passed in. The mutation will have 1 or 2 traits from the
+    network passed in and is guarenteed to have 1 randomly created trait.
+    Args:
+        network (Network object) - network to mutate from
+    Returns:
+        mutation (Network object) - mutated network
+    Raises:
+        None
+    '''
+    num_traits_from_self = random.randInt(1,2)
+    num_traits_from_other = 3 - num_traits_from_self 
+
+    trait_marks = [0, 0, 0]
+    traits = [0, 0, 0]
+
+    #1 indicates trait comes from self, 0 indicates trait comes from random
+    for i in range(num_traits_from_self):
+        index = random.randInt(0,2)
+        trait_marks[index] = 1
+
+    if(trait_marks[0] == 1):
+        traits[0] = self.param[0]
+    else:
+        traits[0] = random.randInt(0,4)
     
+    if(trait_marks[1] == 1):
+        traits[1] = self.param[1]
+    else:
+        traits[1] = random.randInt(0,256)
+
+    if(trait_marks[2] == 1):
+        traits[2] = self.param[2]
+    else:
+        traits[2] = random.randInt(0,2)
+
+    
+    mutation = network(traits[0], traits[1], traits[2])
+    return mutation
 
 def create_random(hidden=4, width=256, act_start=0, act_stop=2):
     '''
@@ -99,7 +158,11 @@ def create_init_population_species(count, hidden=4, width=256, act_start=0, act_
     '''
     Returns a list of neural networks that has length count
     Args:
-        Count (int) number of memembers of species population
+        count (int) number of members of species population
+        hidden (int) max number of hidden layers. Default: 4
+        width (int) max width of neural network. Default: 256
+        act_start (int) where to start subset of available activation functions
+        act_stop (int) where to stop subset of available activation functions
     Returns:
         Population (list of neural network objects)
     Raises:
