@@ -2,41 +2,46 @@ import board
 import pygame
 from pygame.locals import *
 
-#initialize classes
-pygame.init()
+class Game:
+    def __init__(self):
+        #Create the board
+        self.board = board.Board()
+        self.previous_board = board.Board()
 
-#Create the board
-valid = False
-is_over = False
-game_board = board.Board()
-previous_board = board.Board()
+    def run(self):
+        #initialize classes
+        pygame.init()
 
-#Spawn a number
-game_board.spawn_number()
+        #Create the board
+        valid = False
+        is_over = False
 
-while not is_over:
-    if(game_board.is_full()):
-        is_over = True
-        continue
-    #Copy the matrix to make a previous board with the newly spawned number
-    board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
-
-    #Determine if the move is valid
-    #Make this a separate thread to allow the program to run faster
-    move = input("Move: ")
-    if(move == "E"):
-        break
-    if(move == "P"):
-        board.print_matrix_4_rows(game_board.matrix)
-        continue
-    board.determine_move(move, game_board)
-    #Determine if the resulting move did anything
-    if(previous_board.matrix != game_board.matrix):
-        #Copy the matrix to make a previous board with the newly completed move
-        board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
         #Spawn a number
-        game_board.spawn_number()
+        self.board.spawn_number()
 
-print("Score:", max(game_board.matrix))    
-print("Game Over")
+        while not is_over:
+            if(self.board.is_full()):
+                is_over = True
+                continue
+            #Copy the matrix to make a previous board with the newly spawned number
+            board.copy_length_16_matrix(self.board.matrix, self.previous_board.matrix)
+
+            #Determine if the move is valid
+            #Make this a separate thread to allow the program to run faster
+            move = input("Move: ")
+            if(move.lower() == 'e'):
+                break
+            if(move.lower() == "p"):
+                board.print_matrix_4_rows(self.board.matrix)
+                continue
+            board.determine_move(move, self.board)
+            #Determine if the resulting move did anything
+            if(self.previous_board.matrix != self.board.matrix):
+                #Copy the matrix to make a previous board with the newly completed move
+                board.copy_length_16_matrix(self.board.matrix, self.previous_board.matrix)
+                #Spawn a number
+                self.board.spawn_number()
+
+        print("Score:", max(self.board.matrix))    
+        print("Game Over")
 

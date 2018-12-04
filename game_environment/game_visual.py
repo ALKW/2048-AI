@@ -16,6 +16,7 @@ def update_board(screen, board):
     screen.fill(BLACK)
     screen.blit(background_board, background_boardrect)
 
+    #draw each piece to the screen
     for i in range(0, len(game_board.matrix)):
         if game_board.matrix[i] != 0:
             power_2 = math.log(game_board.matrix[i], 2)

@@ -12,8 +12,10 @@ class Network:
                 Tanh - 1
                 Linear - 2
         '''
-        #generate inputs
-        self.inputs = np.array([])
+        #fitness for the network, initialized to 0
+        self.fitness = 0
+        #Species for the network, initialized to 0
+        self.species = 0
         #generate hidden layer
         self.hidden = np.array([list(range(hidden_width)) for x in range(hidden_count)])
         #generate outputs
@@ -21,7 +23,7 @@ class Network:
         #choose activation function
         self.act = act_num
         #network parameters
-        self.param = [hidden_count, hidden_width, act_num]
+        self.params = [hidden_count, hidden_width, act_num]
         #fitness
         self.fitness = 0
 
@@ -32,20 +34,20 @@ class Network:
 
         #feed input layer into first hidden layer
         for i in range(len(first_layer)):
-            outputs.append(self.act_function(np.sum(stimuli * first_layer[i]), self.param[2]))
+            outputs.append(self.act_function(np.sum(stimuli * first_layer[i]), self.params[2]))
         inputs = outputs
         outputs = np.array([])
 
         #Feed inputs into the remaining hidden layers
         for layer in range(1, len(self.hidden)):
             for i in range(len(layer)):
-                outputs.append(self.act_function(np.sum(inputs * first_layer[i]), self.param[2]))
+                outputs.append(self.act_function(np.sum(inputs * first_layer[i]), self.params[2]))
             inputs = outputs
             outputs = np.array([])
 
         #Feeds inputs into the output layer
         for i in range(len(self.outputs)):
-            outputs.append(self.act_function(np.sum(inputs), self.param[2]))
+            outputs.append(self.act_function(np.sum(inputs), self.params[2]))
 
         #Determines best move and returns index; 0 - 3 (left, right, down, up)
         return outputs.index(max(outputs))
@@ -61,7 +63,7 @@ class Network:
 
     def breed(self, other_parent):
         #Child has traits from both parents, weights are updated using a optimizer from the most successful parent
-        num_traits_from_self = random.randInt(1,2)
+        num_traits_from_self = random.randint(1,2)
         num_traits_from_other = 3 - num_traits_from_self 
 
         trait_marks = [0, 0, 0]
@@ -69,29 +71,25 @@ class Network:
 
         #1 indicates trait comes from self, 0 indicates trait comes from other parent
         for i in range(num_traits_from_self):
-            index = random.randInt(0,2)
+            index = random.randint(0,2)
             trait_marks[index] = 1
 
         for i in range(len(traits)):
             if(trait_marks[i] == 1):
-                traits[i] = self.param[i]
+                traits[i] = self.params[i]
             else:
-                traits[i] = self.param[i]
+                traits[i] = self.params[i]
         
-        child = network(traits[0], traits[1], traits[2])
+        child = Network(traits[0], traits[1], traits[2])
         return child
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
 
-    def print_layers(self):
-        print("inputs: ") 
-        print(self.inputs)
-        print("Hidden: ")
-        for i in range(0, len(self.hidden)):
-            print(self.hidden[i])
-        print("Outputs: ")
-        print(self.outputs)
+    def print_traits(self):
+        print("Params: ", self.params)
+        print("Fitness: ", self.fitness)
+        print("Species: ", self.species)
 
 
 
@@ -106,7 +104,7 @@ def mutate(network):
     Raises:
         None
     '''
-    num_traits_from_self = random.randInt(1,2)
+    num_traits_from_self = random.randint(1,2)
     num_traits_from_other = 3 - num_traits_from_self 
 
     trait_marks = [0, 0, 0]
@@ -114,23 +112,23 @@ def mutate(network):
 
     #1 indicates trait comes from self, 0 indicates trait comes from random
     for i in range(num_traits_from_self):
-        index = random.randInt(0,2)
+        index = random.randint(0,2)
         trait_marks[index] = 1
 
     if(trait_marks[0] == 1):
-        traits[0] = self.param[0]
+        traits[0] = network.params[0]
     else:
-        traits[0] = random.randInt(0,4)
+        traits[0] = random.randint(0,4)
     
     if(trait_marks[1] == 1):
-        traits[1] = self.param[1]
+        traits[1] = network.params[1]
     else:
-        traits[1] = random.randInt(0,256)
+        traits[1] = random.randint(0,256)
 
     if(trait_marks[2] == 1):
-        traits[2] = self.param[2]
+        traits[2] = network.params[2]
     else:
-        traits[2] = random.randInt(0,2)
+        traits[2] = random.randint(0,2)
 
     
     mutation = network(traits[0], traits[1], traits[2])
