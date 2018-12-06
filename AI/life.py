@@ -1,5 +1,6 @@
-import neural_network as nw
-import game_environment
+import neural_network as network
+from game_environment import game
+from game_environment import game_visual
 
 #species determined by combination of traits; hidden_layer, hidden_width, and act_func
 class Life:
@@ -25,4 +26,7 @@ class Life:
 #   Mutate Next top 4: +4
 
 all_life = Life()
+all_life.individuals = network.create_init_population_species(20)
 
+test_network = network.create_random()
+test_network.print_traits()
