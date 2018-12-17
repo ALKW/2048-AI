@@ -348,70 +348,69 @@ class Board(Matrix):
             new_values.reverse()
             self.matrix[self.rows[i]] = new_values
 
-def print_matrix_4_rows(m):
-    '''
-    Prints a 4x4 matrix that is in the form of a list of length 16.
-    The function slices the matrix into 4 slices each corressponding to
-    a row then prints the rows sequentially starting with first row.
+    def determine_move(self, move):
+        '''
+        Executes move based on user input, move must match and of the
+        strings below otherwise invalid move is printed
+        
+        Args: 
+            move (Str) valid options: "up", "left", "right", "down"
+            board (Board Object)
+        Returns:
+            Boolean - true if move is matches any provided move, false if
+            move does not match any provided move
+        Raises: 
+            None
+        '''
+        if(move == "up"):
+            self.up_movement()
+            return True
+        elif(move == "down"):
+            self.down_movement()
+            return True
+        elif(move == "left"):
+            self.left_movement()
+            return True
+        elif(move == "right"):
+            self.right_movement()
+            return True
+        else:
+            print("invalid move")
+            return False
 
-    Args:
-        list - length 16
-    Returns:
-        None
-    Raises:
-        None
-    '''
-    row_one = slice(0, 4)
-    row_two = slice(4, 8)
-    row_three = slice(8, 12)
-    row_four = slice(12, 16)
-    print(m[row_one])
-    print(m[row_two])
-    print(m[row_three])
-    print(m[row_four])
+    def print_matrix(self):
+        '''
+        Prints a 4x4 matrix that is in the form of a list of length 16.
+        The function slices the matrix into 4 slices each corressponding to
+        a row then prints the rows sequentially starting with first row.
 
-def determine_move(move, board):
-    '''
-    Executes move based on user input, move must match and of the
-    strings below otherwise invalid move is printed
-    
-    Args: 
-        move (Str) valid options: "up", "left", "right", "down"
-        board (Board Object)
-    Returns:
-        Boolean - true if move is matches any provided move, false if
-        move does not match any provided move
-    Raises: 
-        None
-    '''
-    if(move == "up"):
-        board.up_movement()
-        return True
-    elif(move == "down"):
-        board.down_movement()
-        return True
-    elif(move == "left"):
-        board.left_movement()
-        return True
-    elif(move == "right"):
-        board.right_movement()
-        return True
-    else:
-        print("invalid move")
-        return False
+        Args:
+            list - length 16
+        Returns:
+            None
+        Raises:
+            None
+        '''
+        row_one = slice(0, 4)
+        row_two = slice(4, 8)
+        row_three = slice(8, 12)
+        row_four = slice(12, 16)
+        print(self.matrix[row_one])
+        print(self.matrix[row_two])
+        print(self.matrix[row_three])
+        print(self.matrix[row_four])
 
-def copy_length_16_matrix(matrix, new_matrix):
-    '''
-    Copies array of length 16 into another array of length 16
-    
-    Args: 
-        matrix (list of length 16) matrix to copy from
-        new_matrix (list of length 16) matrix to be copied to
-    Returns:
-        new_matrix
-    Raises: 
-        None
-    '''
-    for i in range(0, 16):
-        new_matrix[i] = matrix[i]
-    return new_matrix
+    def copy_matrix(self, new_matrix):
+        '''
+        Copies array of length 16 into another array of length 16
+        
+        Args: 
+            new_matrix (list of length 16) matrix to be copied to
+        Returns:
+            new_matrix
+        Raises: 
+            None
+        '''
+        for i in range(0, 16):
+            new_matrix[i] = self.matrix[i]
+        return new_matrix

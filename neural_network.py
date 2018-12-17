@@ -17,9 +17,7 @@ class Network:
         #Species for the network, initialized to 0
         self.species = 0
         #generate hidden layer
-        self.hidden = np.array([list(range(hidden_width)) for x in range(hidden_count)])
-        #generate outputs
-        self.outputs = np.array([0 for x in range(4)])
+        self.hidden = np.array([[random.random() for x in range(hidden_width)] for x in range(hidden_count)])
         #choose activation function
         self.act = act_num
         #network parameters
@@ -28,30 +26,46 @@ class Network:
         self.fitness = 0
 
     def feed(self, stimuli):
+        NUMBER_OF_HIDDEN_LAYERS = 0
+        HIDDEN_LAYER_WIDTH = 1
+        ACTIVATION_FUNCTION = 2
+
         stimuli = np.array(stimuli)
-        outputs = np.array([])
-        first_layer = self.hidden[1]
+        outputs = []
+        first_layer = self.hidden[0]
 
         #feed input layer into first hidden layer
         for i in range(len(first_layer)):
-            outputs.append(self.act_function(np.sum(stimuli * first_layer[i]), self.params[2]))
-        inputs = outputs
-        outputs = np.array([])
+            outputs.append(self.act_function(np.sum(stimuli * first_layer[i]), self.params[ACTIVATION_FUNCTION]))
+        inputs = np.array(outputs)
+        outputs = []
 
         #Feed inputs into the remaining hidden layers
         for layer in range(1, len(self.hidden)):
-            for i in range(len(layer)):
-                outputs.append(self.act_function(np.sum(inputs * first_layer[i]), self.params[2]))
-            inputs = outputs
-            outputs = np.array([])
+            print(inputs)
+            for i in range(len(self.hidden[layer])):
+                outputs.append(self.act_function(np.sum(inputs * first_layer[i]), self.params[ACTIVATION_FUNCTION]))
+            inputs = np.array(outputs)
+            outputs = []
+        print(inputs)
 
         #Feeds inputs into the output layer
-        for i in range(len(self.outputs)):
-            outputs.append(self.act_function(np.sum(inputs), self.params[2]))
-
-        #Determines best move and returns index; 0 - 3 (left, right, down, up)
-        return outputs.index(max(outputs))
+        return self.determine_output(np.sum(inputs))
         
+
+    def determine_output(self, result):
+        NUMBER_OF_HIDDEN_LAYERS = 0
+        HIDDEN_LAYER_WIDTH = 1
+        ACTIVATION_FUNCTION = 2
+
+        if self.params[ACTIVATION_FUNCTION] == 0:
+            return (4 * (result / self.params[HIDDEN_LAYER_WIDTH]) - 3.9) * 10
+        elif self.params[ACTIVATION_FUNCTION] == 1:
+            pass
+        else:
+            pass
+        return -1
+
     def act_function(self, input, func):  
         if(func == 0):
             return self.sigmoid(input)
@@ -88,6 +102,10 @@ class Network:
 
     def print_traits(self):
         print("Params: ", self.params)
+        print("[Hidden Layers, Hidden Layers Width, Activation Function]")
+        print("Hidden Layers:")
+        for layer in self.hidden:
+            print(layer)
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
 

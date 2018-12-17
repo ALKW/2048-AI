@@ -49,13 +49,12 @@ INIT_SQUARE_COLOR = 0, 0, 0
 #Set the screen size
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption('2048-AI')
-pygame.display.set_icon(pygame.image.load("C:/Users/Alex/Documents/GitHub/2048-AI/game_environment/background_board.png"))
 
 #Set the font
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
 #Get the background image from a picture
-background_board = pygame.image.load("C:/Users/Alex/Documents/GitHub/2048-AI/game_environment/background_board.png")
+background_board = pygame.image.load("background_board.png")
 #Create the object as a moving object
 background_boardrect = background_board.get_rect()
 
@@ -73,7 +72,7 @@ while not is_over:
         is_over = True
         continue
     #Copy the matrix to make a previous board with the newly spawned number
-    board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
+    previous_board.matrix = game_board.copy_matrix(previous_board.matrix)
 
     #Determine if the move is valid
     #Make this a separate thread to allow the program to run faster
@@ -91,14 +90,14 @@ while not is_over:
                 move = "up"
             else:
                 move = ""
-            board.determine_move(move, game_board)
+            game_board.determine_move(move)
             #Print board to screen 
             update_board(screen, game_board)
 
             #Determine if the resulting move did anything
             if(previous_board.matrix != game_board.matrix):
                 #Copy the matrix to make a previous board with the newly completed move
-                board.copy_length_16_matrix(game_board.matrix, previous_board.matrix)
+                previous_board.matrix = game_board.copy_matrix(previous_board.matrix)
                 #Spawn a number
                 game_board.spawn_number()
     #Print board to screen
