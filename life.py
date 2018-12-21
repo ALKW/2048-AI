@@ -7,24 +7,24 @@ class Life:
         #Array of all networks regardless of species
         self.individuals = []
 
-        #list of lists. each list has a specific species
+        #list of lists. each list has a specific species list
         self.species_list = []
 
     def feed_life(self):
-        #Runs all networks through 1 game each and ranks them accordingly
+        #Runs all networks through 1 game each and ranks them accordingly within their species
         pass
     
     def classify_life(self):
-        #goes through all elements in the list. If it does not have a species classify it and assign it to the appropriate list
+        #goes through all networks in the list. If it does not have a species classify it and assign it to the appropriate list
         pass
     
 def find_move():
     pass
 
 #Have max heaps (species) of 20 individuals max. At each stage:
-#   Delete 4 lowest performers. : -4 
-#   Mate top 4 perfomers. : +6
-#   Mutate Next top 4: +4
+#   Delete 5 lowest performers: -5 
+#   Mate top 5 perfomers and keep original: +15
+#   Mutate Next top 5 and keep original: +10
 
 all_life = Life()
 all_life.individuals = neural_network.create_init_population_species(20)
