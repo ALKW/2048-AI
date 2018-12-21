@@ -22,7 +22,7 @@ class Network:
         #Input layer of nodes
         self.inputs = [Node(inputs[x]) for x in range(len(inputs))]
         #Output layer of nodes
-        self.outputs = [Node(0, outputs[x]) for x in range(len(outputs)))]
+        self.outputs = [Node(0, desc=outputs[x]) for x in range(len(outputs)))]
 
     def feed(self):
         #Perform a bfs type run with each input node as the source
@@ -47,25 +47,23 @@ class Network:
     def breed(self, other_parent):
         pass
 
+    def mutate(self):
+        '''
+        Returns a mutation of the network passed in. The mutation will have 1 or 2 traits from the
+        network passed in and is guarenteed to have 1 randomly created trait.
+        Args:
+            network (Network object) - network to mutate from
+        Returns:
+            mutation (Network object) - mutated network
+        Raises:
+            None
+        '''
+        pass
+    
     def print(self):
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
         print("Generation: ", self.generation)
-
-
-
-def mutate(network):
-    '''
-    Returns a mutation of the network passed in. The mutation will have 1 or 2 traits from the
-    network passed in and is guarenteed to have 1 randomly created trait.
-    Args:
-        network (Network object) - network to mutate from
-    Returns:
-        mutation (Network object) - mutated network
-    Raises:
-        None
-    '''
-    pass
 
 def create_init_population_species(count, inputs, outputs):
     '''
