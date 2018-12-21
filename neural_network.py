@@ -146,7 +146,7 @@ class Network:
             #Choose the input/internal node to connect to the output node (both are random)
             #Error checking to make sure there exists internal nodes
             if len(self.internal) > 0:
-                choice = random.randint(0, 1)
+                choice = random.randint(0, len(self.internal) + len(self.inputs) - 2)
                 internal_index = random.randint(0, len(self.internal) - 1)
             else:
                 choice = 0
@@ -157,10 +157,10 @@ class Network:
             count = 0
 
             while count < 1000:
-                if choice == 0 and self.outputs[output_index] not in self.inputs[input_index].connections:
+                if choice <= len(self.inputs) - 1 and self.outputs[output_index] not in self.inputs[input_index].connections:
                     self.inputs[input_index].connections.append(self.outputs[output_index])
                     break
-                if choice == 1 and self.outputs[output_index] not in self.internal[internal_index].connections:
+                if choice > len(self.inputs) - 1 and self.outputs[output_index] not in self.internal[internal_index].connections:
                     self.internal[internal_index].connections.append(self.outputs[output_index])
                     break
 
@@ -292,6 +292,12 @@ test = Network(
     0,0,0,0],
     ["up", "down", "left", "right"])
 
+test.mutate()
+test.print()
+test.mutate()
+test.print()
+test.mutate()
+test.print()
 test.mutate()
 test.print()
 
