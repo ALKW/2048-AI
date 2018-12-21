@@ -1,4 +1,4 @@
-import random 
+import random
 import node
  
 class Network:
@@ -23,6 +23,8 @@ class Network:
         self.inputs = [node.Node(inputs[x]) for x in range(len(inputs))]
         #Output layer of nodes
         self.outputs = [node.Node(0, desc=outputs[x]) for x in range(len(outputs))]
+        #internal nodes
+        self.internal = []
 
     def feed(self, stimuli=0):
         '''
@@ -44,6 +46,8 @@ class Network:
         for node in self.inputs:
             #DFS style feed forward
             self.feed_forward(node)
+            #DFS style reset
+            self.reset_nodes(node, end=False)
 
         #Find maximum node
         fired_node = self.find_max_output()
@@ -51,7 +55,7 @@ class Network:
         #reset internal nodes and outputs
         for node in self.inputs:
             #DFS style reset
-            self.reset_nodes(node)
+            self.reset_nodes(node, end=True)
 
         return fired_node
 
@@ -70,19 +74,24 @@ class Network:
             node.value += start_node.value * start_node.weight
             self.feed_forward(node)
     
-    def reset_nodes(self, start_node):
+    def reset_nodes(self, start_node, end=True):
         '''
         Resets all nodes except for inputs back to 0
         Args:
             start_node (Node object) - the starting input node to destroy all other nodes
+            end (Boolean) - determine whether to include the output nodes or not; True - include, False - dont include 
         Returns:
             None
         Raises:
             None
         '''
         #Because no loops can exist in this network, we dont have to worry about coloring nodes
+        outputs_too = end
         for node in start_node.connections:
-            node.value *= 0
+            if node.desc != none:
+                node.value *= 0
+            if outputs_too:
+                node.value *= 0
             self.feed_forward(node)
     
     def find_max_output(self):
@@ -115,10 +124,13 @@ class Network:
         '''
         pass
 
-    def mutate(self):
+    def mutate(self, mutation=-1):
         '''
-        Returns a mutation of the network passed in. The mutation will take an input node and along its path either add an extra branch,
-        create a new node that two nodes link to, or remove a branch. Only internal nodes can have weights different than 1
+        Returns a mutation of the network passed in. The mutation will take an input node and along its path either:
+            -add an extra branch
+            -create a new node that two nodes link to 
+            -modify an existing weight
+        Only internal nodes can have weights different than 1
         Args:
             network (Network object) - network to mutate from
         Returns:
@@ -126,12 +138,113 @@ class Network:
         Raises:
             None
         '''
-        pass
+        if mutation == -1:
+            mutation = random.randint(0, 2)
+        if mutation == 0:
+            #Either connects an input to an outut or an internal to an output
+            #Choose either an internal or an input node; 0 - input, 1 - internal
+            #Choose the input/internal node to connect to the output node (both are random)
+            #Error checking to make sure there exists internal nodes
+            if len(self.internal) > 0:
+                choice = random.randint(0, 1)
+                internal_index = random.randint(0, len(self.internal) - 1)
+            else:
+                choice = 0
+                internal_index = 0
+
+            input_index = random.randint(0, len(self.inputs) - 1)
+            output_index = random.randint(0, len(self.outputs) - 1)
+            count = 0
+
+            while count < 1000:
+                if choice == 0 and self.outputs[output_index] not in self.inputs[input_index].connections:
+                    self.inputs[input_index].connections.append(self.outputs[output_index])
+                    break
+                if choice == 1 and self.outputs[output_index] not in self.internal[internal_index].connections:
+                    self.internal[internal_index].connections.append(self.outputs[output_index])
+                    break
+
+                #Find new indices
+                if len(self.internal > 0):
+                    choice = random.randint(0, 1)
+                    internal_index = random.randint(0, len(self.internal) - 1)
+                else:
+                    choice = 0
+                    internal_index = 0
+                input_index = random.randint(0, len(self.inputs) - 1)
+                output_index = random.randint(0, len(self.outputs) - 1)
+                count += 1
+            #If nothing was modifided then move on and try another mutation
+            if count >= 1000:
+                mutation = random.randint(1, 2)
+
+        if mutation == 1:
+            #Create a new internal node
+            #select two input nodes to connect to the internal node
+            #select an output node to connect to the internal node
+            to_add = node.Node(weight=random.choice([-2,-1,1,2]))
+            self.internal.append(to_add)
+            output_index = random.randint(0, len(self.outputs) - 1)
+            left_input_index = random.randint(0, len(self.inputs) - 1)
+            right_input_index = random.randint(0, len(self.inputs) - 1)
+
+            #Prevent the inputs from being the same
+            while left_input_index == right_input_index:
+                left_input_index = random.randint(0, len(self.inputs) - 1)
+                right_input_index = random.randint(0, len(self.inputs) - 1)
+            
+            #Connect the nodes together
+            self.inputs[left_input_index].connections.append(to_add)
+            self.inputs[right_input_index].connections.append(to_add)
+            to_add.connections.append(self.outputs[output_index])
+
+        if mutation == 2:
+            #Choose an internal node and modify its weight
+            #Determine if there are any nodes to begin with
+            if len(self.internal) == 0:
+                self.mutate(mutation=1)
+
+            mutate_index = random.randint(0, len(self.internal) - 1)
+            curr_weight = self.internal[mutate_index].weight
+            poss_weights = set(range(-5,5))
+
+            #Make sure a change actually happens and a weight of 0 is not achieved
+            poss_weights.remove(0)
+            poss_weights.remove(curr_weight)
+
+            #Change the weight of the internal node
+            self.internal[mutate_index].weight = random.choice(list(poss_weights))
     
     def print(self):
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
         print("Generation: ", self.generation, "\n")
+        self.print_node_paths()
+    
+    def print_node_paths(self):
+        #Start with each internal nodes
+        for node in self.inputs:
+            self.find_paths(node, [node])
+            
+    def find_paths(self, curr, path):
+        #if we reach an output node, then print and return
+        if len(curr.connections) == 0:
+            for node in path[:-1]:
+                print("Value:", node.value, "Weight:", node.weight, "-> ", end="")
+            if path[-1].desc != None:
+                print(path[-1].desc)
+            else:
+                print("Value:", path[-1].value, "Weight:", path[-1].weight, "-> None")
+            return
+
+        #Create a duplicate path object
+        new_path = [x for x in path]
+
+        #Append the current node to the path and then return
+        for node in curr.connections:
+            new_path.append(node)
+            self.find_paths(node, new_path)
+
 
 def create_init_population(count, inputs, outputs):
     '''
@@ -146,7 +259,7 @@ def create_init_population(count, inputs, outputs):
     networks = [Network(inputs, outputs) for x in range(count)]
     #Choose random nodes in the input layer and randomly connect them to an output node.
     #Do this x amount of times where 0 < x < number of outputs
-    reps = random.randint(1, len(outputs))
+    reps = random.randint(1, len(outputs) - 1)
     print(reps, "Networks Mutated")
     for x in range(reps):
         #Choose the network then choose the node from input layer to connect to node in output layer randomly
@@ -178,5 +291,8 @@ test = Network(
     0,0,0,0,
     0,0,0,0],
     ["up", "down", "left", "right"])
+
+test.mutate()
+test.print()
 
 
