@@ -29,11 +29,3 @@ def find_move():
 all_life = Life()
 all_life.individuals = neural_network.create_init_population_species(20)
 
-test_game = game.Game()
-test_game.run()
-test_network = neural_network.create_random(act_start=0, act_stop=0)
-test_network.print_traits()
-print(test_network.feed([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]))
-
-#test_game.run(find_move)
-
