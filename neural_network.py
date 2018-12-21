@@ -2,112 +2,55 @@ import numpy as np
 import random 
  
 class Network:
-    def __init__(self, hidden_count, hidden_width, act_num):
+    def __init__(self, inputs, outputs):
         '''
-        Parameters of Neural Network:
-            -Number of hidden layers
-            -Size of hidden layers
-            -Activation function
-                Sigmoid - 0
-                Tanh - 1
-                Linear - 2
+        Neural network that breeds through taking unique sup-topologies from others within its species
+        Args:
+            inputs (list (ints)) - list of inputs to be converted into a list of nodes
+            outputs (list (str)) - list of outputs' actions
+        Returns:
+            None
+        Raises:
+            None
         '''
         #fitness for the network, initialized to 0
         self.fitness = 0
         #Species for the network, initialized to 0
         self.species = 0
-        #generate hidden layer
-        self.hidden = np.array([[random.random() for x in range(hidden_width)] for x in range(hidden_count)])
-        #choose activation function
-        self.act = act_num
-        #network parameters
-        self.params = [hidden_count, hidden_width, act_num]
-        #fitness
-        self.fitness = 0
+        #Historical Makrings to improve breeding uniqueness
+        self.generation = 0
+        #Input layer of nodes
+        self.inputs = [Node(inputs[x]) for x in range(len(inputs))]
+        #Output layer of nodes
+        self.outputs = [Node(0, outputs[x]) for x in range(len(outputs)))]
 
-    def feed(self, stimuli):
-        NUMBER_OF_HIDDEN_LAYERS = 0
-        HIDDEN_LAYER_WIDTH = 1
-        ACTIVATION_FUNCTION = 2
+    def feed(self):
+        #Perform a bfs type run with each input node as the source
+        #Find way to feed network that is efficient and resets values along the way
 
-        stimuli = np.array(stimuli)
-        outputs = []
-        first_layer = self.hidden[0]
+        for node in self.inputs:
+            for toNode in node.next:
+                while(node.next.value != None):
+                    toPass = node.value
+                    node.value = 0
+                    node.next.value += toPass
 
-        #feed input layer into first hidden layer
-        for i in range(len(first_layer)):
-            outputs.append(self.act_function(np.sum(stimuli * first_layer[i]), self.params[ACTIVATION_FUNCTION]))
-        inputs = np.array(outputs)
-        outputs = []
 
-        #Feed inputs into the remaining hidden layers
-        for layer in range(1, len(self.hidden)):
-            print(inputs)
-            for i in range(len(self.hidden[layer])):
-                outputs.append(self.act_function(np.sum(inputs * first_layer[i]), self.params[ACTIVATION_FUNCTION]))
-            inputs = np.array(outputs)
-            outputs = []
-        print(inputs)
-
-        #Feeds inputs into the output layer
-        return self.determine_output(np.sum(inputs))
-        
-
-    def determine_output(self, result):
-        NUMBER_OF_HIDDEN_LAYERS = 0
-        HIDDEN_LAYER_WIDTH = 1
-        ACTIVATION_FUNCTION = 2
-
-        if self.params[ACTIVATION_FUNCTION] == 0:
-            return (4 * (result / self.params[HIDDEN_LAYER_WIDTH]) - 3.9) * 10
-        elif self.params[ACTIVATION_FUNCTION] == 1:
-            pass
-        else:
-            pass
-        return -1
-
-    def act_function(self, input, func):  
-        if(func == 0):
-            return self.sigmoid(input)
-        elif(func == 1):
-            return np.tanh(input)
-        elif(func == 2):
-            return input
-        return input
+    
+    def find_max(self):
+        max = Node(float("-inf"))
+        for node in outputs:
+            if node.value > max.value:
+                max = node
+        return max.desc
 
     def breed(self, other_parent):
-        #Child has traits from both parents, weights are updated using a optimizer from the most successful parent
-        num_traits_from_self = random.randint(1,2)
-        num_traits_from_other = 3 - num_traits_from_self 
+        pass
 
-        trait_marks = [0, 0, 0]
-        traits = [0, 0, 0]
-
-        #1 indicates trait comes from self, 0 indicates trait comes from other parent
-        for i in range(num_traits_from_self):
-            index = random.randint(0,2)
-            trait_marks[index] = 1
-
-        for i in range(len(traits)):
-            if(trait_marks[i] == 1):
-                traits[i] = self.params[i]
-            else:
-                traits[i] = self.params[i]
-        
-        child = Network(traits[0], traits[1], traits[2])
-        return child
-
-    def sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
-
-    def print_traits(self):
-        print("Params: ", self.params)
-        print("[Hidden Layers, Hidden Layers Width, Activation Function]")
-        print("Hidden Layers:")
-        for layer in self.hidden:
-            print(layer)
+    def print(self):
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
+        print("Generation: ", self.generation)
 
 
 
@@ -122,69 +65,28 @@ def mutate(network):
     Raises:
         None
     '''
-    num_traits_from_self = random.randint(1,2)
-    num_traits_from_other = 3 - num_traits_from_self 
+    pass
 
-    trait_marks = [0, 0, 0]
-    traits = [0, 0, 0]
-
-    #1 indicates trait comes from self, 0 indicates trait comes from random
-    for i in range(num_traits_from_self):
-        index = random.randint(0,2)
-        trait_marks[index] = 1
-
-    if(trait_marks[0] == 1):
-        traits[0] = network.params[0]
-    else:
-        traits[0] = random.randint(0,4)
-    
-    if(trait_marks[1] == 1):
-        traits[1] = network.params[1]
-    else:
-        traits[1] = random.randint(0,256)
-
-    if(trait_marks[2] == 1):
-        traits[2] = network.params[2]
-    else:
-        traits[2] = random.randint(0,2)
-
-    
-    mutation = network(traits[0], traits[1], traits[2])
-    return mutation
-
-def create_random(hidden=4, width=256, act_start=0, act_stop=2):
-    '''
-    Creates a network using random parameters with limits
-    Args:
-        hidden (int) Number of hidden layers. Default: 4
-        width (int) Number of nodes in layer. Default: 256
-        act_start (int) Starting number for limiting size of activation function. Default: 0
-        act_stop (int) Ending number for limiting size of activatino funciton. Default: 2
-    Returns:
-        Network (Network object) Network object with random parameters
-    Raises:
-        None
-    '''
-    hidden_count = random.randint(1, hidden)
-    hidden_width = random.randint(4, width)
-    act_func = random.randint(act_start, act_stop)
-    return Network(hidden_count, hidden_width, act_func)
-
-def create_init_population_species(count, hidden=4, width=256, act_start=0, act_stop=2):
+def create_init_population_species(count, inputs, outputs):
     '''
     Returns a list of neural networks that has length count
     Args:
         count (int) number of members of species population
-        hidden (int) max number of hidden layers. Default: 4
-        width (int) max width of neural network. Default: 256
-        act_start (int) where to start subset of available activation functions
-        act_stop (int) where to stop subset of available activation functions
     Returns:
         Population (list of neural network objects)
     Raises:
         None
     '''
-    pop = []
-    for i in range(count):
-        pop.append(create_random(hidden, width, act_start, act_stop))
-    return pop
+    toReturn = [Network(inputs, outputs) for x in range(count)]
+    #Choose random nodes in the input layer and randomly connect them to an output node.
+    #Do this x amount of times where 0 < x < number of outputs
+    reps = random.randint(0, len(outputs))
+    for x in range(reps)
+        #Choose the network then choose the node from input layer to connect to node in output layer randomly
+        network_index = random.randint(0, count - 1)
+        input_index = random.randint(0, len(inputs) - 1)
+        output_index = random.randint(0, len(outputs) - 1)
+
+        #Connect the input node to the output node
+        toReturn[network_index].inputs[input_index].next[0].append(toReturn[network_index].outputs[output_index])
+

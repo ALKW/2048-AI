@@ -40,6 +40,7 @@ class Game:
                 self.previous_board.matrix = self.board.copy_matrix(self.previous_board.matrix)
                 #Spawn a number
                 self.board.spawn_number()
+            else:
                 print("Invalid move")
 
         print("Score:", max(self.board.matrix))    
