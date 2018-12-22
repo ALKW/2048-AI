@@ -1,4 +1,4 @@
-import neural_network
+import neural_network as network
 from game_environment import game
 
 #species determined by combination of traits; hidden_layer, hidden_width, and act_func
@@ -18,8 +18,8 @@ class Life:
         #goes through all networks in the list. If it does not have a species classify it and assign it to the appropriate list
         pass
     
-def find_move():
-    pass
+def get_move(active_game, active_network):
+    return active_network.feed(active_game.curr_board.matrix)
 
 #Have max heaps (species) of 20 individuals max. At each stage:
 #   Delete 5 lowest performers: -5 
@@ -27,5 +27,14 @@ def find_move():
 #   Mutate Next top 5 and keep original: +10
 
 all_life = Life()
-all_life.individuals = neural_network.create_init_population_species(20)
+all_life.individuals = network.create_init_population(20, [
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0,
+                0,0,0,0
+                ], ["up", "down", "left", "right"])
+
+test_game = game.Game()
+test_game.run(get_move, test_game, all_life.individuals[0])
+
 

@@ -26,7 +26,7 @@ class Network:
         #internal nodes
         self.internal = []
 
-    def feed(self, stimuli=0):
+    def feed(self, stimuli=None):
         '''
         Can run with or without stumli, if no stimuli then previous inputs are kept. 
         Runs through neural network and the output is determined by which has the highest value.
@@ -38,7 +38,7 @@ class Network:
             None
         '''
         #If stimuli are given then update the input neurons
-        if stimuli != 0:
+        if stimuli != None:
             for node in self.inputs:
                 node.value = stimuli[self.inputs.index(node)]
 
@@ -104,12 +104,12 @@ class Network:
         Raises:
             None
         '''
-        m = node.Node(float("-inf"))
+        max_node = node.Node(float("-inf"))
         for output_node in self.outputs:
-            if output_node.value > m.value:
-                m = output_node
-        m.print()
-        return m.desc
+            if output_node.value > max_node.value:
+                max_node = output_node
+        print("Finished Feed, Output:", max_node.print())
+        return max_node.desc
 
     def breed(self, other_parent):
         '''
@@ -279,26 +279,10 @@ test = create_init_population(20, [
                 16,4,2,32,
                 ], ["up", "down", "left", "right"])
 
-
 for network in test:
     network.print()
     network.feed()
 '''
-
-test = Network(
-    [2,2,0,0,
-    0,0,0,0,
-    0,0,0,0,
-    0,0,0,0],
-    ["up", "down", "left", "right"])
-
-test.mutate()
-test.print()
-test.mutate()
-test.print()
-test.mutate()
-test.print()
-test.mutate()
-test.print()
+    
 
 

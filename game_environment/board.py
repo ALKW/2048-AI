@@ -20,11 +20,8 @@ class Matrix:
 class Board(Matrix):
     score = 0
 
-    def __init__(self):
-        self.matrix = [0, 0, 0, 0, 
-        0, 0, 0, 0, 
-        0, 0, 0, 0, 
-        0, 0, 0, 0]
+    def __init__(self, board):
+        self.matrix = board
 
     def choose(self):
         '''
@@ -400,7 +397,7 @@ class Board(Matrix):
         print(self.matrix[row_three])
         print(self.matrix[row_four])
 
-    def copy_matrix(self, new_matrix):
+    def make_copy_matrix(self):
         '''
         Copies array of length 16 into another array of length 16
         
@@ -411,6 +408,7 @@ class Board(Matrix):
         Raises: 
             None
         '''
+        new_matrix = [x * 0 for x in range(len(self.matrix))]
         for i in range(0, 16):
             new_matrix[i] = self.matrix[i]
         return new_matrix
