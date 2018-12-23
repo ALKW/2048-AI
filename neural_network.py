@@ -108,7 +108,7 @@ class Network:
         for output_node in self.outputs:
             if output_node.value > max_node.value:
                 max_node = output_node
-        print("Finished Feed, Output:", max_node.print())
+        #------------print("Finished Feed, Output:", max_node.print())---------------
         return max_node.desc
 
     def breed(self, other_parent):
@@ -165,7 +165,7 @@ class Network:
                     break
 
                 #Find new indices
-                if len(self.internal > 0):
+                if len(self.internal) > 0:
                     choice = random.randint(0, 1)
                     internal_index = random.randint(0, len(self.internal) - 1)
                 else:
@@ -261,10 +261,6 @@ def create_init_population(count, inputs, outputs):
         None
     '''
     networks = [Network(inputs, outputs) for x in range(count)]
-    #Choose random nodes in the input layer and randomly connect them to an output node.
-    #Do this x amount of times where 0 < x < number of outputs
-    reps = random.randint(1, len(outputs) - 1)
-    print("All Networks Mutated")
     for network_index in range(count):
         #For each network connect all four output nodes to input nodes initially
         for output_index in range(4):

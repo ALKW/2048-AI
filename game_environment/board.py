@@ -16,8 +16,11 @@ class Matrix:
 class Board(Matrix):
     score = 0
 
-    def __init__(self, board):
-        self.matrix = board
+    def __init__(self, board=None):
+        if board == None:
+            self.matrix = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+        else:
+            self.matrix = board
 
     def choose(self):
         '''
@@ -368,7 +371,7 @@ class Board(Matrix):
             self.right_movement()
             return True
         else:
-            print("invalid move")
+            #-----------------print("invalid move")---------#
             return False
 
     def print_matrix(self):
