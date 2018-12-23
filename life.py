@@ -37,24 +37,30 @@ all_life.individuals = network.create_init_population(20, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 50
+top_performers = []
 
-#Run the simulation for MAX_GENERATIONS iterations
+#Run the simulation for MAX_GENERATIONS iterations with a population size of 20
 for iteration in range(MAX_GENERATIONS):
     #Generate a board to use for all networks
     dummy_game = game.Game()
     init_board = dummy_game.curr_board.matrix
     #Test all individuals on the same board
     for individual in all_life.individuals:
-        test_game = game.Game_Visual(init_board=init_board.copy())
+        test_game = game.Game(init_board=init_board.copy())
         individual.fitness = test_game.run(all_life.individuals.index(individual), get_move, individual)
-        print("Done with network:", all_life.individuals.index(individual), "----------------------------------------")
+        #-----------------print("Network:", all_life.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
 
-    #sort the results
+    #sort the results to get the highest performers ranked at the top
     all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)
 
     #------------Test Print Function--------------#
-    all_life.print_individuals()
+    #------------all_life.print_individuals()
+    print("Finished Generation:", iteration + 1)
+
+    #Keep track of top performers from each generation for analytic purposes
+    top_performer = "Generation: " + str(iteration + 1) + " | Max Score:" + str(all_life.individuals[0].fitness)
+    top_performers.append(top_performer)
 
     #Perform Breeding/Mutating
     new_population = []
@@ -63,18 +69,48 @@ for iteration in range(MAX_GENERATIONS):
     for ind_index in range(5):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
         new_population.append(all_life.individuals[ind_index])
-        new_population.append(new_network.mutate())
+        new_network.mutate()
+        new_population.append(new_network)
     #Keep next top 5 the same
     for ind_index in range(5, 10):
         new_population.append(all_life.individuals[ind_index])
     #Mutate next top 5:
     for ind_index in range(10, 15):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
-        new_population.append(new_network.mutate())
+        new_network.mutate()
+        new_population.append(new_network)
     #Disregard lowest 5 performers
+    #Create new population
+    all_life.individuals = new_population
+
+'''
+#Testing without using darwinism
+#Run iterations where we mutate all networks
+for iteration in range(MAX_GENERATIONS):
+    dummy_game = game.Game()
+    init_board = dummy_game.curr_board.matrix
+    for individual in all_life.individuals:
+        test_game = game.Game(init_board=init_board.copy())
+        individual.fitness = test_game.run(all_life.individuals.index(individual), get_move, individual)
+        individual.mutate()
+'''
 
 
-    
+#Run a visualization through the top 5 networks
+print("--------------------- PRINTING TOP 5 ---------------------")
+dummy_game = game.Game()
+init_board = dummy_game.curr_board.matrix
+for individual in all_life.individuals[:5]:
+    test_game = game.Game_Visual(init_board=init_board.copy())
+    print("-----------NETWORK ", all_life.individuals.index(individual),"-------------")
+    individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
+    print()
+    individual.print()
 
-
-
+#sort the results to get the highest performers ranked at the top
+all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)
+print("Latest Generation:")
+all_life.print_individuals()
+print("Top performers from each generation:")
+for performer in top_performers:
+    print(performer)

@@ -110,13 +110,21 @@ class Network:
             if output_node.value > max_node.value:
                 max_node = output_node
                 max_nodes = [max_node]
-            if output_node.value == max_node.value:
+            elif output_node.value == max_node.value:
                 max_nodes.append(output_node)
 
         index = random.randint(0,len(max_nodes) - 1)
         desc_to_return = max_nodes[index].desc
-        print("Determine Move:", desc_to_return)
-        return desc_to_return
+        '''
+        ------------------
+        print("Determine Move:", desc_to_return, end="")
+        if len(max_nodes) > 1:
+            print(" | Random Choice from:", "".join([str(x.desc) + " " for x in max_nodes]))
+        else:
+            print()
+        -------------------
+        '''
+        return desc_to_return, len(max_nodes)
 
     def breed(self, other_parent):
         '''
@@ -229,23 +237,25 @@ class Network:
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
         print("Generation: ", self.generation, "\n")
-        print("Nodes: ")
+        print("Topology: ")
         self.print_node_paths()
     
     def print_node_paths(self):
         #Start with each internal nodes
         for node in self.inputs:
             self.find_paths(node, [node])
+            print()
             
     def find_paths(self, curr, path):
         #if we reach an output node, then print and return
         if len(curr.connections) == 0:
+            print("----PATH FOR NODE",  self.inputs.index(path[0]), ":", end="")
             for node in path[:-1]:
                 print("Value:", node.value, "Weight:", node.weight, "-> ", end="")
             if path[-1].desc != None:
                 print(path[-1].desc)
             else:
-                print("Value:", path[-1].value, "Weight:", path[-1].weight, "-> None")
+                print("Value:", path[-1].value, "Weight:", path[-1].weight, "-> None---")
             return
 
         #Create a duplicate path object

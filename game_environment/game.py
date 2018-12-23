@@ -29,6 +29,7 @@ class Game:
         valid = False
         is_over = False
         count = 0
+        score = 0
 
         while not is_over:
             if(self.curr_board.is_full()):
@@ -42,7 +43,8 @@ class Game:
             if get_move == None:
                 move = input("input move: ")
             else:
-                move = get_move(args[0], args[1])
+                move_info = get_move(self, args[0])
+                move = move_info[0]
 
             if(move.lower() == 'e'):
                 break
@@ -53,6 +55,25 @@ class Game:
 
             #Determine if the resulting move did anything
             if(self.previous_board.matrix != self.curr_board.matrix):
+                #if the length of possible outputs after feeding is greater than 1, then a random choice was made
+                #punish networks for making random choices by not increasing score
+                if(move_info[1] == 1):
+                    #Determine the score made from the last round and update score
+                    #Find the numbers on the board that arent 0
+                    curr_pieces = [x for x in self.curr_board.matrix if x != 0]
+                    prev_pieces = [x for x in self.previous_board.matrix if x != 0]
+                    #Sort both so the tiles line up
+                    curr_pieces.sort()
+                    prev_pieces.sort()
+                    #Determine the number of tiles combined
+                    num_tiles_combined = len(prev_pieces) - len(curr_pieces)
+                    #Get rid of tiles that are the same across both
+                    #Whats left are the new tiles, add them up to get the score
+                    for tile in prev_pieces:
+                        if tile in curr_pieces:
+                            curr_pieces.remove(tile)
+                    score += sum(curr_pieces)
+
                 #Copy the matrix to make a previous board with the newly completed move
                 self.previous_board.matrix = self.curr_board.make_copy_matrix()
                 #Spawn a number
@@ -63,8 +84,6 @@ class Game:
                 count += 1
             if count > 1:
                 break
-
-        score = max(self.curr_board.matrix)
         '''
         ---------------------------------------
         print("Score:", score)
@@ -84,7 +103,7 @@ class Game_Visual:
         self.curr_board = board.Board(init_board)
         self.previous_board = board.Board(init_board)
 
-    def update_board(self, iteration, screen):
+    def update_board(self, iteration, score, screen):
         BLACK = 0, 0, 0
         SEP_WIDTH = 14
         SQ_WIDTH = 107
@@ -126,6 +145,10 @@ class Game_Visual:
         title_width = title.get_rect().width
         screen.blit(title, (self.width // 2 - title_width / 2, 0))
 
+        score_title = title_font.render("Score: " + str(score), True, BLACK)
+        score_width = score_title.get_rect().width
+        screen.blit(score_title, (self.width - (score_width + 10), 0))
+
         pygame.display.update()
         
 
@@ -148,6 +171,7 @@ class Game_Visual:
         #Spawn a number
         self.curr_board.spawn_number()
         count = 0
+        score = 0
         is_over = False
 
         while not is_over:
@@ -157,34 +181,32 @@ class Game_Visual:
             #Copy the matrix to make a previous board with the newly spawned number
             self.previous_board.matrix = self.curr_board.make_copy_matrix()
 
-            move = ""
             FINISH = 50
+            move = ""
 
             #Determine if the move is valid
             #Make this a separate thread to allow the program to run faster
             
-            for event in pygame.event.get():
-                None
 
-            if get_move == None:
-                FINISH = float("inf")
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        sys.exit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT:
-                            move = "left"
-                        elif event.key == pygame.K_RIGHT:
-                            move = "right"
-                        elif event.key == pygame.K_DOWN:
-                            move = "down"
-                        elif event.key == pygame.K_UP:
-                            move = "up"
-                        else:
-                            move = ""
-            else:
+            FINISH = float("inf")
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                if event.type == pygame.KEYDOWN and get_move == None:
+                    if event.key == pygame.K_LEFT:
+                        move = "left"
+                    elif event.key == pygame.K_RIGHT:
+                        move = "right"
+                    elif event.key == pygame.K_DOWN:
+                        move = "down"
+                    elif event.key == pygame.K_UP:
+                        move = "up"
+                    else:
+                        move = ""
+            if get_move != None:
                 FINISH = 1
-                move = get_move(self, args[0])
+                move_info = get_move(self, args[0])
+                move = move_info[0]
                 if(move.lower() == 'e'):
                     break
                 if(move.lower() == "p"):
@@ -196,10 +218,30 @@ class Game_Visual:
             self.curr_board.determine_move(move)
             
             #Print updated board to screen
-            self.update_board(number, screen)
+            self.update_board(number, score, screen)
             
             #Determine if the resulting move did anything
             if(self.previous_board.matrix != self.curr_board.matrix):
+                #if the length of possible outputs after feeding is greater than 1, then a random choice was made
+                #punish networks for making random choices by not increasing score
+                if(move_info[1] == 1):
+                    #Determine the score made from the last round and update score
+                    #Find the numbers on the board that arent 0
+                    curr_pieces = [x for x in self.curr_board.matrix if x != 0]
+                    prev_pieces = [x for x in self.previous_board.matrix if x != 0]
+                    #Sort both so the tiles line up
+                    curr_pieces.sort()
+                    prev_pieces.sort()
+                    #Determine the number of tiles combined
+                    num_tiles_combined = len(prev_pieces) - len(curr_pieces)
+                    #Get rid of tiles that are the same across both
+                    #Whats left in curr_pieces are the new tiles that were formed from the previous move
+                    #add them up and add them with the current score to get the new score
+                    for tile in prev_pieces:
+                        if tile in curr_pieces:
+                            curr_pieces.remove(tile)
+                    score += sum(curr_pieces)
+                
                 #Copy the matrix to make a previous board with the newly completed move
                 self.previous_board.matrix = self.curr_board.make_copy_matrix()
                 #Spawn a number
@@ -212,6 +254,5 @@ class Game_Visual:
             if count > FINISH:
                 break
 
-        pygame.time.delay(2000)
-        score = max(self.curr_board.matrix)
+        pygame.time.delay(1500)
         return score
