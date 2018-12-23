@@ -88,7 +88,7 @@ class Network:
         #Because no loops can exist in this network, we dont have to worry about coloring nodes
         outputs_too = end
         for node in start_node.connections:
-            if node.desc != none:
+            if node.desc != None:
                 node.value *= 0
             if outputs_too:
                 node.value *= 0
@@ -215,10 +215,14 @@ class Network:
             #Change the weight of the internal node
             self.internal[mutate_index].weight = random.choice(list(poss_weights))
     
+    def print_s(self):
+        print("Fitness: ", self.fitness)
+
     def print(self):
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
         print("Generation: ", self.generation, "\n")
+        print("Nodes: ")
         self.print_node_paths()
     
     def print_node_paths(self):
@@ -243,7 +247,7 @@ class Network:
         #Append the current node to the path and then return
         for node in curr.connections:
             new_path.append(node)
-            self.find_paths(node, new_path)
+            self.find_paths(node, new_path.copy())
 
 
 def create_init_population(count, inputs, outputs):
@@ -260,15 +264,14 @@ def create_init_population(count, inputs, outputs):
     #Choose random nodes in the input layer and randomly connect them to an output node.
     #Do this x amount of times where 0 < x < number of outputs
     reps = random.randint(1, len(outputs) - 1)
-    print(reps, "Networks Mutated")
-    for x in range(reps):
-        #Choose the network then choose the node from input layer to connect to node in output layer randomly
-        network_index = random.randint(0, count - 1)
-        input_index = random.randint(0, len(inputs) - 1)
-        output_index = random.randint(0, len(outputs) - 1)
-
-        #Connect the input node to the output node
-        networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
+    print("All Networks Mutated")
+    for network_index in range(count):
+        #For each network connect all four output nodes to input nodes initially
+        for output_index in range(4):
+            #choose the node from input layer to connect to node in output layer randomly
+            input_index = random.randint(0, len(inputs) - 1)
+            #Connect the input node to the output node
+            networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
     return networks
 
 '''

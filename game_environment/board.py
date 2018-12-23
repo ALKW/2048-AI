@@ -1,10 +1,6 @@
 import random
 
 class Matrix:
-    matrix = [0, 0, 0, 0, 
-    0, 0, 0, 0, 
-    0, 0, 0, 0, 
-    0, 0, 0, 0]
     row_one = slice(0, 4)
     row_two = slice(4, 8)
     row_three = slice(8, 12)

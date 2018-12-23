@@ -58,6 +58,9 @@ class Game:
             if count > 2:
                 break
 
-        print("Score:", max(self.curr_board.matrix))    
+        score = max(self.curr_board.matrix)
+        print("Score:", score)
+        self.curr_board.print_matrix()
         print("Game Over")
+        return score
 
