@@ -37,18 +37,18 @@ all_life.individuals = network.create_init_population(20, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 1
-
+MAX_GENERATIONS = 10
 
 #Run the simulation for MAX_GENERATIONS iterations
 for iteration in range(MAX_GENERATIONS):
     #Generate a board to use for all networks
-    dummy_game_board = game.Game_Visual()
-    init_board = dummy_game_board.curr_board.matrix
+    dummy_game = game.Game()
+    init_board = dummy_game.curr_board.matrix
     #Test all individuals on the same board
     for individual in all_life.individuals:
         test_game = game.Game_Visual(init_board=init_board.copy())
-        individual.fitness = test_game.run(all_life.individuals.index(individual), get_move, test_game, individual)
+        individual.fitness = test_game.run(all_life.individuals.index(individual), get_move, individual)
+        print("Done with network:", all_life.individuals.index(individual), "----------------------------------------")
 
     #sort the results
     all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)

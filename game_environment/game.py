@@ -1,9 +1,10 @@
 from game_environment import board
-import sys
 import pygame
 from pygame.locals import *
+import sys
 import math
 import time
+import random
 
 class Game:
     def __init__(self, init_board=None):
@@ -74,33 +75,16 @@ class Game:
         return score
 
 
-class Game_Visual():
+class Game_Visual:
     def __init__(self, init_board=None):
         if init_board == None:
             init_board = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
 
-        #initialize classes
-        pygame.init()
-
-        #Window Size
-        self.size = self.width, self.height = 548, 548
-
-        #Set the screen size
-        self.screen = pygame.display.set_mode(self.size)
-        pygame.display.set_caption('2048-AI')
-
-
-        #Get the background image from a picture
-        self.background_board = pygame.image.load("background_board.png")
-        #Create the object as a moving object
-        self.background_boardrect = self.background_board.get_rect()
-
         #Create the board
-        self.is_over = False
         self.curr_board = board.Board(init_board)
         self.previous_board = board.Board(init_board)
 
-    def update_board(self, iteration):
+    def update_board(self, iteration, screen):
         BLACK = 0, 0, 0
         SEP_WIDTH = 14
         SQ_WIDTH = 107
@@ -113,8 +97,8 @@ class Game_Visual():
         #Set the font
         number_font = pygame.font.SysFont('Comic Sans MS', 30)
         title_font = pygame.font.SysFont('Arial', 15)
-        self.screen.fill(BLACK)
-        self.screen.blit(self.background_board, self.background_boardrect)
+        screen.fill(BLACK)
+        screen.blit(self.background_board, self.background_boardrect)
 
         #draw each piece to the screen
         for i in range(0, len(self.curr_board.matrix)):
@@ -124,7 +108,7 @@ class Game_Visual():
                 power_2 = math.log(self.curr_board.matrix[i], 2)
                 #Draw the rectangle for the piece
                 pygame.draw.rect(
-                    self.screen, 
+                    screen, 
                     COLORS[int(power_2) % 15], 
                     [ #Rectangle
                         (((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X, 
@@ -135,31 +119,53 @@ class Game_Visual():
                     0)
                 #Draw the number inside the rectangle
                 text_surface = number_font.render(str(self.curr_board.matrix[i]), True, (255, 255, 255))
-                self.screen.blit(text_surface, ((((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X + 45, 
+                screen.blit(text_surface, ((((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X + 45, 
                                         (((i // 4) * SQ_WIDTH) + ((i // 4) * SEP_WIDTH)) + WHITE_SPACE_Y + 30))
 
         title = title_font.render("Network: " + str(iteration), True, BLACK)
         title_width = title.get_rect().width
-        self.screen.blit(title, (self.width // 2 - title_width / 2, 0))
+        screen.blit(title, (self.width // 2 - title_width / 2, 0))
 
-        pygame.display.flip()
+        pygame.display.update()
+        
 
     def run(self, number=0, get_move=None, *args):
+        #initialize classes
+        pygame.init()
+
+        #Window Size
+        size = self.width, self.height = 548, 548
+
+        #Set the screen size
+        screen = pygame.display.set_mode(size)
+        pygame.display.set_caption('2048-AI')
+
+        #Get the background image from a picture
+        self.background_board = pygame.image.load("background_board.png")
+        #Create the object as a moving object
+        self.background_boardrect = self.background_board.get_rect()
+
         #Spawn a number
         self.curr_board.spawn_number()
         count = 0
+        is_over = False
 
-        while not self.is_over:
+        while not is_over:
             if(self.curr_board.is_full()):
-                self.is_over = True
+                is_over = True
                 continue
             #Copy the matrix to make a previous board with the newly spawned number
             self.previous_board.matrix = self.curr_board.make_copy_matrix()
 
             move = ""
+            FINISH = 50
 
             #Determine if the move is valid
             #Make this a separate thread to allow the program to run faster
+            
+            for event in pygame.event.get():
+                None
+
             if get_move == None:
                 FINISH = float("inf")
                 for event in pygame.event.get():
@@ -178,18 +184,20 @@ class Game_Visual():
                             move = ""
             else:
                 FINISH = 1
-                move = get_move(args[0], args[1])
+                move = get_move(self, args[0])
                 if(move.lower() == 'e'):
                     break
                 if(move.lower() == "p"):
                     self.curr_board.print_matrix()
                     continue
+            
 
-            #determine the move that was passed in
+            #determine the move that was passed in and updates the board in memory
             self.curr_board.determine_move(move)
-            #Print board to screen 
-            self.update_board(number)
-
+            
+            #Print updated board to screen
+            self.update_board(number, screen)
+            
             #Determine if the resulting move did anything
             if(self.previous_board.matrix != self.curr_board.matrix):
                 #Copy the matrix to make a previous board with the newly completed move
@@ -200,11 +208,10 @@ class Game_Visual():
             else:
                 #--------------print("Invalid move")----------------#
                 count += 1
+            
             if count > FINISH:
                 break
 
+        pygame.time.delay(2000)
         score = max(self.curr_board.matrix)
-        #Print board to screen
-        self.update_board(number)
-
         return score

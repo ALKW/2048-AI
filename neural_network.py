@@ -105,11 +105,18 @@ class Network:
             None
         '''
         max_node = node.Node(float("-inf"))
+        max_nodes = [max_node]
         for output_node in self.outputs:
             if output_node.value > max_node.value:
                 max_node = output_node
-        #------------print("Finished Feed, Output:", max_node.print())---------------
-        return max_node.desc
+                max_nodes = [max_node]
+            if output_node.value == max_node.value:
+                max_nodes.append(output_node)
+
+        index = random.randint(0,len(max_nodes) - 1)
+        desc_to_return = max_nodes[index].desc
+        print("Determine Move:", desc_to_return)
+        return desc_to_return
 
     def breed(self, other_parent):
         '''
