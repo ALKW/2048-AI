@@ -22,7 +22,10 @@ class Life:
         print()
     
 def get_move(active_game, active_network):
-    return active_network.feed(active_game.curr_board.matrix)
+    #Compute extra stimuli apart from board
+    inbetween = []
+    
+    return active_network.feed(active_game.curr_board.matrix + inbetween)
 
 #Have max heaps (species) of 20 individuals max. At each stage:
 #   Mate top 4 perfomers and keep original: +10
@@ -30,12 +33,16 @@ def get_move(active_game, active_network):
 #   Mutate Next top 5: +5
 #   Disregard 5 lowest performers
 
+#Let input neurons be the board, the rows if a move is available, and the columns if a move is available
+
 all_life = Life()
 all_life.individuals = network.create_init_population(20, [
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0,
-                0,0,0,0
+                0,0,0,0,
+
+
                 ], ["up", "down", "left", "right"])
 MAX_GENERATIONS = 50
 top_performers = []

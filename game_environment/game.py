@@ -150,6 +150,7 @@ class Game_Visual:
         screen.blit(score_title, (self.width - (score_width + 10), 0))
 
         pygame.display.update()
+        pygame.time.delay(50)
         
 
     def run(self, number=0, get_move=None, *args):
