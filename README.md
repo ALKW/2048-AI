@@ -2,7 +2,7 @@
 ### Description
 Python based AI that learned to play 2048 on its own.  All code written from scratch
 
-#### Version 1.0:  
+### Version 1.0:  
 1. No breeding only mutating
     - Top 5 mutated and original networks kept (+10)
     - Next top 5 networks kept the same (+5)
@@ -18,6 +18,11 @@ Python based AI that learned to play 2048 on its own.  All code written from scr
     - Max Score levels out because of this
     - Can be seen in visualization at the end
   
-
 ### Dependencies
 pygame
+
+### Usage
+Run life.py from the command line using:
+  ```
+  python life.py
+  ```
