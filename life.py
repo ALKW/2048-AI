@@ -24,7 +24,6 @@ class Life:
 def get_move(active_game, active_network):
     #Compute extra stimuli apart from board
     inbetween = []
-    
     return active_network.feed(active_game.curr_board.matrix + inbetween)
 
 #Have max heaps (species) of 20 individuals max. At each stage:
@@ -45,6 +44,7 @@ all_life.individuals = network.create_init_population(20, [
 
                 ], ["up", "down", "left", "right"])
 MAX_GENERATIONS = 50
+RUNS_PER_IND = 5
 top_performers = []
 
 #Run the simulation for MAX_GENERATIONS iterations with a population size of 20
@@ -54,8 +54,11 @@ for iteration in range(MAX_GENERATIONS):
     init_board = dummy_game.curr_board.matrix
     #Test all individuals on the same board
     for individual in all_life.individuals:
-        test_game = game.Game(init_board=init_board.copy())
-        individual.fitness = test_game.run(all_life.individuals.index(individual), get_move, individual)
+        run_total = 0
+        for run in range(RUNS_PER_IND):
+            test_game = game.Game(init_board=init_board.copy())
+            run_total += test_game.run(all_life.individuals.index(individual), get_move, individual)
+            individual.fitness = run_total // RUNS_PER_IND
         #-----------------print("Network:", all_life.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
 
     #sort the results to get the highest performers ranked at the top
@@ -66,7 +69,7 @@ for iteration in range(MAX_GENERATIONS):
     print("Finished Generation:", iteration + 1)
 
     #Keep track of top performers from each generation for analytic purposes
-    top_performer = "Generation: " + str(iteration + 1) + " | Max Score:" + str(all_life.individuals[0].fitness)
+    top_performer = "Generation: " + str(iteration + 1) + " | Max Score: " + str(all_life.individuals[0].fitness)
     top_performers.append(top_performer)
 
     #Perform Breeding/Mutating
@@ -109,7 +112,7 @@ dummy_game = game.Game()
 init_board = dummy_game.curr_board.matrix
 for individual in all_life.individuals[:5]:
     test_game = game.Game_Visual(init_board=init_board.copy())
-    print("-----------NETWORK ", all_life.individuals.index(individual),"-------------")
+    print("-----------NETWORK ", all_life.individuals.index(individual) + 1,"-------------")
     individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
     print()
     individual.print()
