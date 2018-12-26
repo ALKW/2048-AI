@@ -22,9 +22,15 @@ class Life:
         print()
     
 def get_move(active_game, active_network):
-    #Compute extra stimuli apart from board
-    inbetween = []
-    return active_network.feed(active_game.curr_board.matrix + inbetween)
+    stimuli = []
+    for entry in active_game.curr_board.matrix:
+        if entry == 0:
+            stimuli.append(0)
+        else:
+            stimuli.append(1)
+    other_stimuli = []
+    stimuli += other_stimuli
+    return active_network.feed(stimuli)
 
 #Have max heaps (species) of 20 individuals max. At each stage:
 #   Mate top 4 perfomers and keep original: +10
@@ -74,7 +80,16 @@ for iteration in range(MAX_GENERATIONS):
 
     #Perform Breeding/Mutating
     new_population = []
+    '''
     #Mate top 4 performers -> add their 6 childred plus the 4 parents 
+    for first_index in range(4):
+        #Append first parent in the pair
+        new_population.append(all_life.individuals[first_index])
+        for second_index in range(first_index + 1, 4):
+            #Create and append the child in the pair
+            child = all_life.individuals[first_index].breed_with(all_life.individuals[second_index])
+            new_population.append(child)
+    '''       
     #------------MUTATING NETWORKS BECAUSE BREEDING FUNCTION IS NOT WRITTEN-------#
     for ind_index in range(5):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
@@ -93,31 +108,22 @@ for iteration in range(MAX_GENERATIONS):
     #Create new population
     all_life.individuals = new_population
 
-'''
-#Testing without using darwinism
-#Run iterations where we mutate all networks
-for iteration in range(MAX_GENERATIONS):
-    dummy_game = game.Game()
-    init_board = dummy_game.curr_board.matrix
-    for individual in all_life.individuals:
-        test_game = game.Game(init_board=init_board.copy())
-        individual.fitness = test_game.run(all_life.individuals.index(individual), get_move, individual)
-        individual.mutate()
-'''
-
 
 #Run a visualization through the top 5 networks
 print("--------------------- PRINTING TOP 5 ---------------------")
 dummy_game = game.Game()
 init_board = dummy_game.curr_board.matrix
 for individual in all_life.individuals[:5]:
+    '''
     test_game = game.Game_Visual(init_board=init_board.copy())
     print("-----------NETWORK ", all_life.individuals.index(individual) + 1,"-------------")
     individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
     print()
+    '''
     individual.print()
 
-#sort the results to get the highest performers ranked at the top
+
+#Print the highest results from each generation and the results from the latest generation
 all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)
 print("Latest Generation:")
 all_life.print_individuals()

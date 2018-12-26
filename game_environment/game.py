@@ -183,6 +183,9 @@ class Game_Visual:
             self.previous_board.matrix = self.curr_board.make_copy_matrix()
 
             FINISH = 50
+            MOVE = 0
+            NUMBER_MAX = 1
+            OUTPUT_RANKS = 2
             move = ""
 
             #Determine if the move is valid
@@ -207,7 +210,7 @@ class Game_Visual:
             if get_move != None:
                 FINISH = 1
                 move_info = get_move(self, args[0])
-                move = move_info[0]
+                move = move_info[MOVE]
                 if(move.lower() == 'e'):
                     break
                 if(move.lower() == "p"):
@@ -225,8 +228,8 @@ class Game_Visual:
             if(self.previous_board.matrix != self.curr_board.matrix):
                 #if the length of possible outputs after feeding is greater than 1, then a random choice was made
                 #punish networks for making random choices by not increasing score
-                if(move_info[1] == 1):
-                    #Determine the score made from the last round and update score
+                if(move_info[NUMBER_MAX] == 1):
+                    #Determine the score made from the current move and update score
                     #Find the numbers on the board that arent 0
                     curr_pieces = [x for x in self.curr_board.matrix if x != 0]
                     prev_pieces = [x for x in self.previous_board.matrix if x != 0]
