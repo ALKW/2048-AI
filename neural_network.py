@@ -184,7 +184,35 @@ class Network:
         for index in arg_input_indices:
             child.inputs[index] = copy.deepcopy(other_parent.inputs[index])
 
+        child.fill_in_internals()
+
         return child
+
+    def fill_in_internals(self):
+        for input_node in self.inputs:
+            self.find_internals(input_node, [input_node])   
+
+    def find_internals(self, curr, path):
+        #if we reach an output node and the path has an internal node, 
+        # then add all the input nodes to the internals if they arent in there already
+        if len(curr.connections) == 0 and len(path) > 2:
+            for internal_node in path[1:-1]:
+                if internal_node not in self.internal:
+                    self.internal.append(internal_node)
+            return
+        #if we reach an output node and the path has no internal nodes
+        #Then do nothing
+        if len(curr.connections) == 0 and len(path) <= 2:
+            return
+
+        #Create a duplicate path object
+        new_path = [x for x in path]
+
+        #Append the current node to the path and then return
+        for con_node in curr.connections:
+            new_path.append(con_node)
+            self.find_internals(con_node, new_path.copy())
+
 
     def find_paths_to_append(self, curr, path, outputs, child):
         #if we reach an output node, then delete the path up to the point that no other paths are affected
@@ -199,7 +227,7 @@ class Network:
         #Append the current node to the path and then return
         for con_node in curr.connections:
             new_path.append(con_node)
-            self.find_paths_to_delete(con_node, path.copy(), outputs, child)
+            self.find_paths_to_append(con_node, path.copy(), outputs, child)
 
     def append_path(self, path, child):
         #Go through the path starting at the input node and write network
@@ -387,12 +415,12 @@ class Network:
         if len(curr.connections) == 0:
             print("----PATH FOR NODE",  self.inputs.index(path[0]), ":", end="")
             for curr_node in path[:-1]:
-                print("Value:", curr_node.value, "Weight:", curr_node.weight, "-> ", end="")
+                print("| Value:", curr_node.value, "Weight:", curr_node.weight, "| -> ", end="")
                 
             if path[-1].desc != None:
                 print(path[-1].desc)
             else:
-                print("Value:", path[-1].value, "Weight:", path[-1].weight, "-> None---")
+                print("| Value:", path[-1].value, "Weight:", path[-1].weight, "|-> ---None---")
             return
 
         #Create a duplicate path object
@@ -424,7 +452,7 @@ def create_init_population(count, inputs, outputs):
             networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
     return networks
 
-'''
+
 #-----------------BREEDING TEST------------------
 test = create_init_population(2, [
                 2,2,2,2,
@@ -432,10 +460,24 @@ test = create_init_population(2, [
                 16,8,2,32,
                 16,4,2,32,
                 ], ["up", "down", "left", "right"])
-    
+
+''' 
+internal1 = node.Node()
+internal1.connections.append(test[0].outputs[0])    
+internal2 = node.Node() 
+internal2.connections.append(test[0].outputs[0])    
+
+test[0].inputs[0].connections.append(internal1)
+
+test[1].inputs[0].connections.append(internal1)
+
+
+
 test[0].print()
 test[1].print()
-test[0].breed_with(test[1]).print()
+child = test[0].breed_with(test[1])
+child.print()
+print(len(child.internal))
 '''
 
     

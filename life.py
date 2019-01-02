@@ -80,7 +80,7 @@ for iteration in range(MAX_GENERATIONS):
 
     #Perform Breeding/Mutating
     new_population = []
-    
+    '''
     #Mate top 4 performers -> add their 6 childred plus the 4 parents 
     for first_index in range(4):
         #Append first parent in the pair
@@ -96,7 +96,7 @@ for iteration in range(MAX_GENERATIONS):
         new_population.append(all_life.individuals[ind_index])
         new_network.mutate()
         new_population.append(new_network)
-    '''
+    
     #Keep next top 5 the same
     for ind_index in range(5, 10):
         new_population.append(all_life.individuals[ind_index])
@@ -115,12 +115,10 @@ print("--------------------- PRINTING TOP 5 ---------------------")
 dummy_game = game.Game()
 init_board = dummy_game.curr_board.matrix
 for individual in all_life.individuals[:5]:
-    '''
     test_game = game.Game_Visual(init_board=init_board.copy())
     print("-----------NETWORK ", all_life.individuals.index(individual) + 1,"-------------")
     individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
     print()
-    '''
     individual.print()
 
 
