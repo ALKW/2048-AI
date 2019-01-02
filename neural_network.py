@@ -153,19 +153,19 @@ class Network:
             None
         '''
         #Create a list of input indexes to choose from
-        choices = [x.desc for x in self.outputs]
-        calling_output_desc = []
-        arg_output_desc = []
+        choices = [x for x in range(len(self.inputs))]
+        calling_input_indices = []
+        arg_input_indices = []
 
         #Choose half the outputs that are taken from the calling parent. Other half are reserved for other parent
         for x in range(len(choices) // 2):
             to_append = random.choice(choices)
-            calling_output_indices.append(to_append)
+            calling_input_indices.append(to_append)
             #Remove it so it is not picked again
             choices.remove(to_append)
 
         #Assign the rest to the outputs from the argument parent
-        arg_output_indices = [x for x in choices]
+        arg_input_indices = [x for x in choices]
 
         '''
         #----------------PRINT---------------------

@@ -80,7 +80,7 @@ for iteration in range(MAX_GENERATIONS):
 
     #Perform Breeding/Mutating
     new_population = []
-    '''
+    
     #Mate top 4 performers -> add their 6 childred plus the 4 parents 
     for first_index in range(4):
         #Append first parent in the pair
@@ -96,6 +96,7 @@ for iteration in range(MAX_GENERATIONS):
         new_population.append(all_life.individuals[ind_index])
         new_network.mutate()
         new_population.append(new_network)
+    '''
     #Keep next top 5 the same
     for ind_index in range(5, 10):
         new_population.append(all_life.individuals[ind_index])
