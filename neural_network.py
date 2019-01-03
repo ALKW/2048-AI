@@ -461,7 +461,7 @@ test = create_init_population(2, [
                 16,4,2,32,
                 ], ["up", "down", "left", "right"])
 
-''' 
+
 internal1 = node.Node()
 internal1.connections.append(test[0].outputs[0])    
 internal2 = node.Node() 
@@ -478,6 +478,6 @@ test[1].print()
 child = test[0].breed_with(test[1])
 child.print()
 print(len(child.internal))
-'''
+
 
     
