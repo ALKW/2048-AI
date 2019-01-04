@@ -371,7 +371,10 @@ class Board(Matrix):
             self.right_movement()
             return True
         else:
-            #-----------------print("invalid move")---------#
+            '''
+            #-----------------Print Invalid Move---------#
+            print("invalid move")
+            '''
             return False
 
     def print_matrix(self):

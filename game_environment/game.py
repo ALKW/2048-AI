@@ -46,6 +46,11 @@ class Game:
                 move_info = get_move(self, args[0])
                 move = move_info[0]
 
+            '''
+            #-------Print Move Info------
+            print(move_info[:-1])
+            '''
+
             if(move.lower() == 'e'):
                 break
             if(move.lower() == "p"):
@@ -80,7 +85,10 @@ class Game:
                 self.curr_board.spawn_number()
                 count = 0
             else:
-                #--------------print("Invalid move")----------------
+                '''
+                #------------Print invalid move
+                print("Invalid move")
+                '''
                 count += 1
             if count > 1:
                 break
@@ -217,7 +225,9 @@ class Game_Visual:
                     self.curr_board.print_matrix()
                     continue
 
-            #-----------------print(move_info[:-1])--------------------
+            
+            #-------Print Move Info------
+            print(move_info[:-1])       
 
             #determine the move that was passed in and updates the board in memory
             self.curr_board.determine_move(move)
@@ -253,7 +263,10 @@ class Game_Visual:
                 self.curr_board.spawn_number()
                 count = 0
             else:
-                #--------------print("Invalid move")----------------#
+                '''
+                #--------------Print invalid move)----------------
+                print("Invalid move"
+                '''
                 count += 1
             
             if count > FINISH:

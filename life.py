@@ -28,9 +28,53 @@ def get_move(active_game, active_network):
             stimuli.append(0)
         else:
             stimuli.append(1)
-    other_stimuli = []
+
+    other_stimuli = classify_board(active_game.curr_board)
+
     stimuli += other_stimuli
     return active_network.feed(stimuli)
+
+def classify_board(board):
+    '''
+    classifies the rows and columns of the matrix with a 1 if there is an available move and 0 if there isnt
+    Args:
+        board (Board Object) - the current game board object
+    Returns:
+        stimuli (list) - the results of the algorithm, the first four are the rows and the last four are the columns
+    Raises:
+        None
+    '''
+    to_return = []
+    #For each row, determine if its possible to move
+    for row_slice in board.rows:
+        row = board.matrix[row_slice]
+        if 0 in row:
+            to_return.append(1)
+        elif can_move(row):
+            to_return.append(1)
+        else:
+            to_return.append(0)
+    
+    #For each column, determine if its possible to move
+    for column_slice in board.columns:
+        column = board.matrix[column_slice]
+        if 0 in column:
+            to_return.append(1)
+        elif can_move(column):
+            to_return.append(1)
+        else:
+            to_return.append(0)
+    
+    return to_return
+
+def can_move(data):
+    curr = data[0]
+    for entry in data[1:]:
+        if curr == entry:
+            return True
+        else:
+            curr = entry
+    return False
 
 #Have max heaps (species) of 20 individuals max. At each stage:
 #   Mate top 4 perfomers and keep original: +10
@@ -46,10 +90,10 @@ all_life.individuals = network.create_init_population(20, [
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0,
-
-
+                0,0,0,0,
+                0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 50
+MAX_GENERATIONS = 150
 RUNS_PER_IND = 5
 top_performers = []
 
@@ -65,13 +109,19 @@ for iteration in range(MAX_GENERATIONS):
             test_game = game.Game(init_board=init_board.copy())
             run_total += test_game.run(all_life.individuals.index(individual), get_move, individual)
             individual.fitness = run_total // RUNS_PER_IND
-        #-----------------print("Network:", all_life.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
+        '''
+        #-----------------Print the network details--------
+        print("Network:", all_life.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
+        '''
 
     #sort the results to get the highest performers ranked at the top
     all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)
 
+    '''
     #------------Test Print Function--------------#
-    #------------all_life.print_individuals()
+    all_life.print_individuals()
+    '''
+
     print("Finished Generation:", iteration + 1)
 
     #Keep track of top performers from each generation for analytic purposes
@@ -90,7 +140,7 @@ for iteration in range(MAX_GENERATIONS):
             child = all_life.individuals[first_index].breed_with(all_life.individuals[second_index])
             new_population.append(child)
     '''       
-    #------------MUTATING NETWORKS BECAUSE BREEDING FUNCTION IS NOT WRITTEN-------#
+    #------------MUTATING TOP 5 NETWORKS-------#
     for ind_index in range(5):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
         new_population.append(all_life.individuals[ind_index])

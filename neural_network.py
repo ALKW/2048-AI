@@ -65,7 +65,7 @@ class Network:
         '''
         Runs through the network to determine the next neuron to fire
         Args:
-            start_node
+            start_node (Node object) - the node whose connections we are examining
         Returns:
             None
         Raises:
@@ -90,11 +90,11 @@ class Network:
         #Because no loops can exist in this network, we dont have to worry about coloring nodes
         outputs_too = end
         for curr_node in start_node.connections:
-            if curr_node.desc != None:
+            if curr_node.desc == None:
                 curr_node.value *= 0
             if outputs_too:
                 curr_node.value *= 0
-            self.feed_forward(curr_node)
+            self.reset_nodes(curr_node)
     
     def find_max_output(self):
         '''
@@ -125,7 +125,7 @@ class Network:
         index = random.randint(0,len(max_nodes) - 1)
         desc_to_return = max_nodes[index].desc
         '''
-        #------------------PRINT-----------------
+        #------------------PRINT Moves-----------------
         print("Determine Move:", desc_to_return, end="")
         if len(max_nodes) > 1:
             print(" | Random Choice from:", "".join([str(x.desc) + " " for x in max_nodes]))
@@ -135,6 +135,7 @@ class Network:
         #Sort the outputs by value, highest is highest rank
         ranks = [x for x in self.outputs]
         ranks.sort(key=lambda x: x.value, reverse=True)
+        ranks = [[x.desc, x.value] for x in ranks]
 
         return desc_to_return, len(max_nodes), ranks
 
@@ -174,7 +175,7 @@ class Network:
         '''
 
         #Create a network object to be the child
-        child = Network(inputs=[0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0], outputs=["up", "down", "left", "right"])
+        child = Network(inputs=[x.value for x in self.inputs], outputs=[x.desc for x in self.outputs])
 
         #take inputs paths from calling parent and assign them to the child
         for index in calling_input_indices:
@@ -212,7 +213,8 @@ class Network:
         for con_node in curr.connections:
             self.find_internals(con_node, path.copy())
 
-    '''-----OTHER TYPE OF BREEDING----
+    '''
+    #-----OTHER TYPE OF BREEDING----
     def find_paths_to_append(self, curr, path, outputs, child):
         #append the current node to the path
         path.append(curr)
@@ -331,72 +333,6 @@ class Network:
 
             #Change the weight of the internal node
             self.internal[mutate_index].weight = random.choice(list(poss_weights))
-        
-        if mutation == 3:
-            #choose a node to delete one of its paths out. If the node is internal and has only
-            #one path out delete all paths to that node
-            node_choice = random.randint(0, len(self.inputs) + len(self.internal) - 1)
-
-            #Choosen an input node
-            if node_choice < len(self.inputs):
-                #choose an input node that has at least 1 output
-                while len(self.inputs[node_choice].connections) < 1:
-                    node_choice = random.randint(0, len(self.inputs) - 1)
-                #Choose the outgoing branch to delete
-                del_choice = random.randint(0, len(self.inputs[node_choice].connections) - 1)
-                #delete the branch
-                self.inputs[node_choice].connections.pop(del_choice)
-            #else choose an internal node
-            else:
-                #if the node has multiple paths leaving it, then just delete the path without deleting the node
-                node_choice -= len(self.inputs)
-                if len(self.internal[node_choice].connections) > 1:
-                    del_choice = random.randint(0, len(self.internal[node_choice].connections) - 1)
-                    self.internal[node_choice].connections.pop(del_choice)
-                    
-                #if the node has only one connection out, delete that node and all paths to it
-                #Go through all paths to find paths that include the internal node. Delete all paths to that node
-                else:
-                    #For each node, run modified DFS with it as the source
-                    for input_node in self.inputs:
-                        #DFS style feed forward
-                        self.find_paths_to_delete(input_node, [], self.internal[node_choice].connections[0])
-
-    def find_paths_to_delete(self, curr, path, end):
-        #append the current node to the path
-        path.append(curr)
-
-        #if we reach an output node, then delete the path up to the point that no other paths are affected
-        if curr == end:
-            self.del_path(path)
-            return
-        #if we reach an output node without encountering the node to terminate, then dont do anything
-        if len(curr.connections) == 0:
-            return
-
-        #Create a duplicate path object
-        new_path = [x for x in path]
-
-        #Go through all connnections in the current node like a DFS style search
-        for con_node in curr.connections:
-            self.find_paths_to_delete(con_node, path.copy(), end)
-
-    def del_path(self, path):
-        #Go through the path starting at the node to delete and look at the number of connections of each node
-        count = len(path) - 1
-        START = path[0]
-        SECOND = path[1]
-
-        for curr_node in path[::-1]:
-            #If we reach an input node, delete the path going from that node
-            if count == 0:
-                self.inputs[self.inputs.index(START)].connections.remove(SECOND)
-            #Keep deleting nodes until you encounter one with more than 1 connection
-            if len(curr_node.connections) == 1:
-                self.internal.remove(curr_node)
-            else:
-                return
-            count -= 1
                        
     def print_s(self):
         print("Fitness: ", self.fitness)
@@ -456,16 +392,16 @@ def create_init_population(count, inputs, outputs):
             networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
     return networks
 
-
+'''
 #-----------------BREEDING TEST------------------
 test = create_init_population(2, [
                 2,2,2,2,
-                2,16,0,2,
+                2,16,50,2,
                 16,8,2,32,
                 16,4,2,32,
                 ], ["up", "down", "left", "right"])
 
-'''
+
 internal1 = node.Node()
 internal1.connections.append(test[0].outputs[0])   
  
@@ -476,14 +412,13 @@ test[0].inputs[0].connections.append(internal1)
 
 test[1].inputs[0].connections.append(internal1)
 
-
-
 test[0].print()
 test[1].print()
 child = test[0].breed_with(test[1])
 child.print()
 print(len(child.internal))
 '''
+
 
 
 
