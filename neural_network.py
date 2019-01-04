@@ -190,9 +190,12 @@ class Network:
 
     def fill_in_internals(self):
         for input_node in self.inputs:
-            self.find_internals(input_node, [input_node])   
+            self.find_internals(input_node, [])   
 
     def find_internals(self, curr, path):
+        #append the current node to the path
+        path.append(curr)
+
         #if we reach an output node and the path has an internal node, 
         # then add all the input nodes to the internals if they arent in there already
         if len(curr.connections) == 0 and len(path) > 2:
@@ -205,16 +208,15 @@ class Network:
         if len(curr.connections) == 0 and len(path) <= 2:
             return
 
-        #Create a duplicate path object
-        new_path = [x for x in path]
-
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            new_path.append(con_node)
-            self.find_internals(con_node, new_path.copy())
+            self.find_internals(con_node, path.copy())
 
-
+    '''-----OTHER TYPE OF BREEDING----
     def find_paths_to_append(self, curr, path, outputs, child):
+        #append the current node to the path
+        path.append(curr)
+
         #if we reach an output node, then delete the path up to the point that no other paths are affected
         if curr == end:
             self.append_path(path, child)
@@ -226,7 +228,6 @@ class Network:
 
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            new_path.append(con_node)
             self.find_paths_to_append(con_node, path.copy(), outputs, child)
 
     def append_path(self, path, child):
@@ -234,6 +235,7 @@ class Network:
         count = len(path) - 1
         START = path[0]
         SECOND = path[1]
+    '''
 
     def mutate(self, mutation=-1):
         '''
@@ -358,9 +360,12 @@ class Network:
                     #For each node, run modified DFS with it as the source
                     for input_node in self.inputs:
                         #DFS style feed forward
-                        self.find_paths_to_delete(input_node, [input_node], self.internal[node_choice].connections[0])
+                        self.find_paths_to_delete(input_node, [], self.internal[node_choice].connections[0])
 
     def find_paths_to_delete(self, curr, path, end):
+        #append the current node to the path
+        path.append(curr)
+
         #if we reach an output node, then delete the path up to the point that no other paths are affected
         if curr == end:
             self.del_path(path)
@@ -372,10 +377,9 @@ class Network:
         #Create a duplicate path object
         new_path = [x for x in path]
 
-        #Append the current node to the path and then return
+        #Go through all connnections in the current node like a DFS style search
         for con_node in curr.connections:
-            new_path.append(con_node)
-            self.find_paths_to_delete(con_node, new_path.copy(), end)
+            self.find_paths_to_delete(con_node, path.copy(), end)
 
     def del_path(self, path):
         #Go through the path starting at the node to delete and look at the number of connections of each node
@@ -407,10 +411,13 @@ class Network:
     def print_node_paths(self):
         #Start with each internal nodes
         for input_node in self.inputs:
-            self.find_paths(input_node, [input_node])
+            self.find_paths(input_node, [])
             print()
             
     def find_paths(self, curr, path):
+        #append the current node to the path
+        path.append(curr)
+
         #if we reach an output node, then print and return
         if len(curr.connections) == 0:
             print("----PATH FOR NODE",  self.inputs.index(path[0]), ":", end="")
@@ -423,13 +430,9 @@ class Network:
                 print("| Value:", path[-1].value, "Weight:", path[-1].weight, "|-> ---None---")
             return
 
-        #Create a duplicate path object
-        new_path = [x for x in path]
-
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            new_path.append(con_node)
-            self.find_paths(con_node, new_path.copy())
+            self.find_paths(con_node, path.copy())
 
 
 def create_init_population(count, inputs, outputs):
@@ -442,11 +445,12 @@ def create_init_population(count, inputs, outputs):
     Raises:
         None
     '''
+    #Create a list of blank network objects
     networks = [Network(inputs, outputs) for x in range(count)]
+    #For each network connect all four output nodes to input nodes initially
     for network_index in range(count):
-        #For each network connect all four output nodes to input nodes initially
         for output_index in range(4):
-            #choose the node from input layer to connect to node in output layer randomly
+            #choose the node from input layer to connect to the output node randomly
             input_index = random.randint(0, len(inputs) - 1)
             #Connect the input node to the output node
             networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
@@ -461,9 +465,10 @@ test = create_init_population(2, [
                 16,4,2,32,
                 ], ["up", "down", "left", "right"])
 
-
+'''
 internal1 = node.Node()
-internal1.connections.append(test[0].outputs[0])    
+internal1.connections.append(test[0].outputs[0])   
+ 
 internal2 = node.Node() 
 internal2.connections.append(test[0].outputs[0])    
 
@@ -478,6 +483,8 @@ test[1].print()
 child = test[0].breed_with(test[1])
 child.print()
 print(len(child.internal))
+'''
+
 
 
     

@@ -216,7 +216,8 @@ class Game_Visual:
                 if(move.lower() == "p"):
                     self.curr_board.print_matrix()
                     continue
-            
+
+            #-----------------print(move_info[:-1])--------------------
 
             #determine the move that was passed in and updates the board in memory
             self.curr_board.determine_move(move)
