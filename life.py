@@ -8,7 +8,8 @@ class Life:
         #Array of all networks regardless of species
         self.individuals = []
 
-        #list of lists. each list has a specific species list
+        #list of lists. each list has a specific species list. 
+        # Species are determined by 2 most popular moves when a specific board is fed in
         self.species_list = []
     
     def classify_life(self):
@@ -93,7 +94,7 @@ all_life.individuals = network.create_init_population(20, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 150
+MAX_GENERATIONS = 50
 RUNS_PER_IND = 5
 top_performers = []
 
