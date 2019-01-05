@@ -153,19 +153,23 @@ class Network:
         Raises:
             None
         '''
+        #Create a network object to be the child
+        child = Network(inputs=[x.value for x in self.inputs], outputs=[x.desc for x in self.outputs])
+
+        #---------INPUT BREEDING------------
         #Create a list of input indexes to choose from
         choices = [x for x in range(len(self.inputs))]
         calling_input_indices = []
         arg_input_indices = []
 
-        #Choose half the outputs that are taken from the calling parent. Other half are reserved for other parent
+        #Choose half the inputs that are taken from the calling parent. Other half are reserved for other parent
         for x in range(len(choices) // 2):
             to_append = random.choice(choices)
             calling_input_indices.append(to_append)
             #Remove it so it is not picked again
             choices.remove(to_append)
 
-        #Assign the rest to the outputs from the argument parent
+        #Assign the rest to the inputs from the argument parent
         arg_input_indices = [x for x in choices]
 
         '''
@@ -174,9 +178,6 @@ class Network:
         print("args: ", arg_input_indices)
         '''
 
-        #Create a network object to be the child
-        child = Network(inputs=[x.value for x in self.inputs], outputs=[x.desc for x in self.outputs])
-
         #take inputs paths from calling parent and assign them to the child
         for index in calling_input_indices:
             child.inputs[index] = copy.deepcopy(self.inputs[index])
@@ -184,6 +185,37 @@ class Network:
         #take inputs paths from argument parent and assign them to the child
         for index in arg_input_indices:
             child.inputs[index] = copy.deepcopy(other_parent.inputs[index])
+
+        #fill in the internal nodes of the child
+        child.fill_in_internals()
+
+        #-----------OUTPUT BREEDING----------
+        #Create a list of output indexes to choose from
+        choices = [x for x in range(len(self.outputs))]
+        calling_output_indices = []
+        arg_output_indices = []
+
+        #Choose half the outputs that are taken from the calling parent. Other half are reserved for other parent
+        for x in range(len(choices) // 2):
+            to_append = random.choice(choices)
+            calling_output_indices.append(to_append)
+            #Remove it so it is not picked again
+            choices.remove(to_append)
+
+        #Assign the rest to the outputs from the argument parent
+        arg_output_indices = [x for x in choices]
+
+        #Get the outputs and assign them to the appropriate lists
+        calling_poss_outpus = [x.desc for x in self.outputs if x in calling_output_indices]
+        arg_poss_outputs = [x.desc for x in self.outputs if x in arg_output_indices]
+
+        #take paths to output from calling parent and assign them to the child
+        for input_node in self.inputs:
+            self.find_paths_to_append(input_node, [], calling_poss_outputs, child)
+
+        #take paths to output from argument parent and assign them to the child
+        for input_node in self.inputs:
+            self.find_paths_to_append(input_node, [], arg_poss_outputs, child)
 
         child.fill_in_internals()
 
@@ -213,31 +245,29 @@ class Network:
         for con_node in curr.connections:
             self.find_internals(con_node, path.copy())
 
-    '''
-    #-----OTHER TYPE OF BREEDING----
-    def find_paths_to_append(self, curr, path, outputs, child):
+    #-----OUTPUT BREEDING----
+    def find_paths_to_append(self, curr, path, poss_outputs, child):
         #append the current node to the path
         path.append(curr)
 
-        #if we reach an output node, then delete the path up to the point that no other paths are affected
-        if curr == end:
+        #if we reach a correct output node, then delete the path up to the point that no other paths are affected
+        if curr.desc in poss_outputs:
             self.append_path(path, child)
             return
 
         #if we reach an output node without encountering the node to terminate, then dont do anything
-        if len(curr.connections) == 0:
+        if curr.desc != None:
             return
 
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            self.find_paths_to_append(con_node, path.copy(), outputs, child)
+            self.find_paths_to_append(con_node, path.copy(), poss_outputs, child)
 
     def append_path(self, path, child):
-        #Go through the path starting at the input node and write network
+        #Go through the path starting at the input node and write to the child network
         count = len(path) - 1
         START = path[0]
         SECOND = path[1]
-    '''
 
     def mutate(self, mutation=-1):
         '''
