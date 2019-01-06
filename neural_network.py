@@ -179,7 +179,7 @@ class Network:
         print("calling: ", calling_input_indices)
         print("args: ", arg_input_indices)
         '''
-        '''
+        '''        
 
         #take inputs paths from calling parent and assign them to the child
         for index in calling_input_indices:
@@ -190,7 +190,8 @@ class Network:
             child.inputs[index] = copy.deepcopy(other_parent.inputs[index])
 
         #fill in the internal nodes of the child
-        child.fill_in_internals()
+        self.fill_in_internals(child)
+        
         '''
 
         #-----------OUTPUT BREEDING----------

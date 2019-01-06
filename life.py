@@ -87,7 +87,7 @@ def can_move(data):
 #Let input neurons be the board, the rows if a move is available, and the columns if a move is available
 
 all_life = Life()
-all_life.individuals = network.create_init_population(20, [
+all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0,
@@ -133,8 +133,8 @@ for iteration in range(MAX_GENERATIONS):
     #Perform Breeding/Mutating
     new_population = []
     
-    #Mate top 4 performers -> add their 6 childred plus the 4 parents 
-    for first_index in range(4):
+    #Mate top 5 performers -> add their 10 childred plus the 5 parents 
+    for first_index in range(5):
         #Append first parent in the pair
         new_population.append(all_life.individuals[first_index])
 
@@ -145,7 +145,7 @@ for iteration in range(MAX_GENERATIONS):
         
          
     #------------MUTATE NETWORKS-------#
-    for ind_index in range(4, 14):
+    for ind_index in range(5, 20):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
         new_network.mutate()
         new_population.append(new_network)
