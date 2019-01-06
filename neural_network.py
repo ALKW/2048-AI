@@ -220,11 +220,15 @@ class Network:
 
         #take paths to output from calling parent and assign them to the child
         for input_node in self.inputs:
-            paths = self.find_paths_to_append(input_node, [], calling_poss_outputs, child, self.inputs.index(input_node), [])
+            result = self.find_paths_to_append(input_node, [], calling_poss_outputs, child, self.inputs.index(input_node), [])
+            if result != None:
+                paths += result
 
         #take paths to output from argument parent and assign them to the child
         for input_node in other_parent.inputs:
-            paths += other_parent.find_paths_to_append(input_node, [], arg_poss_outputs, child, other_parent.inputs.index(input_node), [])
+            result = other_parent.find_paths_to_append(input_node, [], arg_poss_outputs, child, other_parent.inputs.index(input_node), [])
+            if result != None:
+                paths += result
 
         child.append_paths(paths, self, other_parent)
 
@@ -276,7 +280,7 @@ class Network:
 
         return paths
 
-    def append_path(self, paths, calling_parent, arg_parent):
+    def append_paths(self, paths, calling_parent, arg_parent):
         #Go through the path starting at the input node and write to the child network
         #Start at the input index
         curr_node = child.inputs[input_index]
