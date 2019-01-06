@@ -8,3 +8,4 @@ class Node:
     def print(self):
         print("Value:", self.value, "| Weight:", self.weight, "| Description:", self.desc, "| Connected to", len(self.connections), "Nodes\n")  
 
+

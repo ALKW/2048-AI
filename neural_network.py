@@ -214,9 +214,11 @@ class Network:
         calling_poss_outputs = [x.desc for x in self.outputs if self.outputs.index(x) in calling_output_indices]
         arg_poss_outputs = [x.desc for x in self.outputs if self.outputs.index(x) in arg_output_indices]
 
+        '''
         #----------------PRINT---------------------
         print("calling: ", calling_poss_outputs)
         print("args: ", arg_poss_outputs)
+        '''
 
         #take paths to output from calling parent and assign them to the child
         for input_node in self.inputs:
@@ -224,23 +226,26 @@ class Network:
             if result != None:
                 paths += result
 
+        self.append_paths(child, paths, self)
+        paths = []
+
         #take paths to output from argument parent and assign them to the child
         for input_node in other_parent.inputs:
             result = other_parent.find_paths_to_append(input_node, [], arg_poss_outputs, child, other_parent.inputs.index(input_node), [])
             if result != None:
                 paths += result
 
-        child.append_paths(paths, self, other_parent)
+        self.append_paths(child, paths, other_parent)
 
-        child.fill_in_internals()
+        self.fill_in_internals(child)
 
         return child
 
-    def fill_in_internals(self):
+    def fill_in_internals(self, child):
         for input_node in self.inputs:
-            self.find_internals(input_node, [])   
+            self.find_internals(child, input_node, [])   
 
-    def find_internals(self, curr, path):
+    def find_internals(self, child, curr, path):
         #append the current node to the path
         path.append(curr)
 
@@ -248,8 +253,8 @@ class Network:
         # then add all the input nodes to the internals if they arent in there already
         if len(curr.connections) == 0 and len(path) > 2:
             for internal_node in path[1:-1]:
-                if internal_node not in self.internal:
-                    self.internal.append(internal_node)
+                if internal_node not in child.internal:
+                    child.internal.append(internal_node)
             return
         #if we reach an output node and the path has no internal nodes
         #Then do nothing
@@ -258,7 +263,7 @@ class Network:
 
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            self.find_internals(con_node, path.copy())
+            self.find_internals(child, con_node, path.copy())
 
     #----------------OUTPUT BREEDING-------------------
     def find_paths_to_append(self, curr, path, poss_outputs, child, input_index, paths):
@@ -280,18 +285,37 @@ class Network:
 
         return paths
 
-    def append_paths(self, paths, calling_parent, arg_parent):
-        #Go through the path starting at the input node and write to the child network
-        #Start at the input index
-        curr_node = child.inputs[input_index]
+    def append_paths(self, child, paths, parent):
+        #Go through all the paths and append them to the child network
+        #for more efficient storage keep track of nodes added 
+        #Key: Old Node | Value: New Node
+        nodes = dict()
+        OUTPUTS = [x.desc for x in child.outputs]
 
-        #Fill in each node in the path
-        for piece in path[1:]:
-            piece = copy.deepcopy(piece)
-            #Add the connection
-            curr_node.connections.append(piece)
-            #Move to the next node
-            curr_node = piece
+        for path in paths:
+            #Find the corresponding input node
+            input_index = parent.inputs.index(path[0])
+            curr = child.inputs[input_index]
+            #Connect the path
+            for node_obj in path[1:]:
+                #if we reach an output node, use the child output nodes
+                if node_obj.desc != None:
+                    output_index = OUTPUTS.index(node_obj.desc)
+                    node_obj = child.outputs[output_index]
+                    #If the output is already connected then dont append it again
+                    if node_obj in curr.connections:
+                        break
+                #if the node was already replicated use that replicated one
+                elif node_obj in nodes:
+                    node_obj = nodes[node_obj]
+                #Else stoZNre the node for future use and use the replicated one
+                else:
+                    nodes[node_obj] = node.Node(value=node_obj.value, weight=node_obj.weight)
+                    node_obj = nodes[node_obj]
+                #Assign the node to the correct connection list
+                #Start at the second entry as the first is not in any connection list
+                curr.connections.append(node_obj)
+                curr = node_obj
 
     def mutate(self, mutation=-1):
         '''
@@ -299,7 +323,6 @@ class Network:
             -add an extra branch
             -create a new node that two nodes link to 
             -modify an existing weight
-            -delete an existing branch
         Only internal nodes can have weights different than 1
         Args:
             network (Network object) - network to mutate from
@@ -446,7 +469,7 @@ def create_init_population(count, inputs, outputs):
             networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
     return networks
 
-
+'''
 #-----------------BREEDING TEST------------------
 test = create_init_population(2, [
                 2,2,2,2,
@@ -465,6 +488,7 @@ internal2.connections.append(test[1].outputs[0])
 print(internal2)  
 
 test[0].inputs[0].connections.append(internal1)
+test[0].inputs[1].connections.append(internal1)
 
 test[1].inputs[0].connections.append(internal2)
 
@@ -474,6 +498,7 @@ test[1].print()
 child = test[0].breed_with(test[1])
 child.print()
 print(len(child.internal))
+'''
 
 
 

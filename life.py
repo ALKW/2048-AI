@@ -24,6 +24,7 @@ class Life:
     
 def get_move(active_game, active_network):
     stimuli = []
+    
     for entry in active_game.curr_board.matrix:
         if entry == 0:
             stimuli.append(0)
@@ -95,7 +96,7 @@ all_life.individuals = network.create_init_population(20, [
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
 MAX_GENERATIONS = 50
-RUNS_PER_IND = 5
+RUNS_PER_IND = 10
 top_performers = []
 
 #Run the simulation for MAX_GENERATIONS iterations with a population size of 20
@@ -131,32 +132,26 @@ for iteration in range(MAX_GENERATIONS):
 
     #Perform Breeding/Mutating
     new_population = []
-    '''
+    
     #Mate top 4 performers -> add their 6 childred plus the 4 parents 
     for first_index in range(4):
         #Append first parent in the pair
         new_population.append(all_life.individuals[first_index])
+
         for second_index in range(first_index + 1, 4):
             #Create and append the child in the pair
             child = all_life.individuals[first_index].breed_with(all_life.individuals[second_index])
             new_population.append(child)
-    '''       
-    #------------MUTATING TOP 5 NETWORKS-------#
-    for ind_index in range(5):
-        new_network = copy.deepcopy(all_life.individuals[ind_index])
-        new_population.append(all_life.individuals[ind_index])
-        new_network.mutate()
-        new_population.append(new_network)
-    
-    #Keep next top 5 the same
-    for ind_index in range(5, 10):
-        new_population.append(all_life.individuals[ind_index])
-    #Mutate next top 5:
-    for ind_index in range(10, 15):
+        
+         
+    #------------MUTATE NETWORKS-------#
+    for ind_index in range(4, 14):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
         new_network.mutate()
         new_population.append(new_network)
-    #Disregard lowest 5 performers
+
+    #Disregard The rest
+
     #Create new population
     all_life.individuals = new_population
 
