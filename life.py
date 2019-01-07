@@ -96,7 +96,7 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
 MAX_GENERATIONS = 50
-RUNS_PER_IND = 10
+RUNS_PER_IND = 5
 top_performers = []
 
 #Run the simulation for MAX_GENERATIONS iterations with a population size of 20
@@ -163,8 +163,10 @@ init_board = dummy_game.curr_board.matrix
 for individual in all_life.individuals[:5]:
     test_game = game.Game_Visual(init_board=init_board.copy())
     print("-----------NETWORK ", all_life.individuals.index(individual) + 1,"-------------")
+    '''
     individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
     print()
+    '''
     individual.print()
 
 

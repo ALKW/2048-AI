@@ -24,45 +24,68 @@ class Game:
                 self.curr_board.spawn_number()
 
     def run(self, iteration=None, get_move=None, *args):
-
-        #Create the board
         valid = False
         is_over = False
-        count = 0
         score = 0
 
         while not is_over:
             if(self.curr_board.is_full()):
                 is_over = True
                 continue
+
+            MAX_MOVES = 0
+            NUMBER_MAX = 1
+            OUTPUT_RANKS = 2
+            node_ranks = []
+            max_nodes = []
+            move = ""
+            rank = 1
+
+            
             #Copy the matrix to make a previous board with the newly spawned number
             self.previous_board.matrix = self.curr_board.make_copy_matrix()
 
             #Determine if the move is valid
             #Make this a separate thread to allow the program to run faster
-            if get_move == None:
-                move = input("input move: ")
-            else:
+            if get_move != None:
+                #Get the move from the passed in function argument
                 move_info = get_move(self, args[0])
-                move = move_info[0]
+                max_nodes = move_info[MAX_MOVES]
+                #Get the ranks
+                node_ranks = move_info[OUTPUT_RANKS]
+            else:
+                move = input("input move: ")
+                node_ranks.append(node.Node(desc=move))
+
+            #Get the highest ranked move. If mutliple pick a random one
+            if len(max_nodes) > 0:
+                index = random.randint(0, len(max_nodes) - 1)
+                curr_node = max_nodes[index]
+            #If there is no max move then no move was picked
+            else:
+                continue
 
             '''
             #-------Print Move Info------
             print(move_info[:-1])
             '''
 
-            if(move.lower() == 'e'):
-                break
-            if(move.lower() == "p"):
-                self.curr_board.print_matrix()
-                continue
-            self.curr_board.determine_move(move)
+            #Try out all the moves and determine the fitness based on the rank of the move
+            for index in range(len(node_ranks)):
+                prev_node = curr_node
+                curr_node = node_ranks[index]
+                #If the current nodes value is less than the previous then it is a lower rank move
+                if curr_node.value != prev_node.value:
+                    rank += 1
 
-            #Determine if the resulting move did anything
-            if(self.previous_board.matrix != self.curr_board.matrix):
-                #if the length of possible outputs after feeding is greater than 1, then a random choice was made
-                #punish networks for making random choices by not increasing score
-                if(move_info[1] == 1):
+                #Get the description of the move from the node
+                move = curr_node.desc
+
+                #determine the move that was passed in and updates the board in memory
+                self.curr_board.determine_move(move)
+
+                #Determine if the resulting move did anything
+                if(self.previous_board.matrix != self.curr_board.matrix):
                     #Determine the score made from the last round and update score
                     #Find the numbers on the board that arent 0
                     curr_pieces = [x for x in self.curr_board.matrix if x != 0]
@@ -78,20 +101,18 @@ class Game:
                         if tile in curr_pieces:
                             curr_pieces.remove(tile)
                     score += sum(curr_pieces)
+                    #Modify the score based on the move rank
+                    score = score // rank
 
-                #Copy the matrix to make a previous board with the newly completed move
-                self.previous_board.matrix = self.curr_board.make_copy_matrix()
-                #Spawn a number
-                self.curr_board.spawn_number()
-                count = 0
-            else:
+                    #Copy the matrix to make a previous board with the newly completed move
+                    self.previous_board.matrix = self.curr_board.make_copy_matrix()
+                    #Spawn a number
+                    self.curr_board.spawn_number()
+                    break
                 '''
                 #------------Print invalid move
                 print("Invalid move")
                 '''
-                count += 1
-            if count > 1:
-                break
         '''
         ---------------------------------------
         print("Score:", score)
@@ -100,7 +121,6 @@ class Game:
         ---------------------------------------
         '''
         return score
-
 
 class Game_Visual:
     def __init__(self, init_board=None):
@@ -179,7 +199,6 @@ class Game_Visual:
 
         #Spawn a number
         self.curr_board.spawn_number()
-        count = 0
         score = 0
         is_over = False
 
@@ -190,11 +209,13 @@ class Game_Visual:
             #Copy the matrix to make a previous board with the newly spawned number
             self.previous_board.matrix = self.curr_board.make_copy_matrix()
 
-            FINISH = 50
-            MOVE = 0
+            MAX_MOVES = 0
             NUMBER_MAX = 1
             OUTPUT_RANKS = 2
+            node_ranks = []
+            max_nodes = []
             move = ""
+            rank = 1
 
             #Determine if the move is valid
             #Make this a separate thread to allow the program to run faster
@@ -207,39 +228,55 @@ class Game_Visual:
                 if event.type == pygame.KEYDOWN and get_move == None:
                     if event.key == pygame.K_LEFT:
                         move = "left"
+                        node_ranks.append(move)
                     elif event.key == pygame.K_RIGHT:
                         move = "right"
+                        node_ranks.append(move)
                     elif event.key == pygame.K_DOWN:
                         move = "down"
+                        node_ranks.append(move)
                     elif event.key == pygame.K_UP:
                         move = "up"
+                        node_ranks.append(move)
                     else:
                         move = ""
             if get_move != None:
-                FINISH = 1
+                #Get the move from the passed in function argument
                 move_info = get_move(self, args[0])
-                move = move_info[MOVE]
-                if(move.lower() == 'e'):
-                    break
-                if(move.lower() == "p"):
-                    self.curr_board.print_matrix()
-                    continue
+                max_nodes = move_info[MAX_MOVES]
+                #Get the ranks
+                node_ranks = move_info[OUTPUT_RANKS]
 
+            #Get the highest ranked move. If mutliple pick a random one
+            if len(max_nodes) > 0:
+                index = random.randint(0, len(max_nodes) - 1)
+                curr_node = max_nodes[index]
+            #If there is no max move then no move was picked
+            else:
+                continue
             
             #-------Print Move Info------
             print(move_info[:-1])       
 
-            #determine the move that was passed in and updates the board in memory
-            self.curr_board.determine_move(move)
-            
-            #Print updated board to screen
-            self.update_board(number, score, screen)
-            
-            #Determine if the resulting move did anything
-            if(self.previous_board.matrix != self.curr_board.matrix):
-                #if the length of possible outputs after feeding is greater than 1, then a random choice was made
-                #punish networks for making random choices by not increasing score
-                if(move_info[NUMBER_MAX] == 1):
+            #Try out all the moves and determine the fitness based on the rank of the move
+            for index in range(len(node_ranks)):
+                prev_node = curr_node
+                curr_node = node_ranks[index]
+                #If the current nodes value is less than the previous then it is a lower rank move
+                if curr_node.value != prev_node.value:
+                    rank += 1
+
+                #Get the description of the move from the node
+                move = curr_node.desc
+
+                #determine the move that was passed in and updates the board in memory
+                self.curr_board.determine_move(move)
+                
+                #Print updated board to screen
+                self.update_board(number, score, screen)
+                
+                #Determine if the resulting move did something
+                if(self.previous_board.matrix != self.curr_board.matrix):
                     #Determine the score made from the current move and update score
                     #Find the numbers on the board that arent 0
                     curr_pieces = [x for x in self.curr_board.matrix if x != 0]
@@ -256,21 +293,19 @@ class Game_Visual:
                         if tile in curr_pieces:
                             curr_pieces.remove(tile)
                     score += sum(curr_pieces)
-                
-                #Copy the matrix to make a previous board with the newly completed move
-                self.previous_board.matrix = self.curr_board.make_copy_matrix()
-                #Spawn a number
-                self.curr_board.spawn_number()
-                count = 0
-            else:
+                    #adjust the score according to the rank of the move selected
+                    score = score // rank
+                    
+                    #Copy the matrix to make a previous board with the newly completed move
+                    self.previous_board.matrix = self.curr_board.make_copy_matrix()
+                    #Spawn a number
+                    self.curr_board.spawn_number()
+                    break
+                #If it doesnt do anything then try the other move
                 '''
-                #--------------Print invalid move)----------------
+                #--------------Print invalid move----------------
                 print("Invalid move"
                 '''
-                count += 1
-            
-            if count > FINISH:
-                break
 
         pygame.time.delay(1500)
         return score

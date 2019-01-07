@@ -35,7 +35,10 @@ class Network:
         Args:
             stimuli (list (length: 16)) - list of stimuli for each input neuron
         Returns:
-            None
+            Output info (tuple (desc (var), length (list), nodes (list)) 
+                - the highest value output node(s)
+                - Whether the choice was random or not
+                - All the nodes sorted by rank
         Raises:
             None
         '''
@@ -103,7 +106,7 @@ class Network:
             None
         Returns:
             tuple - (desc (var), length (list), nodes (list)) 
-                - the desc member of the maximum ouput node
+                - the highest value output node(s)
                 - Whether the choice was random or not
                 - All the nodes sorted by rank
         Raises:
@@ -121,9 +124,6 @@ class Network:
             elif output_node.value == max_node.value:
                 max_nodes.append(output_node)
 
-        #Determine the move to do
-        index = random.randint(0,len(max_nodes) - 1)
-        desc_to_return = max_nodes[index].desc
         '''
         #------------------PRINT Moves-----------------
         print("Determine Move:", desc_to_return, end="")
@@ -135,9 +135,8 @@ class Network:
         #Sort the outputs by value, highest is highest rank
         ranks = [x for x in self.outputs]
         ranks.sort(key=lambda x: x.value, reverse=True)
-        ranks = [[x.desc, x.value] for x in ranks]
 
-        return desc_to_return, len(max_nodes), ranks
+        return max_nodes, len(max_nodes), ranks
 
     def breed_with(self, other_parent):
         '''
