@@ -18,9 +18,9 @@ class Network:
         self.fitness = 0
         #Species for the network, initialized to 0.
         #Species is determined by which move (up, down, left, right) results in the least amount of game endings (a move is selected that doesnt do anything)
-        self.species = 0
+        self.species = -1
         #Historical Makrings to improve breeding uniqueness so that higher generations dont become replicas of lower generations
-        self.generation = 0
+        self.generation = -1
         #Input layer of nodes
         self.inputs = [node.Node(value=inputs[x]) for x in range(len(inputs))]
         #Output layer of nodes
@@ -222,7 +222,7 @@ class Network:
 
         #take paths to output from calling parent and assign them to the child
         for input_node in self.inputs:
-            result = self.find_paths_to_append(input_node, [], calling_poss_outputs, child, self.inputs.index(input_node), [])
+            result = self.find_paths(input_node, [], calling_poss_outputs, [])
             if result != None:
                 paths += result
 
@@ -231,7 +231,7 @@ class Network:
 
         #take paths to output from argument parent and assign them to the child
         for input_node in other_parent.inputs:
-            result = other_parent.find_paths_to_append(input_node, [], arg_poss_outputs, child, other_parent.inputs.index(input_node), [])
+            result = other_parent.find_paths(input_node, [], arg_poss_outputs, [])
             if result != None:
                 paths += result
 
@@ -266,7 +266,7 @@ class Network:
             self.find_internals(child, con_node, path.copy())
 
     #----------------OUTPUT BREEDING-------------------
-    def find_paths_to_append(self, curr, path, poss_outputs, child, input_index, paths):
+    def find_paths(self, curr, path, poss_outputs, paths):
         #append the current node to the path
         path.append(curr)
 
@@ -281,7 +281,7 @@ class Network:
 
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            self.find_paths_to_append(con_node, path.copy(), poss_outputs, child, input_index, paths)
+            self.find_paths(con_node, path.copy(), poss_outputs, paths)
 
         return paths
 
@@ -327,13 +327,13 @@ class Network:
         Args:
             network (Network object) - network to mutate from
         Returns:
-            mutation (Network object) - mutated network
+            None
         Raises:
             None
         '''
         #If no mutation was passed in
         if mutation == -1:
-            mutation = random.randint(0, 2)
+            mutation = random.randint(0, 3)
 
         if mutation == 0:
             #Either connects an input to an outut or an internal to an output
@@ -396,9 +396,10 @@ class Network:
         if mutation == 2:
             #Choose an internal node and modify its weight
             #Determine if there are any nodes to begin with
-            #If there are none, then the only mutation that can happen is the second one
+            #If there are none, then then choose another mutation that doesnt involve internal nodes
             if len(self.internal) == 0:
-                self.mutate(mutation=1)
+                self.mutate(mutation=random.choice([1,3]))
+                return
 
             mutate_index = random.randint(0, len(self.internal) - 1)
             curr_weight = self.internal[mutate_index].weight
@@ -410,6 +411,19 @@ class Network:
 
             #Change the weight of the internal node
             self.internal[mutate_index].weight = random.choice(list(poss_weights))
+
+        if mutation == 3:
+            #Choose an input node and modify its weight
+            mutate_index = random.randint(0, len(self.inputs) - 1)
+            curr_weight = self.inputs[mutate_index].weight
+            poss_weights = set(range(-5,5))
+
+            #Make sure a change actually happens and a weight of 0 is not achieved
+            poss_weights.remove(0)
+            poss_weights.remove(curr_weight)
+
+            #Change the weight of the internal node
+            self.inputs[mutate_index].weight = random.choice(list(poss_weights))
                        
     def print_s(self):
         print("Fitness: ", self.fitness)
@@ -424,10 +438,10 @@ class Network:
     def print_node_paths(self):
         #Start with each internal nodes
         for input_node in self.inputs:
-            self.find_paths(input_node, [])
+            self.find_paths_to_print(input_node, [])
             print()
             
-    def find_paths(self, curr, path):
+    def find_paths_to_print(self, curr, path):
         #append the current node to the path
         path.append(curr)
 
@@ -445,7 +459,7 @@ class Network:
 
         #Append the current node to the path and then return
         for con_node in curr.connections:
-            self.find_paths(con_node, path.copy())
+            self.find_paths_to_print(con_node, path.copy())
 
 
 def create_init_population(count, inputs, outputs):

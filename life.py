@@ -9,12 +9,96 @@ class Life:
         self.individuals = []
 
         #list of lists. each list has a specific species list. 
-        # Species are determined by 2 most popular moves when a specific board is fed in
+        #Species are determined by 2 most popular moves when a specific board is fed in
         self.species_list = []
+
+        self.SPECIES_KEY = dict()
+        self.SPECIES_KEY["downup"] = 0
+        self.SPECIES_KEY["leftup"] = 1
+        self.SPECIES_KEY["rightup"] = 2
+        self.SPECIES_KEY["downleft"] = 3
+        self.SPECIES_KEY["downright"] = 4
+        self.SPECIES_KEY["leftright"] = 5
+        self.SPECIES_KEY["downleftup"] = 6
+        self.SPECIES_KEY["downrightup"] = 7
+        self.SPECIES_KEY["leftrightup"] = 8
+        self.SPECIES_KEY["downleftright"] = 9
+        self.SPECIES_KEY["downleftrightup"] = 10
     
     def classify_life(self):
-        #goes through all networks in the list. If it does not have a species classify it and assign it to the appropriate list
-        pass
+        ''''
+        Classications:
+           -----2 most prevelant output descriptions-----
+           - up, down: 0
+           - up, left: 1
+           - up, right: 2
+           - down, left: 3
+           - down, right: 4
+           - left, right: 5
+           ------tie between output descriptions (3 descriptions are needed)-----
+           - up, down, left : 6
+           - up, down, right: 7
+           - up, left, right: 8
+           - down, left, right: 9
+           -----Tie between all 4 descriptions-------
+           - up, down, left, right: 10
+        '''
+        #goes through all networks in the list. 
+        #If it does not have a species classify it and assign it to the appropriate list
+        for network in self.individuals:
+            if network.species == -1:
+                network.species = self.classify_network(network)
+    
+    def classify_network(self, network):
+        paths = []
+        #Gets all the neuron paths in the network
+        for input_node in network.inputs:
+            result = network.find_paths(input_node, [], [x.desc for x in network.outputs], [])
+            if result != None:
+                paths += result
+
+        #Counts how many paths end in a certain output node
+        output_count = [0 for x in network.outputs]
+        poss_outputs = [x.desc for x in network.outputs]
+        #For each path increase the corresponding output associated with it
+        for path in paths:
+            output_node_desc = path[-1].desc
+            inc_index = poss_outputs.index(output_node_desc)
+            output_count[inc_index] += 1
+
+        #Determine the species number
+        species = self.determine_species_number(output_count, poss_outputs)
+
+        return species
+    
+    def determine_species_number(self, output_count, poss_outputs):
+        VALUE = 0
+        DESC = 1
+        max_outputs = []
+        #classify the spec7ies according to the outputs
+        output_results = [[output_count[x], poss_outputs[x]] for x in range(len(output_count))]
+        #Sort the results
+        output_results.sort(key=lambda x: x[0], reverse=True)
+        #Find the maxes
+        max_outputs.append(output_results[0])
+        max_outputs.append(output_results[1])
+        
+        #Determine if other maxes exist
+        if output_results[2][VALUE] == max_outputs[1][VALUE]:
+            max_outputs.append(output_results[2])
+
+        if output_results[3][VALUE] == max_outputs[1][VALUE]:
+            max_outputs.append(output_results[3])
+
+        #Sort the max outputs by lexicographical order to help classification
+        max_outputs.sort(key=lambda x: x[DESC][0])
+
+        key = ""
+        for output in max_outputs:
+            key += output[DESC]
+        
+        return self.SPECIES_KEY[key], key
+
 
     def print_individuals(self):
         #Prints all individuals
@@ -95,7 +179,7 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 50
+MAX_GENERATIONS = 30
 RUNS_PER_IND = 5
 top_performers = []
 
@@ -126,9 +210,21 @@ for iteration in range(MAX_GENERATIONS):
 
     print("Finished Generation:", iteration + 1)
 
+    #Classify each new network species
+    all_life.classify_life()
+
+    #fill in generation numbers
+    for individual in all_life.individuals:
+        if individual.generation == -1:
+            individual.generation = iteration
+
     #Keep track of top performers from each generation for analytic purposes
-    top_performer = "Generation: " + str(iteration + 1) + " | Max Score: " + str(all_life.individuals[0].fitness)
+    top_performer = "Generation: " + str(iteration + 1) +  " | Max Score: " + str(all_life.individuals[0].fitness) + " | Species: " + str(all_life.individuals[0].species)
     top_performers.append(top_performer)
+
+    #IF we reach the last generation, then break
+    if iteration == (MAX_GENERATIONS - 1):
+        break
 
     #Perform Breeding/Mutating
     new_population = []
@@ -137,8 +233,7 @@ for iteration in range(MAX_GENERATIONS):
     for first_index in range(5):
         #Append first parent in the pair
         new_population.append(all_life.individuals[first_index])
-
-        for second_index in range(first_index + 1, 4):
+        for second_index in range(first_index + 1, 5):
             #Create and append the child in the pair
             child = all_life.individuals[first_index].breed_with(all_life.individuals[second_index])
             new_population.append(child)
@@ -149,7 +244,6 @@ for iteration in range(MAX_GENERATIONS):
         new_network = copy.deepcopy(all_life.individuals[ind_index])
         new_network.mutate()
         new_population.append(new_network)
-
     #Disregard The rest
 
     #Create new population
@@ -163,10 +257,8 @@ init_board = dummy_game.curr_board.matrix
 for individual in all_life.individuals[:5]:
     test_game = game.Game_Visual(init_board=init_board.copy())
     print("-----------NETWORK ", all_life.individuals.index(individual) + 1,"-------------")
-    '''
     individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
     print()
-    '''
     individual.print()
 
 

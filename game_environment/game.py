@@ -253,10 +253,7 @@ class Game_Visual:
                 curr_node = max_nodes[index]
             #If there is no max move then no move was picked
             else:
-                continue
-            
-            #-------Print Move Info------
-            print(move_info[:-1])       
+                continue    
 
             #Try out all the moves and determine the fitness based on the rank of the move
             for index in range(len(node_ranks)):
@@ -300,6 +297,10 @@ class Game_Visual:
                     self.previous_board.matrix = self.curr_board.make_copy_matrix()
                     #Spawn a number
                     self.curr_board.spawn_number()
+
+                    #-------Print Move Info------
+                    print(move)  
+
                     break
                 #If it doesnt do anything then try the other move
                 '''

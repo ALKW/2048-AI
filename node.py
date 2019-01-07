@@ -6,6 +6,4 @@ class Node:
         self.connections = []
 
     def print(self):
-        print("Value:", self.value, "| Weight:", self.weight, "| Description:", self.desc, "| Connected to", len(self.connections), "Nodes\n")  
-
-print(1 // 1)
+        print("Value:", self.value, "| Weight:", self.weight, "| Description:", self.desc, "| Connected to", len(self.connections), "Nodes\n") 
