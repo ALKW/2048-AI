@@ -1,6 +1,10 @@
 # 2048-AI
 ### Description
-Python based AI that learned to play 2048 on its own.  All code written from scratch
+Python based AI that learned to play 2048 on its own.  All code written from scratch.   
+
+The goal was to make the neuron network inputs and outputs as easy as possible to modify in order to find the optimal combination of inputs and outputs.  
+
+The game was created all by scratch and is based off of the game 2048
 
 ### Version 1.0:  
 1. No breeding only mutating

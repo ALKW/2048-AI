@@ -309,4 +309,5 @@ class Game_Visual:
                 '''
 
         pygame.time.delay(1500)
+        self.curr_board.print_matrix
         return score
