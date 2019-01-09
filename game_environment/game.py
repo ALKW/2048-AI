@@ -315,5 +315,7 @@ class Game_Visual:
                 print("Invalid move"
                 '''
 
+        for event in pygame.event.get():
+            pass
         pygame.time.delay(1500)
         return score

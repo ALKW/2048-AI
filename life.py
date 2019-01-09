@@ -12,6 +12,9 @@ class Life:
         #Species are determined by 2 most popular moves when a specific board is fed in
         self.species_list = []
 
+        #List of top performers from each generation
+        self.top_performers = []
+
         self.SPECIES_KEY = dict()
         self.SPECIES_KEY["downup"] = 0
         self.SPECIES_KEY["leftup"] = 1
@@ -24,6 +27,76 @@ class Life:
         self.SPECIES_KEY["leftrightup"] = 8
         self.SPECIES_KEY["downleftright"] = 9
         self.SPECIES_KEY["downleftrightup"] = 10
+
+    def run(self, MAX_GENERATIONS, RUNS_PER_IND):
+        #Run the simulation for MAX_GENERATIONS iterations with a population size of 20
+        for iteration in range(MAX_GENERATIONS):
+            #Generate a board to use for all networks
+            dummy_game = game.Game()
+            init_board = dummy_game.curr_board.matrix
+            #Test all individuals on the same board
+            for individual in self.individuals:
+                run_total = 0
+                for run in range(RUNS_PER_IND):
+                    test_game = game.Game(init_board=init_board.copy())
+                    run_total += test_game.run(self.individuals.index(individual), get_move, individual)
+                    individual.fitness = run_total // RUNS_PER_IND
+                '''
+                #-----------------Print the network details--------
+                print("Network:", self.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
+                '''
+
+            #sort the results to get the highest performers ranked at the top
+            self.individuals.sort(key=lambda x: x.fitness, reverse=True)
+
+            '''
+            #------------Test Print Function--------------#
+            self.print_individuals()
+            '''
+
+            print("Finished Generation:", iteration + 1)
+
+            #Classify each new network species
+            self.classify_life()
+
+            #fill in generation numbers
+            for individual in self.individuals:
+                if individual.generation == -1:
+                    individual.generation = iteration
+
+            #Keep track of top performers from each generation for analytic purposes
+            top_performer = "Generation: " + str(iteration + 1) +  " | Max Score: " + str(self.individuals[0].fitness) + " | Species: " + str(self.individuals[0].species)
+            self.top_performers.append(top_performer)
+
+            #IF we reach the last generation, then break
+            if iteration == (MAX_GENERATIONS - 1):
+                return
+            else:
+                self.mutate_population()
+
+    def mutate_population(self):
+        #Perform Breeding/Mutating
+        new_population = []
+        
+        #Mate top 5 performers -> add their 10 childred plus the 5 parents 
+        for first_index in range(5):
+            #Append first parent in the pair
+            new_population.append(self.individuals[first_index])
+            for second_index in range(first_index + 1, 5):
+                #Create and append the child in the pair
+                child = self.individuals[first_index].breed_with(self.individuals[second_index])
+                new_population.append(child)
+            
+            
+        #------------MUTATE NETWORKS-------#
+        for ind_index in range(5, 20):
+            new_network = copy.deepcopy(self.individuals[ind_index])
+            new_network.mutate()
+            new_population.append(new_network)
+        #Disregard The rest
+
+        #Create new population
+        self.individuals = new_population
     
     def classify_life(self):
         ''''
@@ -99,9 +172,32 @@ class Life:
         
         return self.SPECIES_KEY[key], key
 
+    def run_visualization(self, amount):
+        #Run a visualization through the top 5 networks
+        if amount > len(self.individuals):
+            print("Not Valid, exceeds individual count")
+            return
+        
+        print("--------------------- PRINTING TOP ", amount, "---------------------")
+        dummy_game = game.Game()
+        init_board = dummy_game.curr_board.matrix
+        for individual in self.individuals[:amount]:
+            test_game = game.Game_Visual(init_board=init_board.copy())
+            print("-----------NETWORK ", self.individuals.index(individual) + 1,"-------------")
+            individual.fitness = test_game.run(self.individuals.index(individual) + 1, get_move, individual)
+            print()
+            individual.print()
+
+    def print_top_performers(self):
+        #Print the highest results from each generation and the results from the latest generation
+        self.individuals.sort(key=lambda x: x.fitness, reverse=True)
+        print("Top performers from each generation:")
+        for performer in self.top_performers:
+            print(performer)
 
     def print_individuals(self):
         #Prints all individuals
+        print("Latest Generation:")
         for network in self.individuals:
             network.print_s()
         print()
@@ -179,93 +275,11 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 3
+MAX_GENERATIONS = 30
 RUNS_PER_IND = 5
-top_performers = []
 
-#Run the simulation for MAX_GENERATIONS iterations with a population size of 20
-for iteration in range(MAX_GENERATIONS):
-    #Generate a board to use for all networks
-    dummy_game = game.Game()
-    init_board = dummy_game.curr_board.matrix
-    #Test all individuals on the same board
-    for individual in all_life.individuals:
-        run_total = 0
-        for run in range(RUNS_PER_IND):
-            test_game = game.Game(init_board=init_board.copy())
-            run_total += test_game.run(all_life.individuals.index(individual), get_move, individual)
-            individual.fitness = run_total // RUNS_PER_IND
-        '''
-        #-----------------Print the network details--------
-        print("Network:", all_life.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
-        '''
+all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 
-    #sort the results to get the highest performers ranked at the top
-    all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)
+all_life.run_visualization(5)
 
-    '''
-    #------------Test Print Function--------------#
-    all_life.print_individuals()
-    '''
-
-    print("Finished Generation:", iteration + 1)
-
-    #Classify each new network species
-    all_life.classify_life()
-
-    #fill in generation numbers
-    for individual in all_life.individuals:
-        if individual.generation == -1:
-            individual.generation = iteration
-
-    #Keep track of top performers from each generation for analytic purposes
-    top_performer = "Generation: " + str(iteration + 1) +  " | Max Score: " + str(all_life.individuals[0].fitness) + " | Species: " + str(all_life.individuals[0].species)
-    top_performers.append(top_performer)
-
-    #IF we reach the last generation, then break
-    if iteration == (MAX_GENERATIONS - 1):
-        break
-
-    #Perform Breeding/Mutating
-    new_population = []
-    
-    #Mate top 5 performers -> add their 10 childred plus the 5 parents 
-    for first_index in range(5):
-        #Append first parent in the pair
-        new_population.append(all_life.individuals[first_index])
-        for second_index in range(first_index + 1, 5):
-            #Create and append the child in the pair
-            child = all_life.individuals[first_index].breed_with(all_life.individuals[second_index])
-            new_population.append(child)
-        
-         
-    #------------MUTATE NETWORKS-------#
-    for ind_index in range(5, 20):
-        new_network = copy.deepcopy(all_life.individuals[ind_index])
-        new_network.mutate()
-        new_population.append(new_network)
-    #Disregard The rest
-
-    #Create new population
-    all_life.individuals = new_population
-
-
-#Run a visualization through the top 5 networks
-print("--------------------- PRINTING TOP 5 ---------------------")
-dummy_game = game.Game()
-init_board = dummy_game.curr_board.matrix
-for individual in all_life.individuals[:5]:
-    test_game = game.Game_Visual(init_board=init_board.copy())
-    print("-----------NETWORK ", all_life.individuals.index(individual) + 1,"-------------")
-    individual.fitness = test_game.run(all_life.individuals.index(individual) + 1, get_move, individual)
-    print()
-    individual.print()
-
-
-#Print the highest results from each generation and the results from the latest generation
-all_life.individuals.sort(key=lambda x: x.fitness, reverse=True)
-print("Latest Generation:")
-all_life.print_individuals()
-print("Top performers from each generation:")
-for performer in top_performers:
-    print(performer)
+all_life.print_top_performers()
