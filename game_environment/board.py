@@ -88,8 +88,27 @@ class Board(Matrix):
         '''
         if (min(self.matrix) == 0):
             return False
-        else:
-            return True
+
+        for column_slice in self.columns:
+            column = self.matrix[column_slice]
+            if self.can_move(column):
+                return False
+
+        for row_slice in self.rows:
+            row = self.matrix[row_slice]
+            if self.can_move(row):
+                return False
+        
+        return True
+
+    def can_move(self, data):
+        curr = data[0]
+        for entry in data[1:]:
+            if curr == entry:
+                return True
+            else:
+                curr = entry
+        return False
     
     def remove_from_list(self, this_list, value):
         '''
