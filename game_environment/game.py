@@ -269,9 +269,6 @@ class Game_Visual:
                 #determine the move that was passed in and updates the board in memory
                 self.curr_board.determine_move(move)
                 
-                #Print updated board to screen
-                self.update_board(number, score, screen)
-                
                 #Determine if the resulting move did something
                 if(self.previous_board.matrix != self.curr_board.matrix):
                     #Determine the score made from the current move and update score
@@ -295,8 +292,18 @@ class Game_Visual:
                     
                     #Copy the matrix to make a previous board with the newly completed move
                     self.previous_board.matrix = self.curr_board.make_copy_matrix()
+
+                    #Print updated board to screen
+                    self.update_board(number, score, screen)
+
+                    for event in pygame.event.get():
+                        pass
+
                     #Spawn a number
                     self.curr_board.spawn_number()
+
+                    #Print updated board to screen
+                    self.update_board(number, score, screen)
 
                     #-------Print Move Info------
                     print(move)  
@@ -309,5 +316,4 @@ class Game_Visual:
                 '''
 
         pygame.time.delay(1500)
-        self.curr_board.print_matrix
         return score
