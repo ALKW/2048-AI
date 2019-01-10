@@ -321,7 +321,7 @@ class Network:
         '''
         Returns a mutation of the network passed in. The mutation will take an input node and along its path either:
             -add an extra branch
-            -create a new node that two nodes link to 
+            -create a new node that links two nodes together
             -modify an existing weight of internal
             -modify existing weight of an input node
             -Connect an output node to an internal or input node
@@ -377,23 +377,35 @@ class Network:
 
         if mutation == 1:
             #Create a new internal node
-            #select two input nodes to connect to the internal node
-            #select an output node to connect to the internal node
+            #select two nodes to connect to the new internal node
             to_add = node.Node(weight=random.choice([-2,-1,1,2]))
             self.internal.append(to_add)
-            output_index = random.randint(0, len(self.outputs) - 1)
-            left_input_index = random.randint(0, len(self.inputs) - 1)
-            right_input_index = random.randint(0, len(self.inputs) - 1)
 
-            #Prevent the inputs from being the same
-            while left_input_index == right_input_index:
-                left_input_index = random.randint(0, len(self.inputs) - 1)
-                right_input_index = random.randint(0, len(self.inputs) - 1)
-            
-            #Connect the nodes together
-            self.inputs[left_input_index].connections.append(to_add)
-            self.inputs[right_input_index].connections.append(to_add)
-            to_add.connections.append(self.outputs[output_index])
+            #Combinations include:
+            #input -> new -> internal
+            #input -> new -> output
+            #internal -> new -> output
+            first_node_index = random.randint(0, len(self.inputs) + len(self.internal) - 2)
+
+            #If the node is an internal then only an output node can be selected
+            if first_node_index >= len(self.inputs):
+                second_node_index = random.randint(0, len(self.outputs) - 1)
+                #Adjust the index
+                first_node_index -= len(self.inputs)
+                #Connect the internal to the new node
+                self.internal[first_node_index].connections.append(to_add)
+                #and the new node to the output
+                to_add.connections.append(self.outputs[second_node_index])
+            else:
+                second_node_index = random.randint(0, len(self.internal) + len(self.outputs) - 2)
+                #Connect the input to the new node
+                self.inputs[first_node_index].connections.append(to_add)
+                #Connect the new node to either the output or the internal
+                if second_node_index >= len(self.internal):
+                    second_node_index -= len(self.internal)
+                    to_add.connections.append(self.outputs[second_node_index])
+                else:
+                    to_add.connections.append(self.internal[second_node_index])
 
         if mutation == 2:
             #Choose an internal node and modify its weight
