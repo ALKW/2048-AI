@@ -27,6 +27,8 @@ class Network:
         self.outputs = [node.Node(0, desc=outputs[x]) for x in range(len(outputs))]
         #internal nodes
         self.internal = []
+        #Connections (genes) between nodes - a list of lists of length 2
+        self.con_genes = []
 
     def feed(self, stimuli=None):
         '''
@@ -337,7 +339,7 @@ class Network:
             mutation = random.randint(0, 3)
 
         if mutation == 0:
-            #Either connects an input to an outut or an internal to an output
+            #Either connects an input to an output or an internal to an output
             #Choose either an internal or an input node; 0 - input, 1 - internal
             #Choose the input/internal node to connect to the output node (both are random)
             #Error checking to make sure there exists internal nodes
