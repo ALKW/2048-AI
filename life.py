@@ -275,11 +275,11 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 100
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 
-#all_life.run_visualization(5)
+all_life.run_visualization(5)
 
 all_life.print_top_performers()

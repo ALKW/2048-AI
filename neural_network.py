@@ -324,7 +324,6 @@ class Network:
             -create a new node that links two nodes together
             -modify an existing weight of internal
             -modify existing weight of an input node
-            -Connect an output node to an internal or input node
         Only internal nodes can have weights different than 1
         Args:
             network (Network object) - network to mutate from
@@ -335,7 +334,7 @@ class Network:
         '''
         #If no mutation was passed in
         if mutation == -1:
-            mutation = random.randint(0, 4)
+            mutation = random.randint(0, 3)
 
         if mutation == 0:
             #Either connects an input to an outut or an internal to an output
@@ -379,7 +378,6 @@ class Network:
             #Create a new internal node
             #select two nodes to connect to the new internal node
             to_add = node.Node(weight=random.choice([-2,-1,1,2]))
-            self.internal.append(to_add)
 
             #Combinations include:
             #input -> new -> internal
@@ -438,25 +436,6 @@ class Network:
 
             #Change the weight of the internal node
             self.inputs[mutate_index].weight = random.choice(list(poss_weights))
-
-        if mutation == 4:
-            #Choose an input node or an internal node and connect it to an output node
-            output_index = random.randint(0, len(self.outputs) - 1)
-            connection_index = random.randint(0, len(self.inputs) + len(self.internal) - 2)
-
-            #Get the output node
-            output_node = self.outputs[output_index]
-            if connection_index < len(self.inputs):
-                connection_node = self.inputs[connection_index]
-            else:
-                connection_node = self.internal[connection_index - len(self.inputs)]
-            
-            #Dont need to worry if its already connected, as we cant modify the weight of the node
-            #And this will allow certain stimuli to be valued more/exceed the max weight
-
-            #Connect the output to the node
-            connection_node.connections.append(output_node)
-
                        
     def print_s(self):
         print("Fitness: ", self.fitness)
@@ -539,6 +518,8 @@ test[0].inputs[1].connections.append(internal1)
 
 test[1].inputs[0].connections.append(internal2)
 
+test[0].mutate(mutation=1)
+
 
 test[0].print()
 test[1].print()
@@ -546,6 +527,7 @@ child = test[0].breed_with(test[1])
 child.print()
 print(len(child.internal))
 '''
+
 
 
 
