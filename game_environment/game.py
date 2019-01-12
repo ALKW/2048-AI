@@ -108,6 +108,10 @@ class Game:
                     self.previous_board.matrix = self.curr_board.make_copy_matrix()
                     #Spawn a number
                     self.curr_board.spawn_number()
+                    '''
+                    #-------Print Move Info------
+                    print(move)  
+                    '''
                     break
                 '''
                 #------------Print invalid move
@@ -305,8 +309,10 @@ class Game_Visual:
                     #Print updated board to screen
                     self.update_board(number, score, screen)
 
+                    '''
                     #-------Print Move Info------
                     print(move)  
+                    '''
 
                     break
                 #If it doesnt do anything then try the other move

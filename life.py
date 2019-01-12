@@ -90,9 +90,8 @@ class Life:
             
         #------------MUTATE NETWORKS-------#
         for ind_index in range(5, 20):
-            new_network = copy.deepcopy(self.individuals[ind_index])
-            new_network.mutate()
-            new_population.append(new_network)
+            self.individuals[ind_index].mutate()
+            new_population.append(self.individuals[ind_index])
         #Disregard The rest
 
         #Create new population

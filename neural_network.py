@@ -28,6 +28,9 @@ class Network:
         #internal nodes
         self.internal = []
         #Connections (genes) between nodes - a list of lists of length 2
+        #Input node as numbered 0 - len(self.inputs)
+        #Output nodes start where the input nodes leave off.
+        #Internal nodes are kept track of using a dictionary with keys being the weight of the internal node
         self.con_genes = []
 
     def feed(self, stimuli=None):
@@ -490,11 +493,11 @@ def create_init_population(count, inputs, outputs):
     networks = [Network(inputs, outputs) for x in range(count)]
     #For each network connect all four output nodes to input nodes initially
     for network_index in range(count):
-        for output_index in range(4):
+        for output_index in range(len(networks[network_index].outputs)):
             #choose the node from input layer to connect to the output node randomly
             input_index = random.randint(0, len(inputs) - 1)
             #Connect the input node to the output node
-            networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
+            networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])    
     return networks
 
 '''
