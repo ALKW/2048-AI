@@ -7,7 +7,9 @@ class Network:
     #The index of the node + the len(inputs) + len(outputs) is the number for the node
     internal_nodes_key = []
     #Dictionary for keeping track of all gene codes. Key is node number + ":" + connecting node number
-    genes = dict()
+    gene_key = dict()
+    #The current innovation number for genes. As the list is empty, the next gene to be created will be assigned 0
+    curr_gene_num = 0
     def __init__(self, inputs, outputs):
         '''
         Neural network that breeds through taking unique sup-topologies from others within its species
@@ -36,7 +38,7 @@ class Network:
         #Input node as numbered 0 -> len(self.inputs) - 1
         #Output nodes are len(self.inputs) -> len(self.inputs) + len(self.outputs) - 1
         #Internal nodes are kept track of using a dictionary with keys being the weight of the internal node
-        self.con_genes = []
+        self.genes = []
 
     def feed(self, stimuli=None):
         '''
@@ -328,25 +330,6 @@ class Network:
                 #Start at the second entry as the first is not in any connection list
                 curr.connections.append(node_obj)
                 curr = node_obj
-    
-    def update_genes(self):
-        '''
-        Goes through all paths in the network and updates the genes member
-        '''
-        for input_node in self.inputs:
-            for con_node in input_node.connections:
-                #Get the first half of the key
-                first_half_key = self.inputs.index(input_node)
-                
-                #Determine the second half of the key by looking up the node
-                con_index = str(con_node.weight)
-
-                #If it doesnt exists then add it to the list, then use its index plus the offset
-                if con_index not in Network.internal_nodes_key:
-                    Network.internal_nodes_key.append(con_index)
-                second_half_key = Network.internal_nodes_key.index(con_node) + (len(self.inputs) - 1) + (len(self.outputs) - 1)
-
-                key = self.inputs.index(input_node) + ":" + self.
 
     def mutate(self, mutation=-1):
         '''
@@ -467,6 +450,38 @@ class Network:
 
             #Change the weight of the internal node
             self.inputs[mutate_index].weight = random.choice(list(poss_weights))
+
+        self.update_genes()
+
+    def update_genes(self):
+        #Goes through all paths in the network and updates the genes list member for the network
+        for input_node in self.inputs:
+            for con_node in input_node.connections:
+                #Get the first half of the key
+                first_half_key = self.inputs.index(input_node)
+
+                #Determine the second half of the key by looking up the node
+                con_index = str(con_node.weight)
+
+                #If it doesnt exists then add it to the list, then use its index plus the offset
+                if con_index not in Network.internal_nodes_key:
+                    Network.internal_nodes_key.append(con_index)
+                second_half_key = Network.internal_nodes_key.index(con_node) + (len(self.inputs) - 1) + (len(self.outputs) - 1)
+
+                #Create the key
+                key = first_half_key + ":" + second_half_key
+
+                #If the key is not in the dictionary, add it, then take its innovation number
+                if key not in Network.gene_key:
+                    Network[key] = Network.curr_gene_num
+                    Network.curr_gene_num += 1
+
+                #Get the gene value
+                gene_value = Network[key]
+
+                #determine if the gene is already marked in the list and add it if it is not yet
+                if gene_value not in self.genes:
+                    self.genes.append(gene_value)
                        
     def print_s(self):
         print("Fitness: ", self.fitness)
