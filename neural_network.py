@@ -244,6 +244,8 @@ class Network:
 
         self.fill_in_internals(child)
 
+        self.define_genes()
+
         return child
 
     def fill_in_internals(self, child):
@@ -321,6 +323,12 @@ class Network:
                 #Start at the second entry as the first is not in any connection list
                 curr.connections.append(node_obj)
                 curr = node_obj
+    
+    def update_genes(self):
+        '''
+        Goes through all paths in the network and updates the genes member
+        '''
+        pass
 
     def mutate(self, mutation=-1):
         '''
