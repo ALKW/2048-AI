@@ -3,6 +3,11 @@ import node
 import copy
  
 class Network:
+    #Inputs and Outputs have defined numbers, however internals do not and need to be kept track of.
+    #The index of the node + the len(inputs) + len(outputs) is the number for the node
+    internal_nodes_key = []
+    #Dictionary for keeping track of all gene codes. Key is node number + ":" + connecting node number
+    genes = dict()
     def __init__(self, inputs, outputs):
         '''
         Neural network that breeds through taking unique sup-topologies from others within its species
@@ -28,8 +33,8 @@ class Network:
         #internal nodes
         self.internal = []
         #Connections (genes) between nodes - a list of lists of length 2
-        #Input node as numbered 0 - len(self.inputs)
-        #Output nodes start where the input nodes leave off.
+        #Input node as numbered 0 -> len(self.inputs) - 1
+        #Output nodes are len(self.inputs) -> len(self.inputs) + len(self.outputs) - 1
         #Internal nodes are kept track of using a dictionary with keys being the weight of the internal node
         self.con_genes = []
 
@@ -244,7 +249,7 @@ class Network:
 
         self.fill_in_internals(child)
 
-        self.define_genes()
+        self.update_genes()
 
         return child
 
@@ -328,7 +333,20 @@ class Network:
         '''
         Goes through all paths in the network and updates the genes member
         '''
-        pass
+        for input_node in self.inputs:
+            for con_node in input_node.connections:
+                #Get the first half of the key
+                first_half_key = self.inputs.index(input_node)
+                
+                #Determine the second half of the key by looking up the node
+                con_index = str(con_node.weight)
+
+                #If it doesnt exists then add it to the list, then use its index plus the offset
+                if con_index not in Network.internal_nodes_key:
+                    Network.internal_nodes_key.append(con_index)
+                second_half_key = Network.internal_nodes_key.index(con_node) + (len(self.inputs) - 1) + (len(self.outputs) - 1)
+
+                key = self.inputs.index(input_node) + ":" + self.
 
     def mutate(self, mutation=-1):
         '''
