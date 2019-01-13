@@ -201,7 +201,7 @@ class Network:
             child.inputs[index] = copy.deepcopy(other_parent.inputs[index])
 
         #fill in the internal nodes of the child
-        self.fill_in_internals(child)
+        self.fill_in_child_internals(child)
         
         '''
 
@@ -249,13 +249,13 @@ class Network:
 
         self.append_paths(child, paths, other_parent)
 
-        self.fill_in_internals(child)
+        self.fill_in_child_internals(child)
 
-        self.update_genes()
+        child.update_genes()
 
         return child
 
-    def fill_in_internals(self, child):
+    def fill_in_child_internals(self, child):
         for input_node in self.inputs:
             self.find_internals(child, input_node, [])   
 
@@ -456,32 +456,49 @@ class Network:
     def update_genes(self):
         #Goes through all paths in the network and updates the genes list member for the network
         for input_node in self.inputs:
-            for con_node in input_node.connections:
-                #Get the first half of the key
-                first_half_key = self.inputs.index(input_node)
+            #Get the first half of the key
+            first_half_key = self.inputs.index(input_node)
+            self.determine_genes(input_node, first_half_key)
 
+        for internal_node in self.internal:
+            #Get the first half of the key
+            key = str(internal_node.value)
+            if key not in Network.internal_nodes_key:
+                Network.internal_nodes_key.append(key)
+            first_half_key = Network.internal_nodes_key.index(key)
+            
+            self.determine_genes(input_node, first_half_key)
+    
+    def determine_genes(self, curr_node, first_half_key):
+        for con_node in curr_node.connections:
+            #If the connection node is an output node, skip over this part
+            if con_node.desc != None:
+                second_half_key = self.outputs.index(con_node) + len(self.inputs)
+            #Else determine the internal node key
+            else:
                 #Determine the second half of the key by looking up the node
                 con_index = str(con_node.weight)
 
                 #If it doesnt exists then add it to the list, then use its index plus the offset
                 if con_index not in Network.internal_nodes_key:
                     Network.internal_nodes_key.append(con_index)
-                second_half_key = Network.internal_nodes_key.index(con_node) + (len(self.inputs) - 1) + (len(self.outputs) - 1)
+                second_half_key = Network.internal_nodes_key.index(con_index) + len(self.inputs) + len(self.outputs)
 
-                #Create the key
-                key = first_half_key + ":" + second_half_key
+            #Create the key
+            key = str(first_half_key) + ":" + str(second_half_key)
 
-                #If the key is not in the dictionary, add it, then take its innovation number
-                if key not in Network.gene_key:
-                    Network[key] = Network.curr_gene_num
-                    Network.curr_gene_num += 1
+            #If the key is not in the dictionary, add it, then take its innovation number
+            if key not in Network.gene_key:
+                Network.gene_key[key] = Network.curr_gene_num
+                Network.curr_gene_num += 1
 
-                #Get the gene value
-                gene_value = Network[key]
+            #Get the gene value
+            gene_value = Network.gene_key[key]
 
-                #determine if the gene is already marked in the list and add it if it is not yet
-                if gene_value not in self.genes:
-                    self.genes.append(gene_value)
+            #determine if the gene is already marked in the list and add it if it is not yet
+            if gene_value not in self.genes:
+                self.genes.append(gene_value)
+
                        
     def print_s(self):
         print("Fitness: ", self.fitness)
@@ -489,7 +506,8 @@ class Network:
     def print(self):
         print("Fitness: ", self.fitness)
         print("Species: ", self.species)
-        print("Generation: ", self.generation, "\n")
+        print("Generation: ", self.generation)
+        print("Genes: ", self.genes, "\n")
         print("Topology: ")
         self.print_node_paths()
     
@@ -539,9 +557,10 @@ def create_init_population(count, inputs, outputs):
             input_index = random.randint(0, len(inputs) - 1)
             #Connect the input node to the output node
             networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])    
+        networks[network_index].update_genes()
     return networks
 
-'''
+
 #-----------------BREEDING TEST------------------
 test = create_init_population(2, [
                 2,2,2,2,
@@ -564,15 +583,12 @@ test[0].inputs[1].connections.append(internal1)
 
 test[1].inputs[0].connections.append(internal2)
 
-test[0].mutate(mutation=1)
-
-
 test[0].print()
 test[1].print()
 child = test[0].breed_with(test[1])
 child.print()
 print(len(child.internal))
-'''
+
 
 
 
