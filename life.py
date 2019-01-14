@@ -70,7 +70,7 @@ class Life:
                     individual.generation = iteration
 
             #Keep track of top performers from each generation for analytic purposes
-            top_performer = "Generation: " + str(iteration + 1) +  " | Max Score: " + str(self.individuals[0].fitness) + " | Species: " + str(self.individuals[0].species)
+            top_performer = "Generation: " + str(iteration + 1) +  " | Max Fitness: " + str(self.individuals[0].fitness) + " | Species: " + str(self.individuals[0].species)
             self.top_performers.append(top_performer)
 
             #IF we reach the last generation, then break
@@ -252,17 +252,19 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 3
+MAX_GENERATIONS = 50
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 
-all_life.run_visualization(1)
+all_life.run_visualization(5)
 
 all_life.print_top_performers()
 
-print("Gene Key:", network.Network.gene_key, "\n")
+print("\nGene Key:", network.Network.gene_key, "\n")
 
 print("Species Key:", Life.species, "\n")
 
-print("All Networks past and present:", all_life.species_list)
+print("All Species:")
+for species in all_life.species_list:
+    print("Species ", all_life.species_list.index(species), ": ", len(species), " -- ", end="")

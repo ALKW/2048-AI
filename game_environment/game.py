@@ -27,6 +27,7 @@ class Game:
         valid = False
         is_over = False
         score = 0
+        fitness = 0
 
         while not is_over:
             if(self.curr_board.is_full()):
@@ -100,9 +101,10 @@ class Game:
                     for tile in prev_pieces:
                         if tile in curr_pieces:
                             curr_pieces.remove(tile)
-                    score += sum(curr_pieces)
+                    move_score = sum(curr_pieces)
                     #Modify the score based on the move rank
-                    score = score // rank
+                    score += move_score
+                    fitness += move_score // rank
 
                     #Copy the matrix to make a previous board with the newly completed move
                     self.previous_board.matrix = self.curr_board.make_copy_matrix()
@@ -124,7 +126,7 @@ class Game:
         print("Game Over")
         ---------------------------------------
         '''
-        return score
+        return fitness
 
 class Game_Visual:
     def __init__(self, init_board=None):
@@ -135,7 +137,7 @@ class Game_Visual:
         self.curr_board = board.Board(init_board)
         self.previous_board = board.Board(init_board)
 
-    def update_board(self, iteration, score, screen):
+    def update_board(self, iteration, fitness, score, screen):
         BLACK = 0, 0, 0
         SEP_WIDTH = 14
         SQ_WIDTH = 107
@@ -169,8 +171,10 @@ class Game_Visual:
                     ],#Rectangle Border
                     0)
                 #Draw the number inside the rectangle
-                text_surface = number_font.render(str(self.curr_board.matrix[i]), True, (255, 255, 255))
-                screen.blit(text_surface, ((((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X + 45, 
+                number = number_font.render(str(self.curr_board.matrix[i]), True, (255, 255, 255))
+                single_number_width = number_font.render(str(1), True, (255, 255, 255)).get_rect().width
+                number_width = number.get_rect().width
+                screen.blit(number, (((((i % 4) * SQ_WIDTH) + ((i % 4) * SEP_WIDTH)) + WHITE_SPACE_X + 45)  - number_width // 2 + single_number_width / 2, 
                                         (((i // 4) * SQ_WIDTH) + ((i // 4) * SEP_WIDTH)) + WHITE_SPACE_Y + 30))
 
         title = title_font.render("Network: " + str(iteration), True, BLACK)
@@ -179,7 +183,11 @@ class Game_Visual:
 
         score_title = title_font.render("Score: " + str(score), True, BLACK)
         score_width = score_title.get_rect().width
-        screen.blit(score_title, (self.width - (score_width + 10), 0))
+        screen.blit(score_title, (10, 0))
+
+        fitness_title = title_font.render("Fitness: " + str(fitness), True, BLACK)
+        fitness_width = fitness_title.get_rect().width
+        screen.blit(fitness_title, (self.width - (fitness_width + 10), 0))
 
         pygame.display.update()
         pygame.time.delay(50)
@@ -204,6 +212,7 @@ class Game_Visual:
         #Spawn a number
         self.curr_board.spawn_number()
         score = 0
+        fitness = 0
         is_over = False
 
         while not is_over:
@@ -290,15 +299,16 @@ class Game_Visual:
                     for tile in prev_pieces:
                         if tile in curr_pieces:
                             curr_pieces.remove(tile)
-                    score += sum(curr_pieces)
+                    move_score = sum(curr_pieces)
                     #adjust the score according to the rank of the move selected
-                    score = score // rank
+                    score += move_score
+                    fitness += move_score // rank
                     
                     #Copy the matrix to make a previous board with the newly completed move
                     self.previous_board.matrix = self.curr_board.make_copy_matrix()
 
                     #Print updated board to screen
-                    self.update_board(number, score, screen)
+                    self.update_board(number, fitness, score, screen)
 
                     for event in pygame.event.get():
                         pass
@@ -307,13 +317,13 @@ class Game_Visual:
                     self.curr_board.spawn_number()
 
                     #Print updated board to screen
-                    self.update_board(number, score, screen)
+                    self.update_board(number, fitness, score, screen)
 
                     '''
                     #-------Print Move Info------
                     print(move)  
                     '''
-
+                    
                     break
                 #If it doesnt do anything then try the other move
                 '''
@@ -324,4 +334,4 @@ class Game_Visual:
         for event in pygame.event.get():
             pass
         pygame.time.delay(1500)
-        return score
+        return fitness

@@ -145,7 +145,7 @@ class Network:
             print()
         '''
         #Sort the outputs by value, highest is highest rank
-        ranks = [x for x in self.outputs]
+        ranks = copy.deepcopy(self.outputs)
         ranks.sort(key=lambda x: x.value, reverse=True)
 
         return max_nodes, len(max_nodes), ranks
