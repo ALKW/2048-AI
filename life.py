@@ -121,14 +121,15 @@ class Life:
         '''
         count = 0
         for species_key in Life.species:
-            genes = species_key.split()
+            species_genes = species_key.split()
             #Go through the genes and determine the percentage of matches
-            for gene in genes:
+            for gene in species_genes:
                 #If gene is in the network then increase match percentage
-                if gene in network.genes:
-                    count+= 1
+                if int(gene) in network.genes:
+                    count += 1
                 #If over 50% match then the network is of that species
-                if count >= len(species_key) // 2:
+                if count >= len(species_genes) // 2:
+                    self.species_list[Life.species[species_key]].append(network)
                     return Life.species[species_key]
             #If we make it through reset
             count = 0
@@ -144,6 +145,7 @@ class Life:
         Life.species[species_key] = Life.curr_species_num
         #Increment to the next available number
         Life.curr_species_num += 1
+        self.species_list.append([network])
 
         return Life.species[species_key]
 
@@ -250,15 +252,17 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 3
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 
-all_life.run_visualization(5)
+all_life.run_visualization(1)
 
 all_life.print_top_performers()
 
 print("Gene Key:", network.Network.gene_key, "\n")
 
-print("Species Key:", Life.species)
+print("Species Key:", Life.species, "\n")
+
+print("All Networks past and present:", all_life.species_list)
