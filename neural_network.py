@@ -560,7 +560,7 @@ def create_init_population(count, inputs, outputs):
         networks[network_index].update_genes()
     return networks
 
-
+'''
 #-----------------BREEDING TEST------------------
 test = create_init_population(2, [
                 2,2,2,2,
@@ -578,16 +578,17 @@ internal2 = node.Node()
 internal2.connections.append(test[1].outputs[0])  
 print(internal2)  
 
-test[0].inputs[0].connections.append(internal1)
-test[0].inputs[1].connections.append(internal1)
 
-test[1].inputs[0].connections.append(internal2)
+
+child = test[0].breed_with(test[1])
+
+print(Network.gene_key)
 
 test[0].print()
 test[1].print()
-child = test[0].breed_with(test[1])
 child.print()
-print(len(child.internal))
+print(Network.gene_key)
+'''
 
 
 

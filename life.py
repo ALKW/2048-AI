@@ -4,12 +4,17 @@ import copy
 
 #species determined by combination of traits; hidden_layer, hidden_width, and act_func
 class Life:
+    #Dictionary for classifying species. If 50%+ of the genes match the original creator of the species, then that species is the same.
+    #The key is all of the genes of the founding network with each gene separated by a space
+    #If the species doesnt match any then a new species is created 
+    species = dict()
+    #The next available number to assign to a species
+    curr_species_num = 0
     def __init__(self):
         #Array of all networks regardless of species
         self.individuals = []
 
         #list of lists. each list has a specific species list. 
-        #Species are determined by 2 most popular moves when a specific board is fed in
         self.species_list = []
 
         #List of top performers from each generation
@@ -75,6 +80,9 @@ class Life:
                 self.mutate_population()
 
     def mutate_population(self):
+        '''
+        mutates/breeds the appropriate members of the population
+        '''
         #Perform Breeding/Mutating
         new_population = []
         
@@ -99,21 +107,7 @@ class Life:
     
     def classify_life(self):
         ''''
-        Classications:
-           -----2 most prevelant output descriptions-----
-           - up, down: 0
-           - up, left: 1
-           - up, right: 2
-           - down, left: 3
-           - down, right: 4
-           - left, right: 5
-           ------tie between output descriptions (3 descriptions are needed)-----
-           - up, down, left : 6
-           - up, down, right: 7
-           - up, left, right: 8
-           - down, left, right: 9
-           -----Tie between all 4 descriptions-------
-           - up, down, left, right: 10
+        Classifies the species of all networks
         '''
         #goes through all networks in the list. 
         #If it does not have a species classify it and assign it to the appropriate list
@@ -122,54 +116,36 @@ class Life:
                 network.species = self.classify_network(network)
     
     def classify_network(self, network):
-        paths = []
-        #Gets all the neuron paths in the network
-        for input_node in network.inputs:
-            result = network.find_paths(input_node, [], [x.desc for x in network.outputs], [])
-            if result != None:
-                paths += result
+        '''
+        Finds the species for the network
+        '''
+        count = 0
+        for species_key in Life.species:
+            genes = species_key.split()
+            #Go through the genes and determine the percentage of matches
+            for gene in genes:
+                #If gene is in the network then increase match percentage
+                if gene in network.genes:
+                    count+= 1
+                #If over 50% match then the network is of that species
+                if count >= len(species_key) // 2:
+                    return Life.species[species_key]
+            #If we make it through reset
+            count = 0
 
-        #Counts how many paths end in a certain output node
-        output_count = [0 for x in network.outputs]
-        poss_outputs = [x.desc for x in network.outputs]
-        #For each path increase the corresponding output associated with it
-        for path in paths:
-            output_node_desc = path[-1].desc
-            inc_index = poss_outputs.index(output_node_desc)
-            output_count[inc_index] += 1
+        #If we make it through all species without a classification, then this is a new species
+        #Create the key for the new species
+        species_key = ""
+        for gene in network.genes[:-1]:
+            species_key += str(gene) + " "
+        species_key += str(network.genes[-1])
 
-        #Determine the species number
-        species = self.determine_species_number(output_count, poss_outputs)
+        #Create the new key and add it to the dictionary
+        Life.species[species_key] = Life.curr_species_num
+        #Increment to the next available number
+        Life.curr_species_num += 1
 
-        return species
-    
-    def determine_species_number(self, output_count, poss_outputs):
-        VALUE = 0
-        DESC = 1
-        max_outputs = []
-        #classify the spec7ies according to the outputs
-        output_results = [[output_count[x], poss_outputs[x]] for x in range(len(output_count))]
-        #Sort the results
-        output_results.sort(key=lambda x: x[0], reverse=True)
-        #Find the maxes
-        max_outputs.append(output_results[0])
-        max_outputs.append(output_results[1])
-        
-        #Determine if other maxes exist
-        if output_results[2][VALUE] == max_outputs[1][VALUE]:
-            max_outputs.append(output_results[2])
-
-        if output_results[3][VALUE] == max_outputs[1][VALUE]:
-            max_outputs.append(output_results[3])
-
-        #Sort the max outputs by lexicographical order to help classification
-        max_outputs.sort(key=lambda x: x[DESC][0])
-
-        key = ""
-        for output in max_outputs:
-            key += output[DESC]
-        
-        return self.SPECIES_KEY[key], key
+        return Life.species[species_key]
 
     def run_visualization(self, amount):
         #Run a visualization through the top 5 networks
@@ -274,7 +250,7 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 30
+MAX_GENERATIONS = 10
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
@@ -282,3 +258,7 @@ all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 all_life.run_visualization(5)
 
 all_life.print_top_performers()
+
+print("Gene Key:", network.Network.gene_key, "\n")
+
+print("Species Key:", Life.species)
