@@ -287,6 +287,8 @@ class Network:
         #if we reach a correct output node, then delete the path up to the point that no other paths are affected
         if curr.desc in poss_outputs:
             paths.append(path)
+            if len(paths) > 50:
+                SystemExit()
             return
 
         #if we reach an output node without encountering the node to terminate, then dont do anything
@@ -514,6 +516,7 @@ class Network:
     def print_node_paths(self):
         #Start with each internal nodes
         for input_node in self.inputs:
+            print(input_node.connections)
             self.find_paths_to_print(input_node, [])
             print()
             

@@ -128,7 +128,7 @@ class Life:
                 if int(gene) in network.genes:
                     count += 1
                 #If over 50% match then the network is of that species
-                if count >= len(species_genes) // 2:
+                if count >= len(network.genes) // 2:
                     self.species_list[Life.species[species_key]].append(network)
                     return Life.species[species_key]
             #If we make it through reset
@@ -252,7 +252,7 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 50
+MAX_GENERATIONS = 30
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
