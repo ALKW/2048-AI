@@ -20,19 +20,6 @@ class Life:
         #List of top performers from each generation
         self.top_performers = []
 
-        self.SPECIES_KEY = dict()
-        self.SPECIES_KEY["downup"] = 0
-        self.SPECIES_KEY["leftup"] = 1
-        self.SPECIES_KEY["rightup"] = 2
-        self.SPECIES_KEY["downleft"] = 3
-        self.SPECIES_KEY["downright"] = 4
-        self.SPECIES_KEY["leftright"] = 5
-        self.SPECIES_KEY["downleftup"] = 6
-        self.SPECIES_KEY["downrightup"] = 7
-        self.SPECIES_KEY["leftrightup"] = 8
-        self.SPECIES_KEY["downleftright"] = 9
-        self.SPECIES_KEY["downleftrightup"] = 10
-
     def run(self, MAX_GENERATIONS, RUNS_PER_IND):
         #Run the simulation for MAX_GENERATIONS iterations with a population size of 20
         for iteration in range(MAX_GENERATIONS):
