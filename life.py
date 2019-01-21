@@ -66,6 +66,12 @@ class Life:
             else:
                 self.mutate_population()
 
+            #Classify each new network species
+            self.classify_life()
+
+            #Go through the species list and only keep up to a population of 200
+            #Only breed within the species
+
     def mutate_population(self):
         '''
         mutates/breeds the appropriate members of the population
@@ -239,7 +245,7 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 30
+MAX_GENERATIONS = 10
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
@@ -248,7 +254,7 @@ all_life.run_visualization(5)
 
 all_life.print_top_performers()
 
-print("\nGene Key:", network.Network.gene_key, "\n")
+print("\nGene Key:", network.Network.gene_to_innovation_key, "\n")
 
 print("Species Key:", Life.species, "\n")
 

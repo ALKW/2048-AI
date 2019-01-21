@@ -4,12 +4,18 @@ import copy
  
 class Network:
     #Inputs and Outputs have defined numbers, however internals do not and need to be kept track of.
-    #The index of the node + the len(inputs) + len(outputs) is the number for the node
-    internal_nodes_key = []
-    #Dictionary for keeping track of all gene codes. Key is node number + ":" + connecting node number
-    gene_key = dict()
+    #Dictionary to keep track of all internal nodes with the number member as the key and weight as value
+    internal_nodes_key = dict()
+    #The next available number to assign to an internal node
+    internal_nodes_num = 0
+
+    #Dictionary for keeping track of all gene codes. Key is node number + ":" + connecting node number, value is innovation number
+    gene_to_innovation_key = dict()
+    #Reverse key value pair so key -> value and value -> key for quicker lookup for innovation number
+    innovation_to_gene_key = dict()
     #The current innovation number for genes. As the list is empty, the next gene to be created will be assigned 0
     curr_gene_num = 0
+
     def __init__(self, inputs, outputs):
         '''
         Neural network that breeds through taking unique sup-topologies from others within its species
@@ -152,11 +158,8 @@ class Network:
 
     def breed_with(self, other_parent):
         '''
-        Breeds two neural networks together using previous generation markers to preserve innovation. Goes through each networks outputs
-        and randomly chooses which parent to take it from. Goes through the list of output nodes and and determines whether to
-        take all paths into that output node from the first of second parent. That output node is marked with a unique identifier
-        that tells what generation it came from and from what rank in that generation, so that innovation is kept. Cannot use input nodes
-        as this disrupts paths and causes networks to perform much worse
+        Breeds two neural networks together using genome markers in the network. The resulting child contains all the genes
+        from both parents. If both parents share a gene, the child only gets one of that gene from either the first or second parent.
         Args:
             other_parent (Network object) - Other parent to mutate from
         Returns:
@@ -164,47 +167,67 @@ class Network:
         Raises:
             None
         '''
+
+        OFFSET = 1
+        INTERNAL_START_NUM = (len(self.inputs) + len(self.outputs))
+        OUTPUT_START_NUM = len(self.inputs)
+        INTERNAL_NODE_OFFSET = len(self.inputs) + len(self.outputs)
+        OUTPUT_NODE_OFFSET = len(self.inputs)
+
         #Create a network object to be the child
         child = Network(inputs=[x.value for x in self.inputs], outputs=[x.desc for x in self.outputs])
-
-        '''
-        #---------INPUT BREEDING------------
-        #Create a list of input indexes to choose from
-        choices = [x for x in range(len(self.inputs))]
-        calling_input_indices = []
-        arg_input_indices = []
-
-        #Choose half the inputs that are taken from the calling parent. Other half are reserved for other parent
-        for x in range(len(choices) // 2):
-            to_append = random.choice(choices)
-            calling_input_indices.append(to_append)
-            #Remove it so it is not picked again
-            choices.remove(to_append)
-
-        #Assign the rest to the inputs from the argument parent
-        arg_input_indices = [x for x in choices]
-
-        '''
-        '''
-        #----------------PRINT---------------------
-        print("calling: ", calling_input_indices)
-        print("args: ", arg_input_indices)
-        '''
-        '''        
-
-        #take inputs paths from calling parent and assign them to the child
-        for index in calling_input_indices:
-            child.inputs[index] = copy.deepcopy(self.inputs[index])
-
-        #take inputs paths from argument parent and assign them to the child
-        for index in arg_input_indices:
-            child.inputs[index] = copy.deepcopy(other_parent.inputs[index])
-
-        #fill in the internal nodes of the child
-        self.fill_in_child_internals(child)
         
-        '''
+        #-----------GENE BREEDING----------
+        #Get the genes
+        calling_parent_genes = self.genes
+        arg_parent_genes = other_parent.genes
 
+        #Create the childs gene array
+        child_genes = set()
+        for gene in calling_parent_genes:
+            child_genes.add(gene)
+        for gene in arg_parent_genes:
+            child_genes.add(gene)
+        for gene in child_genes:
+            child.genes.append(gene)
+
+        #Create the childs connections from the genes
+        for innovation_num in child.genes:
+            nodes = Network.innovation_to_gene_key[str(innovation_num)]
+            nodes = nodes.split()
+            #Get the connections
+            left_node_index = int(nodes[0])
+            right_node_index = int(nodes[1])
+
+            #Right node can only be internal or output node
+            if right_node_index < INTERNAL_START_NUM:
+                #right node is an output node
+                output_node_index = right_node_index - OUTPUT_NODE_OFFSET
+                right_node = child.outputs[output_node_index]
+            else:
+                #right node is an internal node
+                internal_node_index = right_node_index - INTERNAL_NODE_OFFSET
+                if str(internal_node_index) not in Network.internal_nodes_key:
+                    print(Network.internal_nodes_key, internal_node_index)
+                right_node_weight = Network.internal_nodes_key[str(internal_node_index)]
+                right_node = node.Node(weight=right_node_weight)
+                child.internal.append(right_node)
+
+            ##Left node can only be input or internal node
+            if left_node_index < INTERNAL_START_NUM:
+                #left node is an input node
+                child.inputs[left_node_index].connections.append(right_node)
+            else:
+                #left node is an internal node
+                internal_node_index = left_node_index - INTERNAL_NODE_OFFSET
+                left_node_weight = Network.internal_nodes_key[str(internal_node_index)]
+                left_node = node.Node(weight=left_node_weight)
+                left_node.connections.append(right_node)
+                child.internal.append(left_node)
+        
+        return child
+
+        '''
         #-----------OUTPUT BREEDING----------
         #Create a list of output indexes to choose from
         choices = [x for x in range(len(self.outputs))]
@@ -227,9 +250,11 @@ class Network:
         arg_poss_outputs = [x.desc for x in self.outputs if self.outputs.index(x) in arg_output_indices]
 
         '''
+        '''
         #----------------PRINT---------------------
         print("calling: ", calling_poss_outputs)
         print("args: ", arg_poss_outputs)
+        '''
         '''
 
         #take paths to output from calling parent and assign them to the child
@@ -252,8 +277,9 @@ class Network:
         self.fill_in_child_internals(child)
 
         child.update_genes()
-
+        
         return child
+        '''
 
     def fill_in_child_internals(self, child):
         for input_node in self.inputs:
@@ -288,6 +314,7 @@ class Network:
         if curr.desc in poss_outputs:
             paths.append(path)
             if len(paths) > 50:
+                self.print()
                 SystemExit()
             return
 
@@ -353,13 +380,15 @@ class Network:
             mutation = random.randint(0, 3)
 
         if mutation == 0:
-            #Either connects an input to an output or an internal to an output
+            #Either connects an input -> output or an internal -> output
             #Choose either an internal or an input node; 0 - input, 1 - internal
             #Choose the input/internal node to connect to the output node (both are random)
+
             #Error checking to make sure there exists internal nodes
             if len(self.internal) > 0:
                 choice = random.randint(0, len(self.internal) + len(self.inputs) - 1)
                 internal_index = random.randint(0, len(self.internal) - 1)
+            #if there are no internal nodes, then the only choice is input -> output
             else:
                 choice = 0
                 internal_index = 0
@@ -376,16 +405,15 @@ class Network:
                     self.internal[internal_index].connections.append(self.outputs[output_index])
                     break
 
-                #Find new indices
+                #Find new indices for internal
                 if len(self.internal) > 0:
                     choice = random.randint(0, 1)
                     internal_index = random.randint(0, len(self.internal) - 1)
-                else:
-                    choice = 0
-                    internal_index = 0
+                #Find new indices for input and output
                 input_index = random.randint(0, len(self.inputs) - 1)
                 output_index = random.randint(0, len(self.outputs) - 1)
                 count += 1
+
             #If nothing was modifided then move on and try another mutation
             if count >= 1000:
                 mutation = random.randint(1, 2)
@@ -393,7 +421,11 @@ class Network:
         if mutation == 1:
             #Create a new internal node
             #select two nodes to connect to the new internal node
-            to_add = node.Node(weight=random.choice([-2,-1,1,2]))
+            #Assign the node the next internal marker
+            to_add = node.Node(weight=random.choice([-5,-4,-3,-2,-1,1,2,3,4,5]), num=Network.internal_nodes_num)
+            #add it to the list of internals with the weight as the value and number as the key
+            Network.internal_nodes_key[str(Network.internal_nodes_num)] = to_add.weight
+            Network.internal_nodes_num += 1
 
             #Combinations include:
             #input -> new -> internal
@@ -410,16 +442,21 @@ class Network:
                 self.internal[first_node_index].connections.append(to_add)
                 #and the new node to the output
                 to_add.connections.append(self.outputs[second_node_index])
+            #otherwise an internal or an output node can be appened to the end of the chain
             else:
                 second_node_index = random.randint(0, len(self.internal) + len(self.outputs) - 2)
                 #Connect the input to the new node
                 self.inputs[first_node_index].connections.append(to_add)
-                #Connect the new node to either the output or the internal
+                #Connect the new node to the output
                 if second_node_index >= len(self.internal):
                     second_node_index -= len(self.internal)
                     to_add.connections.append(self.outputs[second_node_index])
+                #connect the new node to the internal
                 else:
                     to_add.connections.append(self.internal[second_node_index])
+
+            #Add the nodes to the list of internals for the network
+            self.internal.append(to_add)
 
         if mutation == 2:
             #Choose an internal node and modify its weight
@@ -431,7 +468,7 @@ class Network:
 
             mutate_index = random.randint(0, len(self.internal) - 1)
             curr_weight = self.internal[mutate_index].weight
-            poss_weights = set(range(-5,5))
+            poss_weights = set(range(-5,6))
 
             #Make sure a change actually happens and a weight of 0 is not achieved
             poss_weights.remove(0)
@@ -456,6 +493,8 @@ class Network:
         self.update_genes()
 
     def update_genes(self):
+        INTERNAL_NODE_OFFSET = len(self.inputs) + len(self.outputs)
+
         #Goes through all paths in the network and updates the genes list member for the network
         for input_node in self.inputs:
             #Get the first half of the key
@@ -464,38 +503,41 @@ class Network:
 
         for internal_node in self.internal:
             #Get the first half of the key
-            key = str(internal_node.value)
-            if key not in Network.internal_nodes_key:
-                Network.internal_nodes_key.append(key)
-            first_half_key = Network.internal_nodes_key.index(key)
-            
-            self.determine_genes(input_node, first_half_key)
+            #If the internal node does not have a number assigned to it, then it is untracked
+            if internal_node.number == None:
+                internal_node.number = Network.internal_nodes_num
+                Network.internal_nodes_key[str(Network.internal_nodes_num)] = internal_node.weight
+                Network.internal_nodes_num += 1
+            first_half_key = internal_node.number + INTERNAL_NODE_OFFSET
+            self.determine_genes(internal_node, first_half_key)
     
     def determine_genes(self, curr_node, first_half_key):
-        for con_node in curr_node.connections:
-            #If the connection node is an output node, skip over this part
-            if con_node.desc != None:
-                second_half_key = self.outputs.index(con_node) + len(self.inputs)
-            #Else determine the internal node key
-            else:
-                #Determine the second half of the key by looking up the node
-                con_index = str(con_node.weight)
+        INTERNAL_NODE_OFFSET = len(self.inputs) + len(self.outputs)
+        OUTPUT_NODE_OFFSET = len(self.inputs)
 
-                #If it doesnt exists then add it to the list, then use its index plus the offset
-                if con_index not in Network.internal_nodes_key:
-                    Network.internal_nodes_key.append(con_index)
-                second_half_key = Network.internal_nodes_key.index(con_index) + len(self.inputs) + len(self.outputs)
+        for con_node in curr_node.connections:
+            #If the connection node is an output node, set the second half of the key
+            if con_node.desc != None:
+                second_half_key = self.outputs.index(con_node) + OUTPUT_NODE_OFFSET
+            #Else the second half of the key is another internal node
+            else:
+                if con_node.number == None:
+                    con_node.number = Network.internal_nodes_num
+                    Network.internal_nodes_key[str(Network.internal_nodes_num)] = con_node.weight
+                    Network.internal_nodes_num += 1
+                second_half_key = con_node.number + INTERNAL_NODE_OFFSET
 
             #Create the key
-            key = str(first_half_key) + ":" + str(second_half_key)
+            key = str(first_half_key) + " " + str(second_half_key)
 
             #If the key is not in the dictionary, add it, then take its innovation number
-            if key not in Network.gene_key:
-                Network.gene_key[key] = Network.curr_gene_num
+            if key not in Network.gene_to_innovation_key:
+                Network.gene_to_innovation_key[key] = Network.curr_gene_num
+                Network.innovation_to_gene_key[str(Network.curr_gene_num)] = key
                 Network.curr_gene_num += 1
 
             #Get the gene value
-            gene_value = Network.gene_key[key]
+            gene_value = Network.gene_to_innovation_key[key]
 
             #determine if the gene is already marked in the list and add it if it is not yet
             if gene_value not in self.genes:
@@ -516,7 +558,6 @@ class Network:
     def print_node_paths(self):
         #Start with each internal nodes
         for input_node in self.inputs:
-            print(input_node.connections)
             self.find_paths_to_print(input_node, [])
             print()
             
@@ -573,24 +614,38 @@ test = create_init_population(2, [
                 ], ["up", "down", "left", "right"])
 
 
-internal1 = node.Node()
+#-------------ADD INTERNAL NODES-----------
+#2 internal nodes with the same value
+internal1 = node.Node(weight=2, num=0)
 internal1.connections.append(test[0].outputs[0])   
-print(internal1)
  
-internal2 = node.Node() 
-internal2.connections.append(test[1].outputs[0])  
-print(internal2)  
+internal2 = node.Node(weight=2, num=0) 
+internal2.connections.append(test[1].outputs[0])
+
+Network.internal_nodes_key['0'] = 2
+
+#append the internal nodes to the same position
+test[0].inputs[0].connections.append(internal1)
+test[0].internal.append(internal1)
+test[1].inputs[0].connections.append(internal2)
 
 
+test[0].mutate(mutation=1)
 
+test[0].update_genes()
+print()
+test[1].update_genes()
+
+#create a child network
 child = test[0].breed_with(test[1])
 
-print(Network.gene_key)
-
+#print data
 test[0].print()
 test[1].print()
 child.print()
-print(Network.gene_key)
+print("Internal: ", Network.internal_nodes_key)
+print("Gene to innovation", Network.gene_to_innovation_key)
+print("Innovation to Gene", Network.innovation_to_gene_key)
 '''
 
 
