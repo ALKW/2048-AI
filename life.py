@@ -245,16 +245,19 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 50
 RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 
 all_life.run_visualization(5)
 
+for network in all_life.individuals[:5]:
+    network.print()
+
 all_life.print_top_performers()
 
-print("\nGene Key:", network.Network.gene_to_innovation_key, "\n")
+print("\nGene Key:", network.innovation_to_gene_key, "\n")
 
 print("Species Key:", Life.species, "\n")
 
