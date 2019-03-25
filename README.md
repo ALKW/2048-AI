@@ -1,10 +1,10 @@
-# 2048-AI
+# 2048-AI - Version 2.0
 ### Description
-Python based AI that learned to play 2048 on its own.  All code written from scratch.   
+Python based AI that learned to play 2048 on its own. 
 
 The goal was to make the neuron network inputs and outputs as easy as possible to modify in order to find the optimal combination of inputs and outputs.  
 
-The game was created all by scratch and is based off of the game 2048
+The game was created by hand using pygame and mimics the game 2048
 
 ### Version 1.0:  
 1. No breeding only mutating
@@ -21,6 +21,18 @@ The game was created all by scratch and is based off of the game 2048
 9. The top networks develop a strategy of going back and forth either horizontally or vertically
     - Max Score levels out because of this
     - Can be seen in visualization at the end
+
+
+### Version 2.0:  
+1. Breeding is done within species and mutating is done within species  
+    - Follows the Genetic algorithm: NEAT  
+    - Top networks from each species are used
+2. Total Population of 100 (variable)
+    - Each species has a population of up to 20  
+3. Each network has a group of genes that keep track of which nodes connect to which
+    - Genes determine the species of a network
+4. Network class can be easily generalized to multiple types of games
+5. Life class can be easily generalized to multiple types of games
   
 ### Dependencies
 pygame
