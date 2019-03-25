@@ -8,8 +8,10 @@ class Life:
     #The key is all of the genes of the founding network with each gene separated by a space
     #If the species doesnt match any then a new species is created 
     species = dict()
+
     #The next available number to assign to a species
     curr_species_num = 0
+
     def __init__(self):
         #Array of all networks regardless of species
         self.individuals = []
@@ -26,25 +28,17 @@ class Life:
             #Generate a board to use for all networks
             dummy_game = game.Game()
             init_board = dummy_game.curr_board.matrix
-            #Test all individuals on the same board
+
+            #Test all individuals on the same board for consistency
             for individual in self.individuals:
                 run_total = 0
-                for run in range(RUNS_PER_IND):
+                for ind_run in range(RUNS_PER_IND):
                     test_game = game.Game(init_board=init_board.copy())
                     run_total += test_game.run(self.individuals.index(individual), get_move, individual)
                     individual.fitness = run_total // RUNS_PER_IND
-                '''
-                #-----------------Print the network details--------
-                print("Network:", self.individuals.index(individual) + 1, " | Fitness:", individual.fitness)
-                '''
 
             #sort the results to get the highest performers ranked at the top
             self.individuals.sort(key=lambda x: x.fitness, reverse=True)
-
-            '''
-            #------------Test Print Function--------------#
-            self.print_individuals()
-            '''
 
             print("Finished Generation:", iteration + 1)
 
@@ -63,40 +57,98 @@ class Life:
             #IF we reach the last generation, then break
             if iteration == (MAX_GENERATIONS - 1):
                 return
+            #Otherwise mate and mutate the population by species. Take top 100 to keep population low
             else:
                 self.mutate_population()
 
-            #Classify each new network species
+            #Classify each new network species that was added
             self.classify_life()
-
-            #Go through the species list and only keep up to a population of 200
-            #Only breed within the species
 
     def mutate_population(self):
         '''
         mutates/breeds the appropriate members of the population
+
+        Each species has its own heap and all members of the population are sorted into
+        the heaps through the classify_life() method
+       
+        Have max heaps (species) of 20 individuals max. At each stage:
+            -Mate top 4 perfomers and keep original: +10
+            -Keep next top 5 original: +5
+            -Mutate Next top 5: +5
+            -Disregard 5 lowest performers
         '''
+        MAX_PER_SPECIES = 20
+        MAX_POPULATION = 100
+
         #Perform Breeding/Mutating
         new_population = []
-        
-        #Mate top 5 performers -> add their 10 childred plus the 5 parents 
-        for first_index in range(5):
-            #Append first parent in the pair
-            new_population.append(self.individuals[first_index])
-            for second_index in range(first_index + 1, 5):
-                #Create and append the child in the pair
-                child = self.individuals[first_index].breed_with(self.individuals[second_index])
-                new_population.append(child)
-            
-            
-        #------------MUTATE NETWORKS-------#
-        for ind_index in range(5, 20):
-            self.individuals[ind_index].mutate()
-            new_population.append(self.individuals[ind_index])
-        #Disregard The rest
 
-        #Create new population
-        self.individuals = new_population
+        #Used for classifying species within the current population
+        species = [[] for x in range(len(Life.species))]
+        total_fitness = [0 for x in range(len(Life.species))]
+        avg_fitness = [0 for x in range(len(Life.species))]
+
+        #Sort life based on species, then breed/mutate all the species 
+        #Keep track of the average fitness for each species
+        for network in self.individuals:
+            #Add the network to the apporpriate species index
+            species_key = network.species
+            species[species_key].append(network)
+            total_fitness[species_key] += network.fitness
+
+        #Get the average fitness for each species
+        for species_index in range(len(species)):
+            #If there are no individuals of the species, then disregard it
+            if len(species[species_index]) == 0:
+                continue
+
+            #Compute the average fitness for the species
+            avg_fitness[species_index] = total_fitness[species_index] // len(species[species_index])
+
+        #mutate/breed each species
+        for species_t in species:
+            #Determine if there are enough members in the species to mate
+            mate_max = min(4, len(species_t))
+            num_made = 0
+
+            #Mate up to top 4 performers (less if the species doesnt have enough) 
+            #-> add their children (max 6) plus the parents (max 4) 
+            #-> result is up to 10 networks for the species
+            for first_index in range(mate_max):
+                #Append first parent in the pair. Because each parent is first at some point we append them all
+                new_population.append(species_t[first_index])
+
+                #Mate that network with all other networks it hasnt mated with yet within its species
+                for second_index in range(first_index + 1, mate_max):
+                    #Create and append the child in the pair
+                    child = species_t[first_index].breed_with(species_t[second_index])
+
+                    #set the initial fitness to the average fitness for the species
+                    child.fitness = avg_fitness[species.index(species_t)]
+
+                    #Add the child to the new population
+                    new_population.append(child)
+                    num_made += 1
+            
+            #The last index in species_t to mutate
+            mutate_max = min(len(species_t), mate_max + (MAX_PER_SPECIES - num_made))
+
+            #Mutate the rest of the network so that there is up to 20 individuals made for the new population
+            for ind_index in range(mate_max, mutate_max):
+                species_t[ind_index].mutate()
+                new_population.append(species_t[ind_index])
+                num_made += 1
+
+            #Disregard The rest of the species so as not to poplute with 1 species
+
+        #Sort the new population by fitness.
+        #Children have fitness equal to the average fitness of their species
+        new_population.sort(key=lambda x: x.fitness, reverse=True)
+
+        #Create new population by taking up to the top 100 individuals in the newly generated population
+        max_individuals = min(MAX_POPULATION, len(new_population))
+
+        self.individuals = new_population[:max_individuals]
     
     def classify_life(self):
         ''''
@@ -105,6 +157,7 @@ class Life:
         #goes through all networks in the list. 
         #If it does not have a species classify it and assign it to the appropriate list
         for network in self.individuals:
+            #Classify the network if it hasnt been classified yet
             if network.species == -1:
                 network.species = self.classify_network(network)
     
@@ -115,15 +168,18 @@ class Life:
         count = 0
         for species_key in Life.species:
             species_genes = species_key.split()
+
             #Go through the genes and determine the percentage of matches
             for gene in species_genes:
                 #If gene is in the network then increase match percentage
                 if int(gene) in network.genes:
                     count += 1
+
                 #If over 50% match then the network is of that species
                 if count >= len(network.genes) // 2:
                     self.species_list[Life.species[species_key]].append(network)
                     return Life.species[species_key]
+
             #If we make it through reset
             count = 0
 
@@ -136,6 +192,7 @@ class Life:
 
         #Create the new key and add it to the dictionary
         Life.species[species_key] = Life.curr_species_num
+
         #Increment to the next available number
         Life.curr_species_num += 1
         self.species_list.append([network])
@@ -171,6 +228,11 @@ class Life:
         for network in self.individuals:
             network.print_s()
         print()
+
+    def print_species_info(self):
+        print("All Species:")
+        for species in self.species_list:
+            print("Species ", self.species_list.index(species), "- Population size: ", len(species), " || ", end="")
     
 def get_move(active_game, active_network):
     stimuli = []
@@ -181,12 +243,12 @@ def get_move(active_game, active_network):
         else:
             stimuli.append(1)
 
-    other_stimuli = classify_board(active_game.curr_board)
+    other_stimuli = find_moves_board(active_game.curr_board)
 
     stimuli += other_stimuli
     return active_network.feed(stimuli)
 
-def classify_board(board):
+def find_moves_board(board):
     '''
     classifies the rows and columns of the matrix with a 1 if there is an available move and 0 if there isnt
     Args:
@@ -228,13 +290,9 @@ def can_move(data):
             curr = entry
     return False
 
-#Have max heaps (species) of 20 individuals max. At each stage:
-#   Mate top 4 perfomers and keep original: +10
-#   Keep next top 5 original: +5
-#   Mutate Next top 5: +5
-#   Disregard 5 lowest performers
 
-#Let input neurons be the board, the rows if a move is available, and the columns if a move is available
+MAX_GENERATIONS = 50
+RUNS_PER_IND = 5
 
 all_life = Life()
 all_life.individuals = network.create_init_population(30, [
@@ -245,22 +303,15 @@ all_life.individuals = network.create_init_population(30, [
                 0,0,0,0,
                 0,0,0,0
                 ], ["up", "down", "left", "right"])
-MAX_GENERATIONS = 50
-RUNS_PER_IND = 5
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND)
 
-all_life.run_visualization(5)
-
-for network in all_life.individuals[:5]:
-    network.print()
+all_life.run_visualization(1)
 
 all_life.print_top_performers()
 
-print("\nGene Key:", network.innovation_to_gene_key, "\n")
+print("\nGene Key:", network.Network.innovation_to_gene_key, "\n")
 
 print("Species Key:", Life.species, "\n")
 
-print("All Species:")
-for species in all_life.species_list:
-    print("Species ", all_life.species_list.index(species), ": ", len(species), " -- ", end="")
+all_life.print_species_info()
