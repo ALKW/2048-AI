@@ -1,10 +1,11 @@
-from game_environment import board
 import pygame
 from pygame.locals import *
 import sys
 import math
 import time
 import random
+
+from Game_2048 import board
 
 class Game:
     def __init__(self, init_board=None):

@@ -1,10 +1,11 @@
-import sys
 import pygame
 from pygame.locals import *
-import board
 import math
+import sys
 
-class Game_visual():
+from Game_2048 import board
+
+class Game_Visual():
     def __init__(self):
         #initialize classes
         pygame.init()

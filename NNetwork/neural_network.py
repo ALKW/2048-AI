@@ -1,5 +1,5 @@
 import random
-import node
+from NNetwork import node
 import copy
 import sys
  
@@ -104,9 +104,9 @@ class Network:
         '''
         #Because no loops can exist in this network, we dont have to worry about coloring nodes for DFS
         #Run recursively, so once we get to a node with no connections (this is an output node, or an internal node that doesnt connect to anything)
-        #We recurse up and move on to the next node in the layer, similar to BFS
+        #We recurse up and move on to the next node in the layer, similar to DFS
         for curr_node in start_node.connections:
-            curr_node.value += start_node.value * start_node.weight
+            curr_node.value += start_node.value + start_node.weight
             self.feed_forward(curr_node)
     
     def reset_nodes(self, start_node, end=True):
@@ -124,15 +124,15 @@ class Network:
         outputs_too = end
 
         #Because no loops can exist in this network, we dont have to worry about coloring nodes
-        #For each starting node (a.k.a - input node) run a BFS style search that resets all values in the network to 0
+        #For each starting node (a.k.a - input node) run a DFS style search that resets all values in the network to 0
         for curr_node in start_node.connections:
             #If the node's desc is none then it it an internal node
             if curr_node.desc == None:
-                curr_node.value *= 0
+                curr_node.value = 0
             
             #If we want to reset output node values too
             if outputs_too:
-                curr_node.value *= 0
+                curr_node.value = 0
 
             #Recursively call itself
             self.reset_nodes(curr_node, end=outputs_too)
@@ -202,7 +202,7 @@ class Network:
                 sys.exit("Child has none in output node")
                 child.print()
         
-        #-----------GENE BREEDING----------
+        #-----------GENE BREEDING----------#
         #Get the genes from each parent
         calling_parent_genes = self.genes
         arg_parent_genes = other_parent.genes
