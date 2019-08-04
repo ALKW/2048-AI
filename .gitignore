@@ -333,3 +333,6 @@ ASALocalRun/
 
 # Mac DS store
 .DS_Store
+
+# Test files
+test.*
