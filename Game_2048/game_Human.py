@@ -19,7 +19,7 @@ class Game_Visual():
 
 
         #Get the background image from a picture
-        self.background_board = pygame.image.load("python/Game_2048/background_board.png")
+        self.background_board = pygame.image.load("Game_2048/background_board.png")
         #Create the object as a moving object
         self.background_boardrect = self.background_board.get_rect()
 

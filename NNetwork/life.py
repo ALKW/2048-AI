@@ -1,5 +1,5 @@
 import copy
-
+import sys
 from NNetwork import neural_network as network
 from Game_2048 import game_AI as game
 
@@ -43,6 +43,7 @@ class Life:
             self.individuals.sort(key=lambda x: x.fitness, reverse=True)
 
             print("Finished Generation:", iteration + 1)
+            sys.stdout.flush()
 
             #Classify each new network species
             self.classify_life()
