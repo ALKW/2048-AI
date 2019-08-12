@@ -1,5 +1,6 @@
 from NNetwork import life
 from NNetwork import neural_network as network
+from Snapshots import snapshotgen as ssgen
 
 #Used for getting the move of a 2048 board
 #Tranlsates the 2048 board to a stimuli to pass to the AI
@@ -61,11 +62,11 @@ def can_move(data):
     return False
 
 
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 1
 RUNS_PER_IND = 5
 
 all_life = life.Life()
-all_life.individuals = network.create_init_population(30, 
+all_life.population = network.create_init_population(30, 
                 [
                 0,0,0,0,
                 0,0,0,0,
@@ -86,3 +87,6 @@ print("\nGene Key:", network.Network.innovation_to_gene_key, "\n")
 print("Species Key:", life.Life.species, "\n")
 
 all_life.print_species_info()
+
+generator = ssgen.snapshot(all_life.population, all_life.species, network.Network.gene_to_innovation_key)
+generator.create_snapshot()

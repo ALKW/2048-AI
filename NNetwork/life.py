@@ -14,9 +14,9 @@ class Life:
     #The next available number to assign to a species
     curr_species_num = 0
 
-    def __init__(self, individuals=[], species_list=[], top_performers=[]):
+    def __init__(self, population=[], species_list=[], top_performers=[]):
         #Array of all networks regardless of species
-        self.individuals = individuals
+        self.population = population
 
         #list of lists. each list has a specific species list. 
         self.species_list = species_list
@@ -31,16 +31,16 @@ class Life:
             dummy_game = game.Game()
             init_board = dummy_game.curr_board.matrix
 
-            #Test all individuals on the same board for consistency
-            for individual in self.individuals:
+            #Test all population on the same board for consistency
+            for individual in self.population:
                 run_total = 0
-                for ind_run in range(RUNS_PER_IND):
+                for _ in range(RUNS_PER_IND):
                     test_game = game.Game(init_board=init_board.copy())
-                    run_total += test_game.run(self.individuals.index(individual), get_move, individual)
+                    run_total += test_game.run(self.population.index(individual), get_move, individual)
                     individual.fitness = run_total // RUNS_PER_IND
 
             #sort the results to get the highest performers ranked at the top
-            self.individuals.sort(key=lambda x: x.fitness, reverse=True)
+            self.population.sort(key=lambda x: x.fitness, reverse=True)
 
             print("Finished Generation:", iteration + 1)
             sys.stdout.flush()
@@ -49,12 +49,12 @@ class Life:
             self.classify_life()
 
             #fill in generation numbers
-            for individual in self.individuals:
+            for individual in self.population:
                 if individual.generation == -1:
                     individual.generation = iteration
 
             #Keep track of top performers from each generation for analytic purposes
-            top_performer = "Generation: " + str(iteration + 1) +  " | Max Fitness: " + str(self.individuals[0].fitness) + " | Species: " + str(self.individuals[0].species)
+            top_performer = "Generation: " + str(iteration + 1) +  " | Max Fitness: " + str(self.population[0].fitness) + " | Species: " + str(self.population[0].species)
             self.top_performers.append(top_performer)
 
             #IF we reach the last generation, then break
@@ -74,7 +74,7 @@ class Life:
         Each species has its own heap and all members of the population are sorted into
         the heaps through the classify_life() method
        
-        Have max heaps (species) of 20 individuals max. At each stage:
+        Have sorted lists (species) of 20 individuals max. At each stage:
             -Mate top 4 perfomers and keep original: +10
             -Keep next top 5 original: +5
             -Mutate Next top 5: +5
@@ -93,7 +93,7 @@ class Life:
 
         #Sort life based on species, then breed/mutate all the species 
         #Keep track of the average fitness for each species
-        for network in self.individuals:
+        for network in self.population:
             #Add the network to the apporpriate species index
             species_key = network.species
             species[species_key].append(network)
@@ -151,7 +151,7 @@ class Life:
         #Create new population by taking up to the top 100 individuals in the newly generated population
         max_individuals = min(MAX_POPULATION, len(new_population))
 
-        self.individuals = new_population[:max_individuals]
+        self.population = new_population[:max_individuals]
     
     def classify_life(self):
         ''''
@@ -159,7 +159,7 @@ class Life:
         '''
         #goes through all networks in the list. 
         #If it does not have a species classify it and assign it to the appropriate list
-        for network in self.individuals:
+        for network in self.population:
             #Classify the network if it hasnt been classified yet
             if network.species == -1:
                 network.species = self.classify_network(network)
@@ -204,31 +204,31 @@ class Life:
 
     def run_visualization(self, amount, get_move):
         #Run a visualization through a number of networks equivalent to amount
-        if amount > len(self.individuals):
+        if amount > len(self.population):
             print("Not Valid, exceeds individual count")
             return
         
         print("--------------------- PRINTING TOP ", amount, "---------------------")
         dummy_game = game.Game()
         init_board = dummy_game.curr_board.matrix
-        for individual in self.individuals[:amount]:
+        for individual in self.population[:amount]:
             test_game = game.Game_Visual(init_board=init_board.copy())
-            print("-----------NETWORK ", self.individuals.index(individual) + 1,"-------------")
-            individual.fitness = test_game.run(self.individuals.index(individual) + 1, get_move, individual)
+            print("-----------NETWORK ", self.population.index(individual) + 1,"-------------")
+            individual.fitness = test_game.run(self.population.index(individual) + 1, get_move, individual)
             print()
             individual.print()
 
     def print_top_performers(self):
         #Print the highest results from each generation and the results from the latest generation
-        self.individuals.sort(key=lambda x: x.fitness, reverse=True)
+        self.population.sort(key=lambda x: x.fitness, reverse=True)
         print("Top performers from each generation:")
         for performer in self.top_performers:
             print(performer)
 
-    def print_individuals(self):
-        #Prints all individuals
+    def print_population(self):
+        #Prints all population
         print("Latest Generation:")
-        for network in self.individuals:
+        for network in self.population:
             network.print_s()
         print()
 
