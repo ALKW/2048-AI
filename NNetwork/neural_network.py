@@ -39,10 +39,10 @@ class Network:
         self.generation = -1
 
         #Input layer of nodes
-        self.inputs = [node.Node(value=inputs[x]) for x in range(len(inputs))]
+        self.inputs = [node.Node(value=inputs[x], num=(-1 * x) - 1) for x in range(len(inputs))]
 
         #Output layer of nodes
-        self.outputs = [node.Node(0, desc=outputs[x]) for x in range(len(outputs))]
+        self.outputs = [node.Node(0, desc=outputs[x], num=(-1 * (x + len(inputs)) - 1)) for x in range(len(outputs))]
 
         #internal nodes
         self.internal = []

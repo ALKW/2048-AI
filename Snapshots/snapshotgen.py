@@ -63,15 +63,17 @@ class snapshot:
         file.write("# Life Parameters - Networks\n")
         for network in self.population:
             #Write the input nodes to the file
-            file.write("# Inputs")
+            file.write("\n# Inputs\n")
             for node in network.inputs:
                 file.write("[" + node.to_str() + "]\n")
 
-            file.write("# Internals")
+            #Write the internal nodes to the file
+            file.write("\n# Internals\n")
             for node in network.internal:
                 file.write("[" + node.to_str() + "]\n")
-
-            file.write("# Outputs")
+    
+            #Write the output nodes to the file
+            file.write("\n# Outputs\n")
             for node in network.outputs:
                 file.write("[" + node.to_str() + "]\n")
         

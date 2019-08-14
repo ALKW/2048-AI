@@ -78,15 +78,15 @@ all_life.population = network.create_init_population(30,
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND, get_move_2048)
 
-all_life.run_visualization(1, get_move_2048)
+#all_life.run_visualization(1, get_move_2048)
 
-all_life.print_top_performers()
+#all_life.print_top_performers()
 
-print("\nGene Key:", network.Network.innovation_to_gene_key, "\n")
+#print("\nGene Key:", network.Network.innovation_to_gene_key, "\n")
 
-print("Species Key:", life.Life.species, "\n")
+#print("Species Key:", life.Life.species, "\n")
 
-all_life.print_species_info()
+#all_life.print_species_info()
 
 generator = ssgen.snapshot(all_life.population, all_life.species, network.Network.gene_to_innovation_key)
 generator.create_snapshot()
