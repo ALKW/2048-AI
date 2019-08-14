@@ -1,6 +1,6 @@
 from time import gmtime, strftime
 
-class snapshot:
+class Snapshot:
     def __init__(self, population, species, gtoi_key):
         self.population = population
         self.species = species
@@ -21,6 +21,9 @@ class snapshot:
 
         # Print the population key to the file
         self.print_networks_key(file)
+
+        #Close the file
+        file.close()
 
     def create_file(self):
         today = strftime("%Y-%m-%d-%H-%M-%S", gmtime())

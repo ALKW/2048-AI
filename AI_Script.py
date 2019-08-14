@@ -88,5 +88,5 @@ all_life.run(MAX_GENERATIONS, RUNS_PER_IND, get_move_2048)
 
 #all_life.print_species_info()
 
-generator = ssgen.snapshot(all_life.population, all_life.species, network.Network.gene_to_innovation_key)
+generator = ssgen.Snapshot(all_life.population, all_life.species, network.Network.gene_to_innovation_key)
 generator.create_snapshot()
