@@ -4,17 +4,22 @@ import copy
 import sys
  
 class Network:
-    #Inputs and Outputs have defined numbers, however internals do not and need to be kept track of.
-    #Dictionary to keep track of all internal nodes with the number member as the key and weight as value
+    # Inputs and Outputs have defined numbers, however internals do not and need to be kept track of.
+    # Dictionary to keep track of all internal nodes with the number member as the key and weight as value
     internal_nodes_key = dict()
-    #The next available number to assign to an internal node
+
+    # The next available number to assign to an internal node
     internal_nodes_num = 0
 
-    #Dictionary for keeping track of all gene codes. Key is node number + ":" + connecting node number, value is innovation number
+    # Dictionary for keeping track of all gene codes. 
+    # Key is a gene (2 connected nodes) node1.number + " " + node2.number
+    # Value is the innovation number for that gene (first gene discovered is 0, second gene discovered is 1, ...)
     gene_to_innovation_key = dict()
-    #Reverse key value pair so key -> value and value -> key for quicker lookup for innovation number
+
+    # Reverse key value pair so key and value switch places for quicker lookup for innovation number
     innovation_to_gene_key = dict()
-    #The current innovation number for genes. As the list is empty, the next gene to be created will be assigned 0
+
+    # The current innovation number for genes. As the list is empty, the next gene to be created will be assigned 0
     curr_gene_num = 0
 
     def __init__(self, inputs, outputs):
@@ -28,23 +33,23 @@ class Network:
         Raises:
             None
         '''
-        #fitness for the network, initialized to 0
+        # Fitness for the network, initialized to 0
         self.fitness = 0
 
-        #Species for the network, initialized to 0.
-        #Species is determined by which move (up, down, left, right) results in the least amount of game endings (a move is selected that doesnt do anything)
+        # Species for the network, initialized to 0.
+        # Species is determined by which move (up, down, left, right) results in the least amount of game endings (a move is selected that doesnt do anything)
         self.species = -1
 
-        #Historical Makrings to improve breeding uniqueness so that higher generations dont become replicas of lower generations
+        # Historical Makrings to improve breeding uniqueness so that higher generations dont become replicas of lower generations
         self.generation = -1
 
-        #Input layer of nodes
+        # Input layer of nodes
         self.inputs = [node.Node(value=inputs[x], num=(-1 * x) - 1) for x in range(len(inputs))]
 
-        #Output layer of nodes
+        # Output layer of nodes
         self.outputs = [node.Node(0, desc=outputs[x], num=(-1 * (x + len(inputs)) - 1)) for x in range(len(outputs))]
 
-        #internal nodes
+        # internal nodes
         self.internal = []
 
         #Connections (genes) between nodes - a list of lists of length 2
@@ -52,6 +57,17 @@ class Network:
         #Output nodes are len(self.inputs) -> len(self.inputs) + len(self.outputs) - 1
         #Internal nodes are kept track of using a dictionary with keys being the weight of the internal node
         self.genes = []
+
+        if Network.internal_nodes_num == 0:
+            Network.internal_nodes_num = len(inputs) + len(outputs)
+        
+        # If the number of the next available internal nodes number is not equal to the number of inputs and outputs and 
+        # there are currently no internal nodes created (dictionary is empty), 
+        # then the network does not have the correct amount of input or output nodes
+        if Network.internal_nodes_num != len(inputs) + len(outputs) and not bool(Network.internal_nodes_key):
+            print("Invalid network added. Too many nodes. Exiting")
+            sys.exit()
+            
 
     def feed(self, stimuli=None):
         '''
@@ -447,7 +463,7 @@ class Network:
         #Left node can only be input or internal,, so just cycle through all internal/input nodes for the network
         INTERNAL_NODE_OFFSET = len(self.inputs) + len(self.outputs)
 
-        #Keys are consist of "leftNode + " " +  rightNode"
+        #Keys consist of "leftNode + " " +  rightNode"
         for input_node in self.inputs:
             #Get the first half of the key
             first_half_key = self.inputs.index(input_node)

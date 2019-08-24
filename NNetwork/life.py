@@ -3,11 +3,9 @@ import sys
 from NNetwork import neural_network as network
 from Game_2048 import game_AI as game
 
-
-#species determined by combination of traits; hidden_layer, hidden_width, and act_func
 class Life:
     #Dictionary for classifying species. If 50%+ of the genes match the original creator of the species, then that species is the same.
-    #The key is all of the genes of the founding network with each gene separated by a space
+    #The key is the sequence of genes for network with each gene separated by a space
     #If the species doesnt match any then a new species is created 
     species = dict()
 

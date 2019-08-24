@@ -10,12 +10,12 @@ class Node:
         print("I-Num:", self.number, "| Weight:", self.weight, "| Description:", self.desc, "| Connected to", len(self.connections), "Nodes\n") 
 
     def to_str(self):
-        toRtrn = str(self.value) + ":" + str(self.weight) + ":"
+        toRtrn = str(self.weight) + ":"
 
         if self.desc == None:
             toRtrn += "-1:"
         else:
-            toRtrn += self.desc
+            toRtrn += str(self.desc) + ":"
 
         if self.number == None:
             toRtrn += "-1:"
@@ -35,7 +35,7 @@ class Node:
         return toRtrn
 
     def to_str_det(self):
-        toRtrn = "Value: " + str(self.value) + "|Weight: " + str(self.weight) + "|Description: "
+        toRtrn = "Weight: " + str(self.weight) + "|Description: "
 
         if self.desc == None:
             toRtrn += "-1|Number: "

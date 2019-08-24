@@ -47,7 +47,8 @@ class Snapshot:
         return keys, values
 
     def print_gtoi_key(self, file):
-        file.write("# Life Parameters - Gene to Innovation Key\n")
+        file.write("# Life Parameters - Gene Composition to Gene Number Key\n")
+        file.write("$ GG\n")
         
         keys, values = self.dtol(self.gtoi_key)
 
@@ -55,7 +56,8 @@ class Snapshot:
            file.write(str(keys[i]) + ":" + str(values[i]) + "\n") 
 
     def print_species_key(self, file):
-        file.write("# Life Parameters - Species\n")
+        file.write("# Life Parameters - Genes to Species\n")
+        file.write("$ GS\n")
 
         keys, values = self.dtol(self.species)
 
@@ -63,8 +65,13 @@ class Snapshot:
            file.write(str(keys[i]) + ":" + str(values[i]) + "\n")  
 
     def print_networks_key(self, file):
-        file.write("# Life Parameters - Networks\n")
+        file.write("# Life Parameters - Network Structure\n")
+        file.write("$ NS\n")
+        file.write("Size:" + str(len(self.population)))
         for network in self.population:
+            #Signal New Network
+            file.write("\n# Network " + str(self.population.index(network) + 1) + "\n")
+
             #Write the input nodes to the file
             file.write("\n# Inputs\n")
             for node in network.inputs:

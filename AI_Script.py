@@ -1,6 +1,8 @@
 from NNetwork import life
 from NNetwork import neural_network as network
 from Snapshots import snapshotgen as ssgen
+from Snapshots import snapshotparse as sspar
+import sys
 
 #Used for getting the move of a 2048 board
 #Tranlsates the 2048 board to a stimuli to pass to the AI
@@ -65,16 +67,21 @@ def can_move(data):
 MAX_GENERATIONS = 1
 RUNS_PER_IND = 5
 
-all_life = life.Life()
-all_life.population = network.create_init_population(30, 
-                [
-                0,0,0,0,
-                0,0,0,0,
-                0,0,0,0,
-                0,0,0,0,
-                0,0,0,0,
-                0,0,0,0
-                ], ["up", "down", "left", "right"])
+if len(sys.argv) >= 2: 
+    parser = sspar.Parser(sys.argv[1])
+    parser.build_world()
+    exit()
+else:
+    all_life = life.Life()
+    all_life.population = network.create_init_population(30, 
+                    [
+                    0,0,0,0,
+                    0,0,0,0,
+                    0,0,0,0,
+                    0,0,0,0,
+                    0,0,0,0,
+                    0,0,0,0
+                    ], ["up", "down", "left", "right"])
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND, get_move_2048)
 
