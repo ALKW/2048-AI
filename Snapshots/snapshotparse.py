@@ -32,10 +32,44 @@ class Parser:
 
 
     def build_gtoi_key(self):
-        pass
+        KEY = 0
+        VALUE = 1
+
+        line = self.file.readline()
+        while line:
+            # If we see a "$" then we know we are in another section
+            if "$" in line:
+                return
+            else if "#" in line:
+                line = self.file.readline()
+                continue
+            else
+                key_val = line.split(":")
+                network.Network.gene_to_innovation_key[key_val[KEY]] =  key_val[VALUE]
+                network.Network.innovation_to_gene_key[key_val[VALUE]] =  key_val[KEY]
+            
+            # Read next line in    
+            line = self.file.readline()
+
 
     def build_species_key(self):
-        pass
+        KEY = 0
+        VALUE = 1
+
+        line = self.file.readline()
+        while line:
+            # If we see a "$" then we know we are in another section
+            if "$" in line:
+                return
+            else if "#" in line:
+                line = self.file.readline()
+                continue
+            else
+                key_val = line.split(":")
+                life.Life.species[key_val[KEY]] = key_val[VALUE]
+            
+            # Read next line in    
+            line = self.file.readline()
 
     def build_network(self):
         # Initialize the life object with the a number of empty networks equal to the number of networks in the file
