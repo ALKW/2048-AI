@@ -215,8 +215,8 @@ class Network:
         child = Network(inputs=[x.value for x in self.inputs], outputs=[x.desc for x in self.outputs])
         for x in child.outputs:
             if x.desc == None:
+                print(child)
                 sys.exit("Child has none in output node")
-                child.print()
         
         #-----------GENE BREEDING----------#
         #Get the genes from each parent
@@ -519,14 +519,11 @@ class Network:
         print("Genes: ", self.genes, "\n")
         print("Topology: ")
 
-    def print(self):
-        print("Fitness: ", self.fitness)
-        print("Species: ", self.species)
-        print("Generation: ", self.generation)
-        print("Genes: ", self.genes, "\n")
+    def __str__(self):
         print("Topology: ")
         self.print_node_paths()
-    
+        return "Fitness: " + str(self.fitness) + " Species: "+ str(self.species) + " Generation: " + str(self.generation) + "Genes: " + str(self.genes)
+
     def print_node_paths(self):
         #Start with each internal nodes
         for input_node in self.inputs:

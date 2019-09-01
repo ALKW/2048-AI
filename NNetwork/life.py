@@ -214,7 +214,7 @@ class Life:
             print("-----------NETWORK ", self.population.index(individual) + 1,"-------------")
             individual.fitness = test_game.run(self.population.index(individual) + 1, get_move, individual)
             print()
-            individual.print()
+            print(individual)
 
     def print_top_performers(self):
         #Print the highest results from each generation and the results from the latest generation

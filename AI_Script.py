@@ -73,15 +73,7 @@ if len(sys.argv) >= 2:
     exit()
 else:
     all_life = life.Life()
-    all_life.population = network.create_init_population(30, 
-                    [
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0
-                    ], ["up", "down", "left", "right"])
+    all_life.population = network.create_init_population(30, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ["up", "down", "left", "right"])
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND, get_move_2048)
 

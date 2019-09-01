@@ -6,7 +6,7 @@ class Node:
         self.number = num
         self.connections = []
 
-    def print(self):
+    def __str__(self):
         print("I-Num:", self.number, "| Weight:", self.weight, "| Description:", self.desc, "| Connected to", len(self.connections), "Nodes\n") 
 
     def to_str(self):

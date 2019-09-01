@@ -40,10 +40,10 @@ class Parser:
             # If we see a "$" then we know we are in another section
             if "$" in line:
                 return
-            else if "#" in line:
+            elif "#" in line:
                 line = self.file.readline()
                 continue
-            else
+            else:
                 key_val = line.split(":")
                 network.Network.gene_to_innovation_key[key_val[KEY]] =  key_val[VALUE]
                 network.Network.innovation_to_gene_key[key_val[VALUE]] =  key_val[KEY]
@@ -61,10 +61,10 @@ class Parser:
             # If we see a "$" then we know we are in another section
             if "$" in line:
                 return
-            else if "#" in line:
+            elif "#" in line:
                 line = self.file.readline()
                 continue
-            else
+            else:
                 key_val = line.split(":")
                 life.Life.species[key_val[KEY]] = key_val[VALUE]
             
