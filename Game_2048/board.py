@@ -169,17 +169,17 @@ class Board(Matrix):
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
-            #clears out 0s in the column
-            #checks for numbers that are the same that are next to each other
+            # clears out 0s in the column
+            # checks for numbers that are the same that are next to each other
             for k in range(0, 4):
-                #skips iteration in for loop.
+                # skips iteration in for loop.
                 if(need_to_skip):
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
                 elif(curr_column[k] == 0):
                     continue
-                #checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
+                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
                 elif(k < 3 and curr_column[k] == curr_column[k + 1]):
                     value = curr_column[k] * 2
                     curr_column[k] = 0
@@ -187,11 +187,11 @@ class Board(Matrix):
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
-                #number is unique so it is added without modification to the new values column
+                # number is unique so it is added without modification to the new values column
                 else:
                     new_values[counter] = curr_column[k]
                     counter += 1
-            #assigns the new values to the board
+            # assigns the new values to the board
             self.matrix[self.columns[i]] = new_values
     
     def down_movement(self):
@@ -219,23 +219,23 @@ class Board(Matrix):
         '''
         for i in range(0, 4):
             curr_column = self.matrix[self.columns[i]]
-            #reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
+            # reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
             curr_column.reverse()
             curr_column = self.remove_from_list(curr_column, 0)
             curr_column = self.fill_in_zeros(curr_column, 0, 4)
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
-            #checks for numbers that are the same that are next to each other
+            # checks for numbers that are the same that are next to each other
             for k in range(0, 4):
-                #skips iteration in for loop.
+                # skips iteration in for loop.
                 if(need_to_skip):
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
                 elif(curr_column[k] == 0):
                     continue
-                #checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
+                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
                 elif(k < 3 and curr_column[k] == curr_column[k + 1]):
                     value = curr_column[k] * 2
                     curr_column[k] = 0
@@ -243,11 +243,11 @@ class Board(Matrix):
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
-                #number is unique so it is added without modification to the new values column
+                # number is unique so it is added without modification to the new values column
                 else:
                     new_values[counter] = curr_column[k]
                     counter += 1
-            #assigns the new values to the board
+            # assigns the new values to the board
             new_values.reverse()
             self.matrix[self.columns[i]] = new_values
 
@@ -280,17 +280,17 @@ class Board(Matrix):
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
-            #clears out 0s in the column
-            #checks for numbers that are the same that are next to each other
+            # clears out 0s in the column
+            # checks for numbers that are the same that are next to each other
             for k in range(0, 4):
-                #skips iteration in for loop.
+                # skips iteration in for loop.
                 if(need_to_skip):
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
                 elif(curr_column[k] == 0):
                     continue
-                #checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
+                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
                 elif(k < 3 and curr_column[k] == curr_column[k + 1]):
                     value = curr_column[k] * 2
                     curr_column[k] = 0
@@ -298,11 +298,11 @@ class Board(Matrix):
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
-                #number is unique so it is added without modification to the new values column
+                # number is unique so it is added without modification to the new values column
                 else:
                     new_values[counter] = curr_column[k]
                     counter += 1
-            #assigns the new values to the board
+            # assigns the new values to the board
             self.matrix[self.rows[i]] = new_values
 
     def right_movement(self):
@@ -331,23 +331,23 @@ class Board(Matrix):
         '''
         for i in range(0, 4):
             curr_column = self.matrix[self.rows[i]]
-            #reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
+            # reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
             curr_column.reverse()
             curr_column = self.remove_from_list(curr_column, 0)
             curr_column = self.fill_in_zeros(curr_column, 0, 4)
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
-            #checks for numbers that are the same that are next to each other
+            # checks for numbers that are the same that are next to each other
             for k in range(0, 4):
-                #skips iteration in for loop.
+                # skips iteration in for loop.
                 if(need_to_skip):
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
                 elif(curr_column[k] == 0):
                     continue
-                #checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
+                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
                 elif(k < 3 and curr_column[k] == curr_column[k + 1]):
                     value = curr_column[k] * 2
                     curr_column[k] = 0
@@ -355,11 +355,11 @@ class Board(Matrix):
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
-                #number is unique so it is added without modification to the new values column
+                # number is unique so it is added without modification to the new values column
                 else:
                     new_values[counter] = curr_column[k]
                     counter += 1
-            #assigns the new values to the board
+            # assigns the new values to the board
             new_values.reverse()
             self.matrix[self.rows[i]] = new_values
 

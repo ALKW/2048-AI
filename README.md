@@ -1,14 +1,24 @@
 # 2048-AI - Version 2.1
+
 ## Description
 AI that learned to play 2048 on its own. 
 
-The goal was to make a neural netowork that learned to play 2048, while also making a lirbary that would allow this to be applied to any game. The network takes as input a serialized version of the users choosing, whether it be the screen pixels or the numbers on the board.
+The goal was to make a neural netowork that learned to play 2048, while also making a lirbary that would allow people to build neural networks that follow the N.E.A.T Genertic algorithms.
+The network takes as input a serialized version of the users choosing, whether it be the screen pixels or the numbers on the board and outputs corresponding to what the user specifies
 
-Everything except the visual library (pygame) was created from scratch 
+Everything used (besides the stdlib and pygame) was custom built
+
+Custom items include:
+    Neural Networks with Genes, species, and fitness
+    Breeding and mutation functions for networks
+    Snapshot generator
+    Snapshot parser
+    2048 Game
 
 ## Version 2.1:
 1. Added snapshot generation to allow a group of networks to be saved after the simulation is complete. These snapshots can loaded in later as a starting point for the network
 2. Added snapshot parsing to allow the user to start where they left off in a network.
+3. Added a tests folder to add tests to verify integrity of N.E.A.T Library
 
 ## Version 2.0:  
 1. Breeding is done within species and mutating is done within species  
@@ -43,5 +53,5 @@ pygame
 ## Usage
 Run AI_Script.py from the command line using:
   ```
-  python AI_Script.py [snapshot (optional)]
+  python AI_Script.py (optional)example_snapshot.snp
   ```

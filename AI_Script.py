@@ -4,9 +4,9 @@ from Snapshots import snapshotgen as ssgen
 from Snapshots import snapshotparse as sspar
 import sys
 
-#Used for getting the move of a 2048 board
-#Tranlsates the 2048 board to a stimuli to pass to the AI
-#The stimuli is a list of the inputs for the board
+# Used for getting the move of a 2048 board
+# Tranlsates the 2048 board to a stimuli to pass to the AI
+# The stimuli is a list of the inputs for the board
 def get_move_2048(active_game, active_network):
     stimuli = []
     
@@ -32,7 +32,7 @@ def find_moves_2048_board(board):
         None
     '''
     to_return = []
-    #For each row, determine if its possible to move
+    # For each row, determine if its possible to move
     for row_slice in board.rows:
         row = board.matrix[row_slice]
         if 0 in row:
@@ -42,7 +42,7 @@ def find_moves_2048_board(board):
         else:
             to_return.append(0)
     
-    #For each column, determine if its possible to move
+    # For each column, determine if its possible to move
     for column_slice in board.columns:
         column = board.matrix[column_slice]
         if 0 in column:
@@ -64,8 +64,8 @@ def can_move(data):
     return False
 
 
-MAX_GENERATIONS = 1
-RUNS_PER_IND = 5
+MAX_GENERATIONS = 5
+RUNS_PER_IND = 1
 
 if len(sys.argv) >= 2: 
     parser = sspar.Parser(sys.argv[1])
@@ -73,19 +73,28 @@ if len(sys.argv) >= 2:
     exit()
 else:
     all_life = life.Life()
-    all_life.population = network.create_init_population(30, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], ["up", "down", "left", "right"])
+    all_life.population = network.create_init_population(30, 
+                            [
+                            0,0,0,0,
+                            0,0,0,0,
+                            0,0,0,0,
+                            0,0,0,0,
+                            0,0,0,0,
+                            0,0,0,0
+                            ], 
+                            ["up", "down", "left", "right"])
 
 all_life.run(MAX_GENERATIONS, RUNS_PER_IND, get_move_2048)
 
-#all_life.run_visualization(1, get_move_2048)
+# all_life.run_visualization(1, get_move_2048)
 
-#all_life.print_top_performers()
+# all_life.print_top_performers()
 
-#print("\nGene Key:", network.Network.innovation_to_gene_key, "\n")
+# print("\nGene Key:", network.Network.innovation_to_gene_key, "\n")
 
-#print("Species Key:", life.Life.species, "\n")
+# print("Species Key:", life.Life.species, "\n")
 
-#all_life.print_species_info()
+# all_life.print_species_info()
 
 generator = ssgen.Snapshot(all_life.population, life.Life.species, network.Network.gene_to_innovation_key)
 generator.create_snapshot()

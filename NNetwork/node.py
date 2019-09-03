@@ -20,9 +20,8 @@ class Node:
         if self.number == None:
             toRtrn += "-1:"
         else:
-            toRtrn += str(self.number)
+            toRtrn += str(self.number) + ":"
 
-        toRtrn += "{"
         rem = 0
         for x in self.connections:
             if self.number != None:
@@ -30,7 +29,6 @@ class Node:
                 rem = 1
         if rem == 1:
             toRtrn = toRtrn[:-1]
-        toRtrn += "}"
         
         return toRtrn
 

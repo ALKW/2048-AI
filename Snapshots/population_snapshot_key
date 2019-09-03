@@ -15,15 +15,15 @@
     $ NS
     # Network [0-100]
 
-    # Inputs
+    $ Inputs [0...]
         {weight:desc:number:connections{number...}}
         ... 
 
-    # Internal 
+    $ Internal [0...]
         {weight:desc:number:connections{number...}}
         ... 
 
-    # Outputs
+    $ Outputs [0...]
         {weight:desc:number:connections{number...}}
         ... 
 }

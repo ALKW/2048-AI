@@ -22,7 +22,7 @@ class Snapshot:
         # Print the population key to the file
         self.print_networks_key(file)
 
-        #Close the file
+        # Close the file
         file.close()
 
     def create_file(self):
@@ -35,7 +35,7 @@ class Snapshot:
         file.write("# Header\n")
 
     def dtol(self, dic):
-        #Convert dictionary to key and value lists
+        # Convert dictionary to key and value lists
         keys = list()
         for entry in dic.keys():
             keys.append(entry)
@@ -65,27 +65,27 @@ class Snapshot:
            file.write(str(keys[i]) + ":" + str(values[i]) + "\n")  
 
     def print_networks_key(self, file):
-        file.write("# Life Parameters - Network Structure\n")
+        file.write("\n# Life Parameters - Network Structure\n")
         file.write("$ NS\n")
         file.write("Size:" + str(len(self.population)))
         for network in self.population:
-            #Signal New Network
-            file.write("\n# Network " + str(self.population.index(network) + 1) + "\n")
+            # Signal New Network
+            file.write("\n$ Network " + str(self.population.index(network)) + "\n")
 
-            #Write the input nodes to the file
-            file.write("\n# Inputs\n")
+            # Write the input nodes to the file
+            file.write("\n$ Inputs " + str(len(network.inputs)) + "\n")
             for node in network.inputs:
-                file.write(node.to_str())
+                file.write(node.to_str() + "\n")
 
-            #Write the internal nodes to the file
-            file.write("\n# Internals\n")
+            # Write the internal nodes to the file
+            file.write("\n$ Internals" + str(len(network.internal)) + "\n")
             for node in network.internal:
-                file.write(node.to_str())
+                file.write(node.to_str() + "\n")
     
-            #Write the output nodes to the file
-            file.write("\n# Outputs\n")
+            # Write the output nodes to the file
+            file.write("\n$ Outputs" + str(len(network.outputs)) + "\n")
             for node in network.outputs:
-                file.write(node.to_str())
+                file.write(node.to_str() + "\n")
         
         
 
