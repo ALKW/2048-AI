@@ -509,12 +509,19 @@ class Network:
         print("Species: ", self.species)
         print("Generation: ", self.generation)
         print("Genes: ", self.genes, "\n")
+
+    def print_d(self):
+        print("Fitness: ", self.fitness)
+        print("Species: ", self.species)
+        print("Generation: ", self.generation)
+        print("Genes: ", self.genes, "\n")
         print("Topology: ")
+        self.print_node_paths()
 
     def __str__(self):
         print("Topology: ")
         self.print_node_paths()
-        return "Fitness: " + str(self.fitness) + " Species: "+ str(self.species) + " Generation: " + str(self.generation) + "Genes: " + str(self.genes)
+        return "Fitness: " + str(self.fitness) + " Species: "+ str(self.species) + " Generation: " + str(self.generation) + " Genes: " + str(self.genes) + "\n"
 
     def print_node_paths(self):
         # Start with each internal nodes
@@ -528,14 +535,14 @@ class Network:
 
         # if we reach a node with no other connections, then print and return
         if len(curr.connections) == 0:
-            print("----PATH FOR NODE",  self.inputs.index(path[0]), ":", end="")
+            print("PATH FOR NODE",  self.inputs.index(path[0]), ":", end="")
             for curr_node in path[:-1]:
-                print("| Weight:", curr_node.weight, "I-Num:", curr_node.number, "| -> ", end="")
+                print("[ Weight:", curr_node.weight, "I-Num:", curr_node.number, "] -> ", end="")
                 
             if path[-1].desc != None:
                 print(path[-1].desc)
             else:
-                print("| Weight:", path[-1].weight, "I-Num:", path[-1].number, "|-> ---None---")
+                print("[ Weight:", path[-1].weight, "I-Num:", path[-1].number, "]-> [-None-]")
             return
 
         # Append the current node to the path and then return

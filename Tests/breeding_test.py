@@ -1,4 +1,5 @@
 from NNetwork import neural_network as network
+from NNetwork import node
 
 test = network.create_init_population(2, [
                 2,2,2,2,
@@ -14,7 +15,7 @@ internal1.connections.append(test[0].outputs[0])
 internal2 = node.Node(weight=2, num=0) 
 internal2.connections.append(test[1].outputs[0])
 
-Network.internal_nodes_key['0'] = 2
+network.Network.internal_nodes_key['0'] = 2
 
 #append the internal nodes to the same position
 test[0].inputs[0].connections.append(internal1)
@@ -35,6 +36,6 @@ test[0].print()
 test[1].print()
 child.print()
 
-print("Internal: ", Network.internal_nodes_key)
-print("Gene to innovation", Network.gene_to_innovation_key)
-print("Innovation to Gene", Network.innovation_to_gene_key)
+print("Internal: ", network.Network.internal_nodes_key)
+print("Gene to innovation", network.Network.gene_to_innovation_key)
+print("Innovation to Gene", network.Network.innovation_to_gene_key)

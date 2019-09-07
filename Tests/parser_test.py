@@ -1,7 +1,7 @@
-from NNetwork import life
-from NNetwork import neural_network as network
 from Snapshots import snapshotgen as ssgen
 from Snapshots import snapshotparse as sspar
+from NNetwork import life
+from NNetwork import neural_network as network
 from Game_2048 import game_AI as game
 import sys
 
@@ -68,19 +68,13 @@ def game_loop(identifier, individual):
     test_game = game.Game(init_board=init_board.copy())
     return test_game.run(identifier, get_move_2048, individual)
 
-def game_loop_vis(identifier, individual):
-    test_game = game.Game_Visual(init_board=init_board.copy())
-    return test_game.run(identifier, get_move_2048, individual)
 
-MAX_GENERATIONS = 5
+MAX_GENERATIONS = 1
 RUNS_PER_IND = 1
 
-
-# Initialize the game
 dummy_game = game.Game()
 init_board = dummy_game.curr_board.matrix
 
-# Determine if we are loading from a snapshot
 if len(sys.argv) >= 2: 
     parser = sspar.Parser(sys.argv[1])
     parser.build_world()
@@ -98,21 +92,7 @@ else:
                             ], 
                             ["up", "down", "left", "right"])
 
-# Run the training
-all_life.run(game_loop, MAX_GENERATIONS=MAX_GENERATIONS, RUNS_PER_IND=RUNS_PER_IND)
+all_life.run(MAX_GENERATIONS, RUNS_PER_IND, game_loop)
 
-# Run the top networks to show off results
-# all_life.run_visualization(game_loop_vis, amount=1)
-
-# Print the top performers
-all_life.print_top_performers()
-
-# Print all the genes
-all_life.print_genes()
-
-# Print all the species
-all_life.print_species_info()
-
-# Generate a snapshot after the current run ends
 generator = ssgen.Snapshot(all_life.population, life.Life.species, network.Network.gene_to_innovation_key)
 generator.create_snapshot()

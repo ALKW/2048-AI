@@ -1,7 +1,6 @@
 import copy
 import sys
 from NNetwork import neural_network as network
-from Game_2048 import game_AI as game
 
 class Life:
     # Dictionary for classifying species. If 50%+ of the genes match the original creator of the species, then that species is the same.
@@ -24,20 +23,38 @@ class Life:
 
         #
 
-    def run(self, MAX_GENERATIONS, RUNS_PER_IND, get_move):
+    def run(self, game_loop, MAX_GENERATIONS=1, RUNS_PER_IND=1, ):
+        '''
+        Runs each network in the population a certain number of times
+
+        MAX_GENERATIONS defines the number of times the whole population gets ran
+
+        RUNS_PER_IND defines the number of times each member of the population is ran per generation
+
+        game_loop is a method defined by the user that the game runs. Within the game loop, there should be:
+            Something to get the current game state
+            Something that serializes the current game state to an array of integers
+            Something that calls 'individual.feed' where 
+                - individual is a neural network object
+                - individual is an argument passed to the game_loop method
+                - 'individual.feed' will return one of the strings the user specified earlier
+            Something that takes the return value of 'individual.feed' of the move and executes it in the game
+            Something that checks for an exit condition of the game and exits the game loop once the condition is met
+            Something that returns a score of the game and if the user prefers translates that score to a fitness for the network
+        '''
         # Run the simulation for MAX_GENERATIONS iterations with a population size of 20
         for iteration in range(MAX_GENERATIONS):
-            # Generate a board to use for all networks
-            dummy_game = game.Game()
-            init_board = dummy_game.curr_board.matrix
-
-            # Test all population on the same board for consistency
+            # Test each memeber of the population
             for individual in self.population:
                 run_total = 0
+
+                #Run the individual through a number of games to get an average fitness
                 for _ in range(RUNS_PER_IND):
-                    test_game = game.Game(init_board=init_board.copy())
-                    run_total += test_game.run(self.population.index(individual), get_move, individual)
-                    individual.fitness = run_total // RUNS_PER_IND
+                    # Give a unique identifier (An index in the list of members in the population) and pass the network object to the game loop
+                    run_total += game_loop(self.population.index(individual), individual)
+                
+                # Assign the average fitness to the network
+                individual.fitness = run_total // RUNS_PER_IND
 
             # Sort the results to get the highest performers ranked at the top
             self.population.sort(key=lambda x: x.fitness, reverse=True)
@@ -71,8 +88,8 @@ class Life:
         '''
         mutates/breeds the appropriate members of the population
 
-        Each species has its own heap and all members of the population are sorted into
-        the heaps through the classify_life() method
+        Each species has its own sorted array and all members of the population are 
+        sorted through the classify_life() method
        
         Have sorted lists (species) of 20 individuals max. At each stage:
             -Mate top 4 perfomers and keep original: +10
@@ -155,7 +172,9 @@ class Life:
     
     def classify_life(self):
         ''''
-        Classifies the species of all networks
+        Classifies the species for each network in the population
+
+        The species are kept track in the species dictionary where each is a positive number starting from 1
         '''
         # goes through all networks in the list. 
         # If it does not have a species classify it and assign it to the appropriate list
@@ -166,7 +185,7 @@ class Life:
     
     def classify_network(self, network):
         '''
-        Finds the species for the network
+        Finds the species for the network according to its gene array
         '''
         count = 0
         for species_key in Life.species:
@@ -198,41 +217,77 @@ class Life:
 
         # Increment to the next available number
         Life.curr_species_num += 1
+
+        # Append a list with the new species as the only network in the list
         self.species_list.append([network])
 
         return Life.species[species_key]
 
-    def run_visualization(self, amount, get_move):
-        # Run a visualization through a number of networks equivalent to amount
+    def run_visualization(self, game_loop, amount=1):
+        '''
+        Run a visualization through a number of networks equivalent to amount
+        '''
+
+        # Ensure the number of 
         if amount > len(self.population):
             print("Not Valid, exceeds individual count")
             return
         
         print("--------------------- PRINTING TOP ", amount, "---------------------")
-        dummy_game = game.Game()
-        init_board = dummy_game.curr_board.matrix
         for individual in self.population[:amount]:
-            test_game = game.Game_Visual(init_board=init_board.copy())
             print("-----------NETWORK ", self.population.index(individual) + 1,"-------------")
-            individual.fitness = test_game.run(self.population.index(individual) + 1, get_move, individual)
+            game_loop(self.population.index(individual), individual)
             print()
             print(individual)
 
     def print_top_performers(self):
-        # Print the highest results from each generation and the results from the latest generation
-        self.population.sort(key=lambda x: x.fitness, reverse=True)
-        print("Top performers from each generation:")
+        '''
+        Print the highest fitness network from each generation
+        '''
+        print("\nTop performers from each generation:")
         for performer in self.top_performers:
             print(performer)
 
-    def print_population(self):
-        # Prints all population
-        print("Latest Generation:")
-        for network in self.population:
-            network.print_s()
+    def print_population_detail(self):
+        '''
+        Prints all of the population and the detailed stats for each network
+        Topology included
+        '''
+        print("\nLatest Generation:")
+        for individual in self.population:
+            individual.print_d()
+        print()
+
+    def print_population_simple(self):
+        '''
+        Prints all of the population and the simple stats for each network
+        No topology included
+        '''
+        print("\nLatest Generation:")
+        for individual in self.population:
+            individual.print_s()
         print()
 
     def print_species_info(self):
-        print("All Species:")
-        for species in self.species_list:
-            print("Species ", self.species_list.index(species), "- Population size: ", len(species), " || ", end="")
+        '''
+        Prints each species identifier and the number of species in the network
+        '''
+        print("\nAll Species:")
+        for species in Life.species.keys():
+            print("Species ", Life.species[species], "- Genes: ", species, "- Population size: ", len(self.species_list[int(Life.species[species])]), " || ")
+
+    def print_genes(self):
+        '''
+        Prints all genes across all networks in a formatted manner
+        '''
+        print("\nGenes:")
+        line_length = 10
+        count = 0
+        for key in network.Network.innovation_to_gene_key.keys():
+            if count == line_length:
+                print(key, "\t: ", network.Network.innovation_to_gene_key[key])
+                count = 0
+            else:
+                print(key, "\t:", network.Network.innovation_to_gene_key[key], end="\t| ")
+                count += 1
+        print()
