@@ -13,6 +13,10 @@
 
 # Life Parameters - Network Structure{
     $ NS
+    size:[0...]
+    inp-size:[0...]
+    int-size:[0...]
+    outs:["output1",...]
     # Network [0-100]
 
     $ Inputs [0...]

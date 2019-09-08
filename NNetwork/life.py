@@ -21,8 +21,6 @@ class Life:
         # List of top performers from each generation
         self.top_performers = top_performers
 
-        #
-
     def run(self, game_loop, MAX_GENERATIONS=1, RUNS_PER_IND=1, ):
         '''
         Runs each network in the population a certain number of times

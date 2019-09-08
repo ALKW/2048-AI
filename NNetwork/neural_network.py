@@ -22,6 +22,12 @@ class Network:
     # The current innovation number for genes. As the list is empty, the next gene to be created will be assigned 0
     curr_gene_num = 0
 
+    # Used to ensure new networks added have the same input size as other networks
+    input_size = 0
+
+    # Used to ensure new networks added have the same outputs as other networks
+    outputs = []
+
     def __init__(self, inputs, outputs):
         '''
         Neural network that breeds through taking unique sup-topologies from others within its species
@@ -58,15 +64,25 @@ class Network:
         # Internal nodes are kept track of using a dictionary with keys being the weight of the internal node
         self.genes = []
 
+        # Error handling for new networks to ensure new networks have identical input and output parameters as other networks
         if Network.internal_nodes_num == 0:
             Network.internal_nodes_num = len(inputs) + len(outputs)
-        
-        # If the number of the next available internal nodes number is not equal to the number of inputs and outputs and 
-        # there are currently no internal nodes created (dictionary is empty), 
-        # then the network does not have the correct amount of input or output nodes
-        if Network.internal_nodes_num != len(inputs) + len(outputs) and not bool(Network.internal_nodes_key):
-            print("Invalid network added. Too many nodes. Exiting")
-            sys.exit()
+
+        if Network.input_size == 0:
+            Network.input_size = len(self.inputs)
+
+        if not Network.outputs:
+            Network.outputs = [x.desc for x in self.outputs]
+
+        if Network.input_size != Network.input_size:
+            print("Invalud input length for new network. Exiting")
+            exit(1)
+
+        if Network.outputs != [x.desc for x in self.outputs]:
+            print(Network.outputs)
+            print(self.outputs)
+            print("Invalid outputs for new network. Exiting")
+            exit(1)
             
 
     def feed(self, stimuli=None):
@@ -320,25 +336,25 @@ class Network:
             # Either connects an input -> output or an internal -> output
             # Choose either an internal or an input node; 0 - input, 1 - internal
             # Choose the input/internal node to connect to the output node (both are random)
-            self.add_branch_mutation()
+            self.mutation_add_branch()
 
         if mutation == 1:
             # Create a new internal node
             # select two nodes to connect to the new internal node
-            self.create_node_mutation()
+            self.mutation_create_node()
 
         if mutation == 2:
             # Choose an internal node and modify its weight
             # Determine if there are any nodes to begin with
-            self.modify_internal_weight_mutation()
+            self.mutation_modify_internal_weight()
 
         if mutation == 3:
             # Choose an input node and modify its weight
-            self.modify_input_weight_mutation()
+            self.mutation_modify_input_weight()
 
         self.update_genes()
 
-    def add_branch_mutation(self):
+    def mutation_add_branch(self):
         # Error checking to make sure there exists internal nodes
         if len(self.internal) > 0:
             choice = random.randint(0, len(self.internal) + len(self.inputs) - 1)
@@ -375,7 +391,7 @@ class Network:
         if count >= 1000:
             self.mutate(mutation=random.randint(1, 3))
 
-    def create_node_mutation(self):
+    def mutation_create_node(self):
         # Assign the node the next availble global internal marker
         to_add = node.Node(weight=random.choice([-5,-4,-3,-2,-1,1,2,3,4,5]), num=Network.internal_nodes_num)
         # add it to the list of internals with the weight as the value and number as the key
@@ -421,7 +437,7 @@ class Network:
         # Add the nodes to the list of internals for the network
         self.internal.append(to_add)
 
-    def modify_internal_weight_mutation(self):
+    def mutation_modify_internal_weight(self):
         # If there are none, then then choose another mutation that doesnt involve internal nodes
         if len(self.internal) == 0:
             self.mutate(mutation=random.choice([1,3]))
@@ -438,7 +454,7 @@ class Network:
         # Change the weight of the internal node
         self.internal[mutate_index].weight = random.choice(list(poss_weights))
 
-    def modify_input_weight_mutation(self):
+    def mutation_modify_input_weight(self):
         mutate_index = random.randint(0, len(self.inputs) - 1)
         curr_weight = self.inputs[mutate_index].weight
         poss_weights = set(range(-5,5))

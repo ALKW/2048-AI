@@ -20,23 +20,26 @@ class Parser:
         self.file = open(filename, "r")
         self.curr_line = ""
         self.net_index = 0
-        self.input = []
+        self.inputs = []
         self.internal = []
-        self.output = []
+        self.global_internal = []
+        self.outputs = []
         self.num_inputs = 0
         self.num_internal = 0
+        self.num_global_internal = 0
         self.num_outputs = 0
-        self.ops = {"GG": self.build_gtoi_key, 
-                    "GS": self.build_species_key, 
-                    "NS": self.build_network,
+        self.ops = {"GG":       self.build_gtoi_key, 
+                    "GS":       self.build_species_key, 
+                    "NS":       self.build_network,
+                    "CS":       self.build_genes,
                     "Network" : self.get_net_num,
-                    "Input": self.build_input,
-                    "Internal": self.build_internal,
-                    "Ouptput": self.build_output}
+                    "Inputs":   self.build_input,
+                    "Internals": self.build_internal,
+                    "Outputs":  self.build_output}
     def clear_lists(self):
-        self.input = []
+        self.inputs = []
         self.internal = []
-        self.output = []
+        self.outputs = []
 
     def build_world(self):
         self.curr_line = self.file.readline()
@@ -46,14 +49,20 @@ class Parser:
                 self.curr_line = self.file.readline()
                 continue
 
+            # Skip empty lines
+            if not self.curr_line.rstrip("\r\n"):
+                self.curr_line = self.file.readline()
+                continue
+
             # "$" Indicates a new category
             if "$" in self.curr_line:
                 choice = self.curr_line.split(" ")
+                choice = [x.rstrip("\n\r") for x in choice]
                 self.ops[choice[Cons.OP]]()
 
             self.curr_line = self.file.readline()
-        return self.world
 
+        return self.world
 
     def build_gtoi_key(self):
         KEY = 0
@@ -61,14 +70,20 @@ class Parser:
 
         self.curr_line = self.file.readline()
         while self.curr_line:
+            # Skip Comments
+            if "#" in self.curr_line:
+                self.curr_line = self.file.readline()
+                continue
             # If we see a "$" then we know we are in another section
-            if "$" in self.curr_line:
+            elif "$" in self.curr_line:
                 return
-            elif "#" in self.curr_line:
+            # Skip empty lines
+            elif not self.curr_line.rstrip("\r\n"):
                 self.curr_line = self.file.readline()
                 continue
             else:
                 key_val = self.curr_line.split(":")
+                key_val = [x.rstrip("\n\r") for x in key_val]
                 network.Network.gene_to_innovation_key[key_val[KEY]] =  key_val[VALUE]
                 network.Network.innovation_to_gene_key[key_val[VALUE]] =  key_val[KEY]
             
@@ -82,15 +97,20 @@ class Parser:
 
         self.curr_line = self.file.readline()
         while self.curr_line:
-            # If we see a "$" then we know we are in another section
-            if "$" in self.curr_line:
-                return
             # Skip comments
-            elif "#" in self.curr_line:
+            if "#" in self.curr_line:
+                self.curr_line = self.file.readline()
+                continue
+            # If we see a "$" then we know we are in another section
+            elif "$" in self.curr_line:
+                return
+            # Skip empty lines
+            elif not self.curr_line.rstrip("\r\n"):
                 self.curr_line = self.file.readline()
                 continue
             else:
                 key_val = self.curr_line.split(":")
+                key_val = [x.rstrip("\n\r") for x in key_val]
                 life.Life.species[key_val[KEY]] = key_val[VALUE]
             
             # Read next line in    
@@ -99,93 +119,150 @@ class Parser:
     def build_network(self):
         # Initialize the life object with the a number of empty networks equal to the number of networks in the file
         self.curr_line = self.file.readline()
-        world_size = int(self.curr_line.split(":")[1])
-        self.world = network.create_init_population(world_size,                     
-                    [
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0
-                    ], 
-                    ["up", "down", "left", "right"])
+        world_size = int(self.curr_line.split(":")[1].rstrip("\n\r"))
+
+        # Get the number of input nodes for the networks
+        self.curr_line = self.file.readline()
+        input_size = int(self.curr_line.split(":")[1].rstrip("\n\r"))
+
+        # Get the number of internal nodes across all networks
+        self.curr_line = self.file.readline()
+        self.num_global_internal = int(self.curr_line.split(":")[1].rstrip("\n\r"))
+
+        # Get the outputs for the networks
+        self.curr_line = self.file.readline()
+        outputs = self.curr_line.split(":")[1].split(",")
+        outputs = [x.rstrip("\r\n") for x in outputs]
+
+        # Create initial networks to be molded into the snapshot networks
+        self.world = life.Life()
+        self.world.population = network.create_init_population(world_size,                     
+                    [0 * x for x in range(input_size)], 
+                    outputs)
+
+        # Initilaize the internal nodes array with an empty one that can hold all internal ndoes
+        # Used for building connections
+        self.global_internal = [0 for x in range(self.num_global_internal)]
 
         # Update node information in the network
         self.curr_line = self.file.readline()
+        code = 0
         while self.curr_line:
             # Skip commented lines
             if "#" in self.curr_line:
                 self.curr_line = self.file.readline()
                 continue
 
-            # Go to the operator's section
+            # Skip empty lines
+            if not self.curr_line.rstrip("\r\n"):
+                self.curr_line = self.file.readline()
+                continue
+
+            # Call the appropriate function
             if "$" in self.curr_line:
                 choice = self.curr_line.split(" ")
-                self.ops[choice[Cons.OP]]()
+                choice = [x.rstrip("\n\r") for x in choice]
+                code = self.ops[choice[Cons.OP]]()
             
-            # Read next line in    
-            self.curr_line = self.file.readline()
+            # Read next line in if we didnt return on a "$" line
+            if code == 0:
+                self.curr_line = self.file.readline()
+            code = 0
         
-        pass
+        return self.world
 
     # Get the network number 
-    def get_net_num(self, params):
-        self.net_index = params[2]
+    def get_net_num(self):
+        self.net_index = int(self.curr_line.split(" ")[2].rstrip("\r\n"))
+        return 0
 
     # Build/update an input node in a network
     def build_input(self):
-        self.num_inputs = self.curr_line.split(" ")[2]
+        self.num_inputs = int(self.curr_line.split(" ")[2].rstrip("\r\n"))
         self.curr_line = self.file.readline()
         while self.curr_line:
+            # Skip empty lines
+            if not self.curr_line.rstrip("\r\n"):
+                self.curr_line = self.file.readline()
+                continue
+
+            # Skip commented lines
+            if "#" in self.curr_line:
+                self.curr_line = self.file.readline()
+                continue
+
+            # We hit another paramter so we might have to do something else
             if "$" in self.curr_line:
-                return
+                return 1
 
             # Get the node and the parameters to update
             params = self.curr_line.split(":")
-            node = self.world.population[self.net_index].input[params[Cons.NUMBER] * -1]
+            params = [x.rstrip("\n\r") for x in params]
+            node = self.world.population[self.net_index].inputs[int(params[Cons.NUMBER]) * -1 - 1]
             
             # Update the node's parameters
             node.weight = int(params[Cons.WEIGHT])
-            node.number = int(params[Cons.NUMBER])
+            node.number = int(params[Cons.NUMBER]) * -1
 
             # Add the node to the list of inputs so we can go back and assign connections
-            self.input.append(params)
+            self.inputs.append(params)
 
             # Read the next line
             self.curr_line = self.file.readline()
     
     # Build/update an internal node in a network
     def build_internal(self):
-        self.num_internal = self.curr_line.split(" ")[2]
+        self.num_internal = int(self.curr_line.split(" ")[2].rstrip("\r\n"))
         self.curr_line = self.file.readline()
         while self.curr_line:
+            # Skip empty lines
+            if not self.curr_line.rstrip("\r\n"):
+                self.curr_line = self.file.readline()
+                continue
+
+            # Skip commented lines
+            if "#" in self.curr_line:
+                self.curr_line = self.file.readline()
+                continue
+
             if "$" in self.curr_line:
-                return
+                return 1
 
             # Make an internal node and append it to the networks list of internal nodes
             params = self.curr_line.split(":")
+            params = [x.rstrip("\n\r") for x in params]
             n = network.node.Node(weight=params[Cons.WEIGHT], desc=params[Cons.DESC], num=params[Cons.NUMBER])
-            self.world.population[self.net_index].internal.append(n)
+            self.global_internal[int(params[Cons.NUMBER]) - (self.num_inputs + self.num_outputs)] = n
 
             # Read the next line in
             self.curr_line = self.file.readline()
 
     # Build/update an output node in a network
     def build_output(self):
-        self.num_outputs = self.curr_line.split(" ")[2]
+        self.num_outputs = int(self.curr_line.split(" ")[2].rstrip("\r\n"))
         self.curr_line = self.file.readline()
         while self.curr_line:
+            # Skip empty lines
+            if not self.curr_line.rstrip("\r\n"):
+                self.curr_line = self.file.readline()
+                continue
+
+            # Skip commented lines
+            if "#" in self.curr_line:
+                self.curr_line = self.file.readline()
+                continue
+
             if "$" in self.curr_line:
                 break
 
             # Get the node and the parameters to update
             params = self.curr_line.split(":")
-            node = self.world.population[self.net_index].output[params[Cons.NUMBER]  + self.num_inputs + 1]
+            params = [x.rstrip("\n\r") for x in params]
+            node = self.world.population[self.net_index].outputs[int(params[Cons.NUMBER])  + self.num_inputs + 1]
 
             # Update the node's parameters
             node.weight = int(params[Cons.WEIGHT])
-            node.number = int(params[Cons.NUMBER])
+            node.number = int(params[Cons.NUMBER]) * -1
             node.desc = params[Cons.DESC]
 
             # Read the next line
@@ -197,59 +274,57 @@ class Parser:
         # Build connections for internal nodes
         self.build_internal_connections()
 
-        # Build connections for output nodes
-        self.build_output_connections()
+        # Outputs have no connections
 
         # Clear the lists for the next network
         self.clear_lists()
 
+        return 1
+
     def build_input_connections(self):
         # Append nodes to all input nodes connections list based on the snapshot data
-        for node_params in self.input:
+        for node_params in self.inputs:
+            # If their are no connections for this node, then skip it
+            if not node_params[Cons.CONNECTIONS]:
+                continue
+
             # Get the node and the connections for that node
             connections = node_params[Cons.CONNECTIONS].split(",")
-            node = self.world.population[self.net_index].inputs[node_params[Cons.NUMBER] * -1]
+            connections = [x.rstrip("\n\r") for x in connections]
+            node = self.world.population[self.net_index].inputs[int(node_params[Cons.NUMBER]) * -1 - 1]
 
             # Add the node that corresponds to the number to the list of connections
             for con_num in connections:
                 # For input nodes, a node in its connection list with a negative number indicates that it is an output node
-                if con_num < 0:
-                    output_index = node_params[Cons.NUMBER] + self.num_inputs + 1
-                    node.connections.append(self.world.population[self.net_index].output[output_index])
+                if int(con_num) < 0:
+                    output_index = (int(con_num) + self.num_inputs + 1) * -1
+                    node.connections.append(self.world.population[self.net_index].outputs[output_index])
                 else:
-                    internal_index = con_num
-                    node.connections.append(self.world.population[self.net_index].internal[internal_index])
+                    internal_index = int(con_num) - (self.num_inputs + self.num_outputs)
+                    node.connections.append(self.global_internal[internal_index])
 
     def build_internal_connections(self):
         # Append nodes to all input nodes connections list based on the snapshot data
         for node_params in self.internal:
+            # If their are no connections for this node, then skip it
+            if not node_params[Cons.CONNECTIONS]:
+                continue
+
             # Get the node and the connections for that node
             connections = node_params[Cons.CONNECTIONS].split(",")
-            node = self.world.population[self.net_index].inputs[node_params[Cons.NUMBER]]
+            connections = [x.rstrip("\n\r") for x in connections]
+            node = self.world.population[self.net_index].inputs[int(node_params[Cons.NUMBER])]
 
             # Add the node that corresponds to the number to the list of connections
             for con_num in connections:
                 # For internal nodes, a node in its connection list with a number less than the number of input nodes indicates that it is an output node
-                if con_num < self.num_inputs * -1:
-                    output_index = node_params[Cons.NUMBER] + self.num_inputs + 1
-                    node.connections.append(self.world.population[self.net_index].output[output_index])
+                if int(con_num) < self.num_inputs * -1:
+                    output_index = (int(con_num) + self.num_inputs + 1) * -1
+                    node.connections.append(self.world.population[self.net_index].outputs[output_index])
+                # Otherwise its another internal node
                 else:
-                    input_index = node_params[Cons.NUMBER] * -1
-                    node.connections.append(self.world.population[self.net_index].input[input_index])
+                    internal_index = int(con_num) - (self.num_inputs + self.num_outputs)
+                    node.connections.append(self.global_internal[internal_index])
 
-    def build_output_connections(self):
-        # Append nodes to all input nodes connections list based on the snapshot data
-        for node_params in self.output:
-            # Get the node and the connections for that node
-            connections = node_params[Cons.CONNECTIONS].split(",")
-            node = self.world.population[self.net_index].inputs[node_params[Cons.NUMBER] + self.num_inputs + 1]
-
-            # Add the node that corresponds to the number to the list of connections
-            for con_num in connections:
-                # For output nodes, a node in its connection list with a negative number indicates that it is an input node
-                if con_num < 0:
-                    input_index = node_params[Cons.NUMBER] * -1
-                    node.connections.append(self.world.population[self.net_index].input[input_index])
-                else:
-                    internal_index = con_num
-                    node.connections.append(self.world.population[self.net_index].internal[internal_index])
+    def build_genes(self):
+        return 0

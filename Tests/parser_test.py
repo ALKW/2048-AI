@@ -1,98 +1,46 @@
+import inspect
+import os
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+os.sys.path.insert(0,parentdir) 
+
 from Snapshots import snapshotgen as ssgen
 from Snapshots import snapshotparse as sspar
 from NNetwork import life
 from NNetwork import neural_network as network
-from Game_2048 import game_AI as game
-import sys
-
-# Used for getting the move of a 2048 board
-# Tranlsates the 2048 board to a stimuli to pass to the AI
-# The stimuli is a list of the inputs for the board
-def get_move_2048(active_game, active_network):
-    stimuli = []
-    
-    for entry in active_game.curr_board.matrix:
-        if entry == 0:
-            stimuli.append(0)
-        else:
-            stimuli.append(1)
-
-    other_stimuli = find_moves_2048_board(active_game.curr_board)
-
-    stimuli += other_stimuli
-    return active_network.feed(stimuli)
-
-def find_moves_2048_board(board):
-    '''
-    classifies the rows and columns of the matrix with a 1 if there is an available move and 0 if there isnt
-    Args:
-        board (Board Object) - the current game board object
-    Returns:
-        stimuli (list) - the results of the algorithm, the first four are the rows and the last four are the columns
-    Raises:
-        None
-    '''
-    to_return = []
-    # For each row, determine if its possible to move
-    for row_slice in board.rows:
-        row = board.matrix[row_slice]
-        if 0 in row:
-            to_return.append(1)
-        elif can_move(row):
-            to_return.append(2)
-        else:
-            to_return.append(0)
-    
-    # For each column, determine if its possible to move
-    for column_slice in board.columns:
-        column = board.matrix[column_slice]
-        if 0 in column:
-            to_return.append(1)
-        elif can_move(column):
-            to_return.append(2)
-        else:
-            to_return.append(0)
-    
-    return to_return
-
-def can_move(data):
-    curr = data[0]
-    for entry in data[1:]:
-        if curr == entry:
-            return True
-        else:
-            curr = entry
-    return False
-
-def game_loop(identifier, individual):
-    test_game = game.Game(init_board=init_board.copy())
-    return test_game.run(identifier, get_move_2048, individual)
-
 
 MAX_GENERATIONS = 1
 RUNS_PER_IND = 1
 
-dummy_game = game.Game()
-init_board = dummy_game.curr_board.matrix
+al = life.Life()
+al.population = network.create_init_population(10, 
+                        [
+                        0,0,0,0,
+                        0,0,0,0,
+                        0,0,0,0,
+                        0,0,0,0,
+                        0,0,0,0,
+                        0,0,0,0
+                        ], 
+                        ["up", "down", "left", "right"])
 
-if len(sys.argv) >= 2: 
-    parser = sspar.Parser(sys.argv[1])
-    parser.build_world()
-    exit()
-else:
-    all_life = life.Life()
-    all_life.population = network.create_init_population(30, 
-                            [
-                            0,0,0,0,
-                            0,0,0,0,
-                            0,0,0,0,
-                            0,0,0,0,
-                            0,0,0,0,
-                            0,0,0,0
-                            ], 
-                            ["up", "down", "left", "right"])
+# Mutate each network to allow complex parsing and allow internal nodes to be generated
+for individual in al.population:
+    individual.mutate()
 
-all_life.run(MAX_GENERATIONS, RUNS_PER_IND, game_loop)
+# Generate a snapshot
+generator = ssgen.Snapshot(al.population, life.Life.species, network.Network.gene_to_innovation_key)
+filename = generator.create_snapshot()
 
-generator = ssgen.Snapshot(all_life.population, life.Life.species, network.Network.gene_to_innovation_key)
-generator.create_snapshot()
+
+# Generate a world from the snapshot
+parser = sspar.Parser(filename)
+al_re = parser.build_world()
+
+# Test if they are the same
+for index in range(len(al.population)):
+    print("\nNetwork " + str(index))
+    al.population[index].print_s()
+    al_re.population[index].print_s()
+
+os.remove(filename)

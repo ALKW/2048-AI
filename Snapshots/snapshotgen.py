@@ -1,5 +1,16 @@
 from time import gmtime, strftime
 
+import inspect
+import os
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+os.sys.path.insert(0,parentdir) 
+from NNetwork import neural_network as network
+
+class Cons:
+    FILE = 0
+    FILENAME = 1
+
 class Snapshot:
     def __init__(self, population, species, gtoi_key):
         self.population = population
@@ -8,7 +19,8 @@ class Snapshot:
     
     def create_snapshot(self):
         # Create a file
-        file = self.create_file()
+        filedata = self.create_file()
+        file = filedata[Cons.FILE]
 
         # Print header information
         self.print_header(file)
@@ -25,11 +37,15 @@ class Snapshot:
         # Close the file
         file.close()
 
+        # Return the name of the file
+        return filedata[Cons.FILENAME]
+
     def create_file(self):
         today = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-        file = open("Snapshots/snapshot" + today + ".snp", "w+")
+        filename = "Snapshots/snapshot" + today + ".snp"
+        file = open(filename, "w+")
 
-        return file
+        return [file, filename]
 
     def print_header(self, file):
         file.write("# Header\n")
@@ -65,27 +81,38 @@ class Snapshot:
            file.write(str(keys[i]) + ":" + str(values[i]) + "\n")  
 
     def print_networks_key(self, file):
+        # Header information about the shared networks structures
         file.write("\n# Life Parameters - Network Structure\n")
         file.write("$ NS\n")
-        file.write("Size:" + str(len(self.population)))
-        for network in self.population:
+        file.write("size:" + str(len(self.population)) + "\n")
+        file.write("inp-size:" + str(network.Network.input_size) + "\n")
+        file.write("int-size:" + str(len(network.Network.internal_nodes_key)) + "\n")
+        outputs = str(network.Network.outputs[0])
+        for item in network.Network.outputs[1:]:
+            outputs += "," + str(item) 
+        file.write("outs:" + outputs  + "\n")
+
+        # Go through the population and make a snapshot of each
+        for individual in self.population:
             # Signal New Network
-            file.write("\n$ Network " + str(self.population.index(network)) + "\n")
+            file.write("\n$ Network " + str(self.population.index(individual)) + "\n")
 
             # Write the input nodes to the file
-            file.write("\n$ Inputs " + str(len(network.inputs)) + "\n")
-            for node in network.inputs:
+            file.write("\n$ Inputs " + str(len(individual.inputs)) + "\n")
+            for node in individual.inputs:
                 file.write(node.to_str() + "\n")
 
             # Write the internal nodes to the file
-            file.write("\n$ Internals" + str(len(network.internal)) + "\n")
-            for node in network.internal:
+            file.write("\n$ Internals " + str(len(individual.internal)) + "\n")
+            for node in individual.internal:
                 file.write(node.to_str() + "\n")
     
             # Write the output nodes to the file
-            file.write("\n$ Outputs" + str(len(network.outputs)) + "\n")
-            for node in network.outputs:
+            file.write("\n$ Outputs " + str(len(individual.outputs)) + "\n")
+            for node in individual.outputs:
                 file.write(node.to_str() + "\n")
+
+        file.write("$ CS\n")
         
         
 
