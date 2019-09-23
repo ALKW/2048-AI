@@ -1,5 +1,5 @@
-from NNetwork import neural_network as network
-from NNetwork import node
+from nnetwork import neural_network as network
+from nnetwork import node
 
 test = network.create_init_population(2, [
                 2,2,2,2,

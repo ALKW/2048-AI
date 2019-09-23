@@ -4,10 +4,10 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 os.sys.path.insert(0,parentdir) 
 
-from Snapshots import snapshotgen as ssgen
-from Snapshots import snapshotparse as sspar
-from NNetwork import life
-from NNetwork import neural_network as network
+from snapshots import snapshotgen as ssgen
+from snapshots import snapshotparse as sspar
+from nnetwork import life
+from nnetwork import neural_network as network
 
 MAX_GENERATIONS = 1
 RUNS_PER_IND = 1

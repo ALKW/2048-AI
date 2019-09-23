@@ -5,7 +5,7 @@ import os
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 os.sys.path.insert(0,parentdir) 
-from NNetwork import neural_network as network
+from nnetwork import neural_network as network
 
 class Cons:
     FILE = 0
@@ -17,9 +17,9 @@ class Snapshot:
         self.species = species
         self.gtoi_key = gtoi_key
     
-    def create_snapshot(self):
+    def create_snapshot(self, filename=None):
         # Create a file
-        filedata = self.create_file()
+        filedata = self.create_file(filename)
         file = filedata[Cons.FILE]
 
         # Print header information
@@ -40,9 +40,10 @@ class Snapshot:
         # Return the name of the file
         return filedata[Cons.FILENAME]
 
-    def create_file(self):
-        today = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
-        filename = "Snapshots/snapshot" + today + ".snp"
+    def create_file(self, filename=None):
+        if filename == None:
+            today = strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+            filename = "snapshot" + today + ".snp"
         file = open(filename, "w+")
 
         return [file, filename]

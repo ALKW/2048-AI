@@ -5,7 +5,7 @@ import math
 import time
 import random
 
-from Game_2048 import board
+from game_2048 import board
 
 class Game:
     def __init__(self, init_board=None):

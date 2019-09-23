@@ -1,6 +1,6 @@
 import copy
 import sys
-from NNetwork import neural_network as network
+from nnetwork import neural_network as network
 
 class Life:
     # Dictionary for classifying species. If 50%+ of the genes match the original creator of the species, then that species is the same.
@@ -21,7 +21,7 @@ class Life:
         # List of top performers from each generation
         self.top_performers = top_performers
 
-    def run(self, game_loop, MAX_GENERATIONS=1, RUNS_PER_IND=1, ):
+    def run(self, game_loop, MAX_GENERATIONS=1, RUNS_PER_IND=1, MAX_POPULATION=100, MAX_PER_SPECIES=20):
         '''
         Runs each network in the population a certain number of times
 
@@ -77,12 +77,12 @@ class Life:
                 return
             # Otherwise mate and mutate the population by species. Take top 100 to keep population low
             else:
-                self.mutate_population()
+                self.mutate_population(MAX_POPULATION=MAX_POPULATION, MAX_PER_SPECIES=MAX_PER_SPECIES)
 
             # Classify each new network species that was added
             self.classify_life()
 
-    def mutate_population(self):
+    def mutate_population(self, MAX_POPULATION, MAX_PER_SPECIES):
         '''
         mutates/breeds the appropriate members of the population
 
@@ -95,8 +95,6 @@ class Life:
             -Mutate Next top 5: +5
             -Disregard 5 lowest performers
         '''
-        MAX_PER_SPECIES = 20
-        MAX_POPULATION = 100
 
         # Perform Breeding/Mutating
         new_population = []
@@ -272,20 +270,20 @@ class Life:
         '''
         print("\nAll Species:")
         for species in Life.species.keys():
-            print("Species ", Life.species[species], "- Genes: ", species, "- Population size: ", len(self.species_list[int(Life.species[species])]), " || ")
+            print("Species ", Life.species[species], "\tGenes: ", species, "\tPopulation size: ", len(self.species_list[int(Life.species[species])]))
 
     def print_genes(self):
         '''
         Prints all genes across all networks in a formatted manner
         '''
         print("\nGenes:")
-        line_length = 10
+        line_length = 5
         count = 0
         for key in network.Network.innovation_to_gene_key.keys():
             if count == line_length:
-                print(key, "\t: ", network.Network.innovation_to_gene_key[key])
+                print("[", key, ": ", network.Network.innovation_to_gene_key[key], "]")
                 count = 0
             else:
-                print(key, "\t:", network.Network.innovation_to_gene_key[key], end="\t| ")
+                print("[", key, ":", network.Network.innovation_to_gene_key[key], "]", end="\t\t")
                 count += 1
         print()

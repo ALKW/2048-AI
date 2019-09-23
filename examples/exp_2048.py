@@ -1,9 +1,11 @@
-from NNetwork import life
-from NNetwork import neural_network as network
-from Snapshots import snapshotgen as ssgen
-from Snapshots import snapshotparse as sspar
-from Game_2048 import game_AI as game
 import sys
+sys.path.append('..')
+
+from nnetwork import life
+from nnetwork import neural_network as network
+from snapshots import snapshotgen as ssgen
+from snapshots import snapshotparse as sspar
+from game_2048 import game_AI as game
 
 # Used for getting the move of a 2048 board
 # Tranlsates the 2048 board to a stimuli to pass to the AI
@@ -72,9 +74,8 @@ def game_loop_vis(identifier, individual):
     test_game = game.Game_Visual(init_board=init_board.copy())
     return test_game.run(identifier, get_move_2048, individual)
 
-MAX_GENERATIONS = 5
-RUNS_PER_IND = 1
-
+MAX_GENERATIONS = 10
+RUNS_PER_IND = 5
 
 # Initialize the game
 dummy_game = game.Game()

@@ -1,3 +1,3 @@
-from NNetwork import neural_network as network
+from nnetwork import neural_network as network
 
 # Test the mutations parameter here
