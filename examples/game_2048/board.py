@@ -102,12 +102,39 @@ class Board(Matrix):
         return True
 
     def can_move(self, data):
+        # Check for if we can move horizontally
+        if(self.can_move_helper(data)):
+            return True
+
+        # Transpose the board 
+        row_length = 4
+        new_data = []
+        for row_num in range(0, row_length):
+            for j in range(row_num, len(data), row_length):
+                new_data.append(data[j])
+        data = new_data
+
+        # check for if we can move vertically
+        if(self.can_move_helper(data)):
+            return True
+
+        return False
+
+    def can_move_helper(self, data):
         curr = data[0]
+        counter = 0
         for entry in data[1:]:
-            if curr == entry:
+            # If we reach the end of a row, then continue
+            if counter % 4 == 0:
+                curr == entry
+                continue
+            # If an entry in a row is the same as the one next to it, we can move
+            elif curr == entry:
                 return True
+            # Otherwise check the next one
             else:
                 curr = entry
+            counter += 1
         return False
     
     def remove_from_list(self, this_list, value):

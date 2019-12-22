@@ -336,3 +336,9 @@ ASALocalRun/
 
 # Test files
 test.*
+
+# virtual environment
+env/*
+
+# Snapshot file
+*.snp

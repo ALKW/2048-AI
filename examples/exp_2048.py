@@ -58,12 +58,39 @@ def find_moves_2048_board(board):
     return to_return
 
 def can_move(data):
+    # Check for if we can move horizontally
+    if(can_move_helper(data)):
+        return True
+
+    # Transpose the board 
+    row_length = 4
+    new_data = []
+    for row_num in range(0, row_length):
+        for j in range(row_num, len(data), row_length):
+            new_data.append(data[j])
+    data = new_data
+
+    # check for if we can move vertically
+    if(can_move_helper(data)):
+        return True
+
+    return False
+
+def can_move_helper(data):
     curr = data[0]
+    counter = 0
     for entry in data[1:]:
-        if curr == entry:
+        # If we reach the end of a row, then continue
+        if counter % 4 == 0:
+            curr == entry
+            continue
+        # If an entry in a row is the same as the one next to it, we can move
+        elif curr == entry:
             return True
+        # Otherwise check the next one
         else:
             curr = entry
+        counter += 1
     return False
 
 def game_loop(identifier, individual):
@@ -74,8 +101,25 @@ def game_loop_vis(identifier, individual):
     test_game = game.Game_Visual(init_board=init_board.copy())
     return test_game.run(identifier, get_move_2048, individual)
 
+
+
+
+'''
+Each network plays the game 2048
+
+The training lasts for 10 generations and each network in a generation is run 5 times.
+The average is taken of the 5 runs and that is the fitness score for that network in 
+that generation.
+
+After the training is done, the top 2 networks are run visually so the user can see it
+It also prints the genes, and species info of all species that were created duing training
+
+It then generates a snapshot for later use
+
+'''
 MAX_GENERATIONS = 10
 RUNS_PER_IND = 5
+NUM_VIS_IND = 2
 
 # Initialize the game
 dummy_game = game.Game()
@@ -103,7 +147,7 @@ else:
 all_life.run(game_loop, MAX_GENERATIONS=MAX_GENERATIONS, RUNS_PER_IND=RUNS_PER_IND)
 
 # Run the top networks to show off results
-# all_life.run_visualization(game_loop_vis, amount=1)
+all_life.run_visualization(game_loop_vis, amount=NUM_VIS_IND)
 
 # Print the top performers
 all_life.print_top_performers()
