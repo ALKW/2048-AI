@@ -4,6 +4,7 @@ import sys
 import math
 import time
 import random
+import os
 
 from game_2048 import board
 
@@ -25,7 +26,6 @@ class Game:
                 self.curr_board.spawn_number()
 
     def run(self, iteration=None, get_move=None, *args):
-        valid = False
         is_over = False
         score = 0
         fitness = 0
@@ -36,7 +36,6 @@ class Game:
                 continue
 
             MAX_MOVES = 0
-            NUMBER_MAX = 1
             OUTPUT_RANKS = 2
             node_ranks = []
             max_nodes = []
@@ -92,41 +91,29 @@ class Game:
                     # Find the numbers on the board that arent 0
                     curr_pieces = [x for x in self.curr_board.matrix if x != 0]
                     prev_pieces = [x for x in self.previous_board.matrix if x != 0]
+
                     # Sort both so the tiles line up
                     curr_pieces.sort()
                     prev_pieces.sort()
-                    # Determine the number of tiles combined
-                    num_tiles_combined = len(prev_pieces) - len(curr_pieces)
+
                     # Get rid of tiles that are the same across both
                     # Whats left are the new tiles, add them up to get the score
                     for tile in prev_pieces:
                         if tile in curr_pieces:
                             curr_pieces.remove(tile)
                     move_score = sum(curr_pieces)
+
                     # Modify the score based on the move rank
                     score += move_score
                     fitness += move_score // rank
 
                     # Copy the matrix to make a previous board with the newly completed move
                     self.previous_board.matrix = self.curr_board.make_copy_matrix()
+
                     # Spawn a number
                     self.curr_board.spawn_number()
-                    '''
-                    #-------Print Move Info------
-                    print(move)  
-                    '''
                     break
-                '''
-                #------------Print invalid move
-                print("Invalid move")
-                '''
-        '''
-        ---------------------------------------
-        print("Score:", score)
-        self.curr_board.print_matrix()
-        print("Game Over")
-        ---------------------------------------
-        '''
+
         return fitness
 
 class Game_Visual:
@@ -148,6 +135,7 @@ class Game_Visual:
                     [0, 255, 0], [0, 255, 85], [0, 255, 170], [0, 255, 255],
                     [0, 0, 255], [85, 0, 255], [170, 0, 255], [255, 0, 255],
                     [255, 255, 255], [170, 170, 170], [85, 85, 85], [0, 0, 0],)
+
         # Set the font
         number_font = pygame.font.SysFont('Comic Sans MS', 30)
         title_font = pygame.font.SysFont('Arial', 15)
@@ -160,6 +148,7 @@ class Game_Visual:
             if self.curr_board.matrix[i] != 0:
                 # Convert to base for coloring
                 power_2 = math.log(self.curr_board.matrix[i], 2)
+
                 # Draw the rectangle for the piece
                 pygame.draw.rect(
                     screen, 
@@ -171,6 +160,7 @@ class Game_Visual:
                         SQ_WIDTH
                     ],# Rectangle Border
                     0)
+
                 # Draw the number inside the rectangle
                 number = number_font.render(str(self.curr_board.matrix[i]), True, (255, 255, 255))
                 single_number_width = number_font.render(str(1), True, (255, 255, 255)).get_rect().width
@@ -183,7 +173,6 @@ class Game_Visual:
         screen.blit(title, (self.width // 2 - title_width / 2, 0))
 
         score_title = title_font.render("Score: " + str(score), True, BLACK)
-        score_width = score_title.get_rect().width
         screen.blit(score_title, (10, 0))
 
         fitness_title = title_font.render("Fitness: " + str(fitness), True, BLACK)
@@ -206,7 +195,8 @@ class Game_Visual:
         pygame.display.set_caption('2048-AI')
 
         # Get the background image from a picture
-        self.background_board = pygame.image.load("Game_2048/background_board.png")
+        self.background_board = pygame.image.load(os.path.join(os.getcwd(), "examples", "game_2048", "background_board.png"))
+        
         # Create the object as a moving object
         self.background_boardrect = self.background_board.get_rect()
 
@@ -233,9 +223,8 @@ class Game_Visual:
 
             # Determine if the move is valid
             # Make this a separate thread to allow the program to run faster
-            
 
-            FINISH = float("inf")
+            # Check for moves
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -289,11 +278,11 @@ class Game_Visual:
                     # Find the numbers on the board that arent 0
                     curr_pieces = [x for x in self.curr_board.matrix if x != 0]
                     prev_pieces = [x for x in self.previous_board.matrix if x != 0]
+
                     # Sort both so the tiles line up
                     curr_pieces.sort()
                     prev_pieces.sort()
-                    # Determine the number of tiles combined
-                    num_tiles_combined = len(prev_pieces) - len(curr_pieces)
+
                     # Get rid of tiles that are the same across both
                     # Whats left in curr_pieces are the new tiles that were formed from the previous move
                     # add them up and add them with the current score to get the new score
@@ -301,6 +290,7 @@ class Game_Visual:
                         if tile in curr_pieces:
                             curr_pieces.remove(tile)
                     move_score = sum(curr_pieces)
+
                     # adjust the score according to the rank of the move selected
                     score += move_score
                     fitness += move_score // rank
@@ -319,20 +309,12 @@ class Game_Visual:
 
                     # Print updated board to screen
                     self.update_board(number, fitness, score, screen)
-
-                    '''
-                    #-------Print Move Info------
-                    print(move)  
-                    '''
                     
                     break
-                # If it doesnt do anything then try the other move
-                '''
-                #--------------Print invalid move----------------
-                print("Invalid move"
-                '''
 
+        # Allows for the game to run slower than normal so the human eye can watch
         for event in pygame.event.get():
             pass
+
         pygame.time.delay(1500)
         return fitness

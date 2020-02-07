@@ -1,6 +1,6 @@
 import copy
 import sys
-from nnetwork import neural_network as network
+from NNetwork import neural_network as network
 
 class Life:
     # Dictionary for classifying species. If 50%+ of the genes match the original creator of the species, then that species is the same.

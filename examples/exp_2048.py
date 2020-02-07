@@ -1,10 +1,12 @@
 import sys
-sys.path.append('..')
+import os
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0,parentdir)
 
-from nnetwork import life
-from nnetwork import neural_network as network
-from snapshots import snapshotgen as ssgen
-from snapshots import snapshotparse as sspar
+from NNetwork import life
+from NNetwork import neural_network as network
+from Snapshots import snapshotgen as ssgen
+from Snapshots import snapshotparse as sspar
 from game_2048 import game_AI as game
 
 # Used for getting the move of a 2048 board
@@ -117,9 +119,9 @@ It also prints the genes, and species info of all species that were created duin
 It then generates a snapshot for later use
 
 '''
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 1
 RUNS_PER_IND = 5
-NUM_VIS_IND = 2
+NUM_VIS_IND = 1
 
 # Initialize the game
 dummy_game = game.Game()

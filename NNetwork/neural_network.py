@@ -1,5 +1,5 @@
 import random
-from nnetwork import node
+from NNetwork import node
 import copy
 import sys
  

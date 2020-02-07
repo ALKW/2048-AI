@@ -5,7 +5,7 @@ import os
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 os.sys.path.insert(0,parentdir) 
-from nnetwork import neural_network as network
+from NNetwork import neural_network as network
 
 class Cons:
     FILE = 0
