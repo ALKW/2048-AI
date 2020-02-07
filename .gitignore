@@ -342,3 +342,6 @@ env/*
 
 # Snapshot file
 *.snp
+
+# Virtual Environment
+2048_AI/*
