@@ -3,6 +3,7 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+.vscode
 .vscode/*
 
 # User-specific files
@@ -344,4 +345,5 @@ env/*
 *.snp
 
 # Virtual Environment
+2048_AI
 2048_AI/*

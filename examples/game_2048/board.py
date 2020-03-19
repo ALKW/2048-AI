@@ -1,28 +1,43 @@
+'''Board class for representing the 2048 board'''
 import random
+from examples.game_2048 import error
 
-class Matrix:
-    row_one = slice(0, 4)
-    row_two = slice(4, 8)
-    row_three = slice(8, 12)
-    row_four = slice(12, 16)
-    rows = [row_one, row_two, row_three, row_four]
+class Board():
+    '''
+    Inherits from the matrix class in order to give it more functionality as a board
 
-    column_one = slice(0, 16, 4)
-    column_two = slice(1, 16, 4)
-    column_three = slice(2, 16, 4)
-    column_four = slice(3, 16, 4)
-    columns = [column_one, column_two, column_three, column_four]
+    The board itself is a "matrix" under the hood (a 1d list in python with members dividing
+    the list)
+    '''
 
-class Board(Matrix):
-    score = 0
+    ROW_ONE = slice(0, 4)
+    ROW_TWO = slice(4, 8)
+    ROW_THREE = slice(8, 12)
+    ROW_FOUR = slice(12, 16)
+    ROWS = [ROW_ONE, ROW_TWO, ROW_THREE, ROW_FOUR]
+
+    COLUMN_ONE = slice(0, 16, 4)
+    COLUMN_TWO = slice(1, 16, 4)
+    COLUMN_THREE = slice(2, 16, 4)
+    COLUMN_FOUR = slice(3, 16, 4)
+    COLUMNS = [COLUMN_ONE, COLUMN_TWO, COLUMN_THREE, COLUMN_FOUR]
 
     def __init__(self, board=None):
-        if board == None:
-            self.matrix = [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
-        else:
+        if board is not None:
+            if len(board) != 16:
+                print("Invalid board length given to instantiate matrix")
+                raise error.LengthError
             self.matrix = board
+        else:
+            self.matrix = [
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                0, 0, 0, 0
+            ]
 
-    def choose(self):
+    @classmethod
+    def choose(cls):
         '''
         Chooses 4 with probablility 0.2 and 2 with probability 0.8
 
@@ -35,15 +50,15 @@ class Board(Matrix):
             None
         '''
         probability = random.randrange(1, 11)
-        if(probability >= 2):
+        if probability >= 2:
             return 2
-        else:
-            return 4
+        return 4
 
-    def pick_position(self):
+    @classmethod
+    def pick_position(cls):
         '''
-        Picks a random number between 0 and 15
-        
+        Picks a random number between 0 and 15 in order to pick a position on the board
+
         Args:
             None
         Returns:
@@ -51,9 +66,9 @@ class Board(Matrix):
         Raises:
             None
         '''
-        p = random.randint(0, 15)
-        return p
-    
+        position = random.randint(0, 15)
+        return position
+
     def spawn_number(self):
         '''
         Creates either a 4 or a 2 anywhere a zero is in the objects list
@@ -67,15 +82,15 @@ class Board(Matrix):
         '''
         number_to_insert = self.choose()
         position = random.randint(0, 15)
-        while(self.matrix[position] != 0):
-            if(self.is_full()):
+        while self.matrix[position] != 0:
+            if self.is_full():
                 break
             position = self.pick_position()
         self.matrix[position] = number_to_insert
-    
+
     def is_full(self):
         '''
-        Determines if a list contains any zeros and returns true if it 
+        Determines if a list contains any zeros and returns true if it
         doesn't and false if it does
 
         Args:
@@ -86,27 +101,38 @@ class Board(Matrix):
         Raises:
             None
         '''
-        if (min(self.matrix) == 0):
+        if min(self.matrix) == 0:
             return False
 
-        for column_slice in self.columns:
+        for column_slice in self.COLUMNS:
             column = self.matrix[column_slice]
             if self.can_move(column):
                 return False
 
-        for row_slice in self.rows:
+        for row_slice in self.ROWS:
             row = self.matrix[row_slice]
             if self.can_move(row):
                 return False
-        
+
         return True
 
     def can_move(self, data):
+        '''
+        Checks if it is possible to move on the board or not
+
+        Args:
+            data - (list) - the list of integers that make up the board
+        Returns:
+            (Boolean) - true if it is possible to move
+                        false otherwise
+        Raises:
+            None
+        '''
         # Check for if we can move horizontally
-        if(self.can_move_helper(data)):
+        if self.can_move_helper(data):
             return True
 
-        # Transpose the board 
+        # Transpose the board
         row_length = 4
         new_data = []
         for row_num in range(0, row_length):
@@ -115,18 +141,22 @@ class Board(Matrix):
         data = new_data
 
         # check for if we can move vertically
-        if(self.can_move_helper(data)):
+        if self.can_move_helper(data):
             return True
 
         return False
 
-    def can_move_helper(self, data):
+    @classmethod
+    def can_move_helper(cls, data):
+        '''
+        this
+        '''
         curr = data[0]
         counter = 0
         for entry in data[1:]:
             # If we reach the end of a row, then continue
             if counter % 4 == 0:
-                curr == entry
+                curr = entry
                 continue
             # If an entry in a row is the same as the one next to it, we can move
             elif curr == entry:
@@ -136,8 +166,27 @@ class Board(Matrix):
                 curr = entry
             counter += 1
         return False
-    
-    def remove_from_list(self, this_list, value):
+
+    @classmethod
+    def extend_with_to(cls, arr, value, length):
+        '''
+        Appends values to the end of a list up to a specified length
+
+        Args:
+            arr (list) - list to be modified
+            value (int) - value to be appeneded to end of list
+            length (int) - target length of list
+        Returns:
+            (list) - arr with values appended
+        Raises:
+            None
+        '''
+        while len(arr) <= length:
+            arr.append(value)
+        return arr
+
+    @classmethod
+    def remove_from_list(cls, this_list, value):
         '''
         Removes all 0's from a list and does not replace them
 
@@ -150,38 +199,24 @@ class Board(Matrix):
             None
         '''
         return [value for value in this_list if value != 0]
-    
-    def fill_in_zeros(self, this_list, value, length):
-        '''
-        Appends values to the end of a list up to a specified length
-
-        Args:
-            this_list (list) - list to be modified
-            value (int) - value to be appeneded to end of list
-            length (int) - length of list
-        Returns:
-            (list) - this_list with values appended
-        Raises:
-            None
-        '''
-        while(len(this_list) != length):
-            this_list.append(value)
-        return this_list
 
     def up_movement(self):
         '''
-        Performs an up movement on the matrix within the board object.
-        The movement will go through all columns in the matrix. The 
-        matrix is a list of length 16 and is arranged in a 4x4 grid with
-        position 0 in the top left and the list extending right and
-        ending with position 16 in the bottom right. For each column the
-        slice associated with has its 0's removed and not replaced. The
-        column is then appended with 0's until the length is 4. Starting
-        at the top of the column, if the number below is the same then
-        the numbers are combined and the result is copied to a new array
-        with the number below being deleted if not then the number is 
-        copied without modification. 0's are ignored.
-        
+        Performs an up movement on the matrix within the board object. The movement will go through
+        all columns in the matrix. The matrix is a 1d list of length 16 and is arranged using
+        slices in a 4x4 grid with position 0 in the top left and the list extending right and
+        ending with position 16 in the bottom right. For each column the slice associated with has
+        its 0's removed and not replaced. The column is then appended with 0's until the length is
+        4. Starting at the top of the column, if the number below is the same then the numbers are
+        combined and the result is copied to a new array with the number below being deleted if not
+        then the number is copied without modification. 0's are ignored.
+
+        Column indices in terms of board orientation:
+        0
+        1
+        2
+        3
+
         Args:
             None
         Returns:
@@ -189,54 +224,67 @@ class Board(Matrix):
         Raises:
             None
         '''
-        for i in range(0, 4):
-            curr_column = self.matrix[self.columns[i]]
+        for col_index in range(0, 4):
+            # Get a row
+            curr_column = self.matrix[self.COLUMNS[col_index]]
+
+            # Remove all the zeros in the list as 0's are ignored in matching adjacent pairs
+            # [2 0 2] is equivalent to [2 2] when it comes to moves
+            # Then extend the row if 0's were removed. Essentially putting 0's at the end
             curr_column = self.remove_from_list(curr_column, 0)
-            curr_column = self.fill_in_zeros(curr_column, 0, 4)
+            curr_column = self.extend_with_to(curr_column, 0, 4)
+
+            # Used to store the new values after a movement has occurred
             new_values = [0, 0, 0, 0]
             counter = 0
+
+            # When two numbers are combined we need to skip over the number that was used to combine
             need_to_skip = False
+
             # clears out 0s in the column
             # checks for numbers that are the same that are next to each other
-            for k in range(0, 4):
+            for cell_index in range(0, 4):
                 # skips iteration in for loop.
-                if(need_to_skip):
+                if need_to_skip:
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
-                elif(curr_column[k] == 0):
-                    continue
-                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
-                elif(k < 3 and curr_column[k] == curr_column[k + 1]):
-                    value = curr_column[k] * 2
-                    curr_column[k] = 0
-                    curr_column[k + 1] = 0
+                if curr_column[cell_index] == 0:
+                    break
+                # checks to see if the numbers are the same in columns and combines them if they
+                # are the same. Sets flag to skip next number
+                if cell_index < 3 and curr_column[cell_index] == curr_column[cell_index + 1]:
+                    value = curr_column[cell_index] * 2
+                    curr_column[cell_index] = 0
+                    curr_column[cell_index + 1] = 0
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
                 # number is unique so it is added without modification to the new values column
                 else:
-                    new_values[counter] = curr_column[k]
+                    new_values[counter] = curr_column[cell_index]
                     counter += 1
-            # assigns the new values to the board
-            self.matrix[self.columns[i]] = new_values
-    
+
+            # assigns the new values to the column
+            self.matrix[self.COLUMNS[col_index]] = new_values
+
     def down_movement(self):
         '''
-        Performs a down movement, similar to the game 2048,
-        on the matrix within the board object. The movement will go 
-        through all columns in the matrix. The matrix is a list of 
-        length 16 and is arranged in a 4x4 grid with position 0 in the 
-        top left and the list extending right and ending with position 16
-        in the bottom right. For each column, the slice associated 
-        with has its 0's removed and not replaced. The column is then 
-        appended with 0's until the length is 4. The column is then 
-        reversed. Starting at the top of the column, if the  number 
-        below is the same then the numbers are combined and the result 
-        is copied to a new array with the number below being deleted if
+        Performs a down movement on the matrix within the board object. The movement will go through
+        all columns in the matrix. The matrix is a 1d list of length 16 and is arranged using
+        slices in a 4x4 grid with position 0 in the top left and the list extending right and
+        ending with position 16 in the bottom right. For each column the slice associated with has
+        its 0's removed and not replaced. The column is then appended with 0's until the length is
+        4. Starting at the bottom of the column, if the number above is the same then the numbers
+        are combined and the result is copied to a new array with the number below being deleted if
         not then the number is copied without modification. 0's are ignored.
-        The move is an up move with the column reversed.
-        
+
+        Column indices in terms of board orientation:
+        0
+        1
+        2
+        3
+
         Args:
             None
         Returns:
@@ -244,55 +292,58 @@ class Board(Matrix):
         Raises:
             None
         '''
-        for i in range(0, 4):
-            curr_column = self.matrix[self.columns[i]]
-            # reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
+        for col_index in range(0, 4):
+            curr_column = self.matrix[self.COLUMNS[col_index]]
+            # reverses and clears out 0s in the column, uses temp column to allow loop to execute
+            # correctly otherwise 2 zeros in first positions creates problem. List is reveresed to
+            # account for opposite Direction of move
             curr_column.reverse()
             curr_column = self.remove_from_list(curr_column, 0)
-            curr_column = self.fill_in_zeros(curr_column, 0, 4)
+            curr_column = self.extend_with_to(curr_column, 0, 4)
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
             # checks for numbers that are the same that are next to each other
-            for k in range(0, 4):
+            for cell_index in range(0, 4):
                 # skips iteration in for loop.
-                if(need_to_skip):
+                if need_to_skip:
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
-                elif(curr_column[k] == 0):
+                if curr_column[cell_index] == 0:
                     continue
-                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
-                elif(k < 3 and curr_column[k] == curr_column[k + 1]):
-                    value = curr_column[k] * 2
-                    curr_column[k] = 0
-                    curr_column[k + 1] = 0
+                # checks to see if the numbers are the same in columns and combines them if they are
+                # the same. Sets flag to skip next number
+                if cell_index < 3 and curr_column[cell_index] == curr_column[cell_index + 1]:
+                    value = curr_column[cell_index] * 2
+                    curr_column[cell_index] = 0
+                    curr_column[cell_index + 1] = 0
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
                 # number is unique so it is added without modification to the new values column
                 else:
-                    new_values[counter] = curr_column[k]
+                    new_values[counter] = curr_column[cell_index]
                     counter += 1
-            # assigns the new values to the board
+
+            # assigns the new values to the column
             new_values.reverse()
-            self.matrix[self.columns[i]] = new_values
+            self.matrix[self.COLUMNS[col_index]] = new_values
 
     def left_movement(self):
         '''
-        Performs a left movement, similar to the game 2048,
-        on the matrix within the board object. The movement will go 
-        through all rows in the matrix. The matrix is a list of 
-        length 16 and is arranged in a 4x4 grid with position 0 in the 
-        top left and the list extending right and ending with position 16
-        in the bottom right. For each row, the slice associated 
-        with has its 0's removed and not replaced. The row is then 
-        appended with 0's until the length is 4. Starting at the far 
-        right of the row, if the number to the left is the same then 
-        the numbers are combined and the result is copied to a new 
-        array with the number below being deleted if not then the number
-        is copied without modification. 0's are ignored.
-        
+        Performs a left movement, similar to the game 2048, on the matrix within the board object.
+        The movement will go through all rows in the matrix. The matrix is a list of length 16 and
+        is arranged in a 4x4 grid with position 0 in the top left and the list extending right and
+        ending with position 16 in the bottom right. For each row, the slice associated with has
+        its 0's removed and not replaced. The row is then appended with 0's until the length is 4.
+        Starting at the far right of the row, if the number to the left is the same then the
+        numbers are combined and the result is copied to a new array with the number below being
+        deleted if not then the number is copied without modification. 0's are ignored.
+
+        Row indices in terms of board orientation:
+        0 1 2 3
+
         Args:
             None
         Returns:
@@ -300,55 +351,53 @@ class Board(Matrix):
         Raises:
             None
         '''
-        for i in range(0, 4):
-            curr_column = self.matrix[self.rows[i]]
-            curr_column = self.remove_from_list(curr_column, 0)
-            curr_column = self.fill_in_zeros(curr_column, 0, 4)
+        for row_index in range(0, 4):
+            curr_row = self.matrix[self.ROWS[row_index]]
+            curr_row = self.remove_from_list(curr_row, 0)
+            curr_row = self.extend_with_to(curr_row, 0, 4)
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
             # clears out 0s in the column
             # checks for numbers that are the same that are next to each other
-            for k in range(0, 4):
+            for cell_index in range(0, 4):
                 # skips iteration in for loop.
-                if(need_to_skip):
+                if need_to_skip:
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
-                elif(curr_column[k] == 0):
+                if curr_row[cell_index] == 0:
                     continue
-                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
-                elif(k < 3 and curr_column[k] == curr_column[k + 1]):
-                    value = curr_column[k] * 2
-                    curr_column[k] = 0
-                    curr_column[k + 1] = 0
+                # checks to see if the numbers are the same in columns and combines them if they
+                # are the same. Sets flag to skip next number
+                if cell_index < 3 and curr_row[cell_index] == curr_row[cell_index + 1]:
+                    value = curr_row[cell_index] * 2
+                    curr_row[cell_index] = 0
+                    curr_row[cell_index + 1] = 0
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
                 # number is unique so it is added without modification to the new values column
                 else:
-                    new_values[counter] = curr_column[k]
+                    new_values[counter] = curr_row[cell_index]
                     counter += 1
-            # assigns the new values to the board
-            self.matrix[self.rows[i]] = new_values
+            # assigns the new values to the row
+            self.matrix[self.ROWS[row_index]] = new_values
 
     def right_movement(self):
         '''
-        Performs a right movement, similar to the game 2048,
-        on the matrix within the board object. The movement will go 
-        through all rows in the matrix. The matrix is a list of 
-        length 16 and is arranged in a 4x4 grid with position 0 in the 
-        top left and the list extending right and ending with position 16
-        in the bottom right. For each row, the slice associated 
-        with has its 0's removed and not replaced. The row is then 
-        appended with 0's until the length is 4. The row is then 
-        reversed. Starting at the far right of the row, if the number 
-        to the left is the same then the numbers are combined and the 
-        result is copied to a new array with the number below being 
-        deleted if not then the number is copied without 
-        modification. 0's are ignored. The move is a left move with 
-        the row reversed.
-        
+        Performs a right movement, similar to the game 2048, on the matrix within the board object.
+        The movement will go through all rows in the matrix. The matrix is a list of length 16 and
+        is arranged in a 4x4 grid with position 0 in the top left and the list extending right and
+        ending with position 16 in the bottom right. For each row, the slice associated with has
+        its 0's removed and not replaced. The row is then appended with 0's until the length is 4.
+        Starting at the far left of the row, if the number to the right is the same then the
+        numbers are combined and the result is copied to a new array with the number below being
+        deleted if not then the number is copied without modification. 0's are ignored.
+
+        Row indices in terms of board orientation:
+        0 1 2 3
+
         Args:
             None
         Returns:
@@ -356,72 +405,70 @@ class Board(Matrix):
         Raises:
             None
         '''
-        for i in range(0, 4):
-            curr_column = self.matrix[self.rows[i]]
-            # reverses and clears out 0s in the column, uses temp column to allow loop to execute correctly, otherwise 2 zeros in first positions creates problem
-            curr_column.reverse()
-            curr_column = self.remove_from_list(curr_column, 0)
-            curr_column = self.fill_in_zeros(curr_column, 0, 4)
+        for row_index in range(0, 4):
+            curr_row = self.matrix[self.ROWS[row_index]]
+            # reverses and clears out 0s in the column, uses temp column to allow loop to execute
+            # correctly, otherwise 2 zeros in first positions creates problem
+            curr_row.reverse()
+            curr_row = self.remove_from_list(curr_row, 0)
+            curr_row = self.extend_with_to(curr_row, 0, 4)
             new_values = [0, 0, 0, 0]
             counter = 0
             need_to_skip = False
             # checks for numbers that are the same that are next to each other
-            for k in range(0, 4):
+            for cell_index in range(0, 4):
                 # skips iteration in for loop.
-                if(need_to_skip):
+                if need_to_skip:
                     need_to_skip = False
                     continue
                 #0s are at the end, if hit then we are done with column
-                elif(curr_column[k] == 0):
+                if curr_row[cell_index] == 0:
                     continue
-                # checks to see if the numbers are the same in columns and combines them if they are the same. Sets flag to skip next number
-                elif(k < 3 and curr_column[k] == curr_column[k + 1]):
-                    value = curr_column[k] * 2
-                    curr_column[k] = 0
-                    curr_column[k + 1] = 0
+                # checks to see if the numbers are the same in columns and combines them if they
+                # are the same. Sets flag to skip next number
+                if cell_index < 3 and curr_row[cell_index] == curr_row[cell_index + 1]:
+                    value = curr_row[cell_index] * 2
+                    curr_row[cell_index] = 0
+                    curr_row[cell_index + 1] = 0
                     new_values[counter] = value
                     counter += 1
                     need_to_skip = True
                 # number is unique so it is added without modification to the new values column
                 else:
-                    new_values[counter] = curr_column[k]
+                    new_values[counter] = curr_row[cell_index]
                     counter += 1
-            # assigns the new values to the board
+
+            # assigns the new values to the row
             new_values.reverse()
-            self.matrix[self.rows[i]] = new_values
+            self.matrix[self.ROWS[row_index]] = new_values
 
     def determine_move(self, move):
         '''
         Executes move based on user input, move must match and of the
         strings below otherwise invalid move is printed
-        
-        Args: 
+
+        Args:
             move (Str) valid options: "up", "left", "right", "down"
             board (Board Object)
         Returns:
             Boolean - true if move is matches any provided move, false if
             move does not match any provided move
-        Raises: 
+        Raises:
             None
         '''
-        if(move == "up"):
+        if move == "up":
             self.up_movement()
             return True
-        elif(move == "down"):
+        if move == "down":
             self.down_movement()
             return True
-        elif(move == "left"):
+        if move == "left":
             self.left_movement()
             return True
-        elif(move == "right"):
+        if move == "right":
             self.right_movement()
             return True
-        else:
-            '''
-            #-----------------Print Invalid Move---------#
-            print("invalid move")
-            '''
-            return False
+        return False
 
     def print_matrix(self):
         '''
@@ -436,24 +483,20 @@ class Board(Matrix):
         Raises:
             None
         '''
-        row_one = slice(0, 4)
-        row_two = slice(4, 8)
-        row_three = slice(8, 12)
-        row_four = slice(12, 16)
-        print(self.matrix[row_one])
-        print(self.matrix[row_two])
-        print(self.matrix[row_three])
-        print(self.matrix[row_four])
+        print(self.matrix[Board.ROW_ONE])
+        print(self.matrix[Board.ROW_TWO])
+        print(self.matrix[Board.ROW_THREE])
+        print(self.matrix[Board.ROW_FOUR])
 
     def make_copy_matrix(self):
         '''
         Copies array of length 16 into another array of length 16
-        
-        Args: 
+
+        Args:
             new_matrix (list of length 16) matrix to be copied to
         Returns:
             new_matrix
-        Raises: 
+        Raises:
             None
         '''
         new_matrix = [x * 0 for x in range(len(self.matrix))]

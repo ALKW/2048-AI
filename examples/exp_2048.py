@@ -38,7 +38,7 @@ def find_moves_2048_board(board):
     '''
     to_return = []
     # For each row, determine if its possible to move
-    for row_slice in board.rows:
+    for row_slice in board.ROWS:
         row = board.matrix[row_slice]
         if 0 in row:
             to_return.append(1)
@@ -48,7 +48,7 @@ def find_moves_2048_board(board):
             to_return.append(0)
     
     # For each column, determine if its possible to move
-    for column_slice in board.columns:
+    for column_slice in board.COLUMNS:
         column = board.matrix[column_slice]
         if 0 in column:
             to_return.append(1)
