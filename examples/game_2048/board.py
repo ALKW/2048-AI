@@ -26,7 +26,8 @@ class Board():
         if board is not None:
             if len(board) != 16:
                 print("Invalid board length given to instantiate matrix")
-                raise error.LengthError
+                raise error.LengthError("Board length of " + str(len(board)) + " is not the correct\
+                                     board length")
             self.matrix = board
         else:
             self.matrix = [
