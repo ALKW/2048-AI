@@ -1,5 +1,7 @@
 '''Board class for representing the 2048 board'''
 import random
+import copy
+
 from examples.game_2048 import error
 
 class Board():
@@ -28,7 +30,7 @@ class Board():
                 print("Invalid board length given to instantiate matrix")
                 raise error.LengthError("Board length of " + str(len(board)) + " is not the correct\
                                      board length")
-            self.matrix = board
+            self.matrix = copy.deepcopy(board)
         else:
             self.matrix = [
                 0, 0, 0, 0,
@@ -72,7 +74,7 @@ class Board():
 
     def spawn_number(self):
         '''
-        Creates either a 4 or a 2 anywhere a zero is in the objects list
+        Creates either a 4 or a 2 anywhere a zero is in the list
 
         Args:
             None
@@ -201,6 +203,96 @@ class Board():
         '''
         return [value for value in this_list if value != 0]
 
+    @classmethod
+    def can_move_at_line(cls, line):
+        '''
+        Determines if we can move in a row or column or not. Does not compute the result
+
+        Args:
+            line - (list) - row or column to compute if its possible to move or not
+        Returns:
+            (Boolean) - True if we can move. False if we cannot
+        Raises:
+            None
+        '''
+        curr = line[0]
+        for entry in line[1:]:
+            # Skip over 0's
+            if entry == 0:
+                continue
+
+            # If we find the same number then we are done
+            if curr == entry:
+                return True
+
+            # If we find a different number, then we are now looking for a matching number
+            curr = entry
+
+        # If we reach the end, then we never found a mathc
+        return False
+
+    @classmethod
+    def execute_move(cls, curr_list):
+        '''
+        Executes the corresponding move given the column or row
+
+        Args:
+            curr_list - (list) - the row or column that is being executed upon
+        Returns:
+            (list) - The new values for the column after the move is executed
+        Raises:
+            None
+        '''
+        # Used to store the new values after a movement has occurred
+        new_values = [0, 0, 0, 0]
+        counter = 0
+
+        # When two numbers are combined we need to skip over the number that was used to combine
+        need_to_skip = False
+
+        # checks for numbers that are the same that are next to each other
+        for cell_index in range(0, 4):
+            # skips iteration in for loop.
+            if need_to_skip:
+                need_to_skip = False
+                continue
+            #0s are at the end, if hit then we are done with column
+            if curr_list[cell_index] == 0:
+                break
+            # checks to see if the numbers are the same in columns and combines them if they
+            # are the same. Sets flag to skip next number
+            if cell_index < 3 and curr_list[cell_index] == curr_list[cell_index + 1]:
+                value = curr_list[cell_index] * 2
+                curr_list[cell_index] = 0
+                curr_list[cell_index + 1] = 0
+                new_values[counter] = value
+                counter += 1
+                need_to_skip = True
+            # number is unique so it is added without modification to the new values column
+            else:
+                new_values[counter] = curr_list[cell_index]
+                counter += 1
+
+        return new_values
+
+    def is_valid(self, move):
+        '''
+        Determines if a move is valid or not
+
+        Args:
+            move - (string) - the move in question
+        Returns:
+            (Boolean) - if the move is possible or not
+        Raises:
+            None
+        '''
+        test_board = copy.deepcopy(self)
+        test_board.exec_move(move)
+
+        if test_board.matrix != self.matrix:
+            return True
+        return False
+
     def up_movement(self):
         '''
         Performs an up movement on the matrix within the board object. The movement will go through
@@ -226,7 +318,7 @@ class Board():
             None
         '''
         for col_index in range(0, 4):
-            # Get a row
+            # Get a column
             curr_column = self.matrix[self.COLUMNS[col_index]]
 
             # Remove all the zeros in the list as 0's are ignored in matching adjacent pairs
@@ -235,36 +327,7 @@ class Board():
             curr_column = self.remove_from_list(curr_column, 0)
             curr_column = self.extend_with_to(curr_column, 0, 4)
 
-            # Used to store the new values after a movement has occurred
-            new_values = [0, 0, 0, 0]
-            counter = 0
-
-            # When two numbers are combined we need to skip over the number that was used to combine
-            need_to_skip = False
-
-            # clears out 0s in the column
-            # checks for numbers that are the same that are next to each other
-            for cell_index in range(0, 4):
-                # skips iteration in for loop.
-                if need_to_skip:
-                    need_to_skip = False
-                    continue
-                #0s are at the end, if hit then we are done with column
-                if curr_column[cell_index] == 0:
-                    break
-                # checks to see if the numbers are the same in columns and combines them if they
-                # are the same. Sets flag to skip next number
-                if cell_index < 3 and curr_column[cell_index] == curr_column[cell_index + 1]:
-                    value = curr_column[cell_index] * 2
-                    curr_column[cell_index] = 0
-                    curr_column[cell_index + 1] = 0
-                    new_values[counter] = value
-                    counter += 1
-                    need_to_skip = True
-                # number is unique so it is added without modification to the new values column
-                else:
-                    new_values[counter] = curr_column[cell_index]
-                    counter += 1
+            new_values = self.execute_move(curr_column)
 
             # assigns the new values to the column
             self.matrix[self.COLUMNS[col_index]] = new_values
@@ -301,34 +364,13 @@ class Board():
             curr_column.reverse()
             curr_column = self.remove_from_list(curr_column, 0)
             curr_column = self.extend_with_to(curr_column, 0, 4)
-            new_values = [0, 0, 0, 0]
-            counter = 0
-            need_to_skip = False
-            # checks for numbers that are the same that are next to each other
-            for cell_index in range(0, 4):
-                # skips iteration in for loop.
-                if need_to_skip:
-                    need_to_skip = False
-                    continue
-                #0s are at the end, if hit then we are done with column
-                if curr_column[cell_index] == 0:
-                    continue
-                # checks to see if the numbers are the same in columns and combines them if they are
-                # the same. Sets flag to skip next number
-                if cell_index < 3 and curr_column[cell_index] == curr_column[cell_index + 1]:
-                    value = curr_column[cell_index] * 2
-                    curr_column[cell_index] = 0
-                    curr_column[cell_index + 1] = 0
-                    new_values[counter] = value
-                    counter += 1
-                    need_to_skip = True
-                # number is unique so it is added without modification to the new values column
-                else:
-                    new_values[counter] = curr_column[cell_index]
-                    counter += 1
+
+            new_values = self.execute_move(curr_column)
+
+            # Reverse the row back as we reversed it earlier
+            new_values.reverse()
 
             # assigns the new values to the column
-            new_values.reverse()
             self.matrix[self.COLUMNS[col_index]] = new_values
 
     def left_movement(self):
@@ -354,34 +396,13 @@ class Board():
         '''
         for row_index in range(0, 4):
             curr_row = self.matrix[self.ROWS[row_index]]
+
+            # The same operation except we operate on rows instead of columns
             curr_row = self.remove_from_list(curr_row, 0)
             curr_row = self.extend_with_to(curr_row, 0, 4)
-            new_values = [0, 0, 0, 0]
-            counter = 0
-            need_to_skip = False
-            # clears out 0s in the column
-            # checks for numbers that are the same that are next to each other
-            for cell_index in range(0, 4):
-                # skips iteration in for loop.
-                if need_to_skip:
-                    need_to_skip = False
-                    continue
-                #0s are at the end, if hit then we are done with column
-                if curr_row[cell_index] == 0:
-                    continue
-                # checks to see if the numbers are the same in columns and combines them if they
-                # are the same. Sets flag to skip next number
-                if cell_index < 3 and curr_row[cell_index] == curr_row[cell_index + 1]:
-                    value = curr_row[cell_index] * 2
-                    curr_row[cell_index] = 0
-                    curr_row[cell_index + 1] = 0
-                    new_values[counter] = value
-                    counter += 1
-                    need_to_skip = True
-                # number is unique so it is added without modification to the new values column
-                else:
-                    new_values[counter] = curr_row[cell_index]
-                    counter += 1
+
+            new_values = self.execute_move(curr_row)
+
             # assigns the new values to the row
             self.matrix[self.ROWS[row_index]] = new_values
 
@@ -413,37 +434,16 @@ class Board():
             curr_row.reverse()
             curr_row = self.remove_from_list(curr_row, 0)
             curr_row = self.extend_with_to(curr_row, 0, 4)
-            new_values = [0, 0, 0, 0]
-            counter = 0
-            need_to_skip = False
-            # checks for numbers that are the same that are next to each other
-            for cell_index in range(0, 4):
-                # skips iteration in for loop.
-                if need_to_skip:
-                    need_to_skip = False
-                    continue
-                #0s are at the end, if hit then we are done with column
-                if curr_row[cell_index] == 0:
-                    continue
-                # checks to see if the numbers are the same in columns and combines them if they
-                # are the same. Sets flag to skip next number
-                if cell_index < 3 and curr_row[cell_index] == curr_row[cell_index + 1]:
-                    value = curr_row[cell_index] * 2
-                    curr_row[cell_index] = 0
-                    curr_row[cell_index + 1] = 0
-                    new_values[counter] = value
-                    counter += 1
-                    need_to_skip = True
-                # number is unique so it is added without modification to the new values column
-                else:
-                    new_values[counter] = curr_row[cell_index]
-                    counter += 1
+
+            new_values = self.execute_move(curr_row)
+
+            # Reverse the row back as we reversed it earlier
+            new_values.reverse()
 
             # assigns the new values to the row
-            new_values.reverse()
             self.matrix[self.ROWS[row_index]] = new_values
 
-    def determine_move(self, move):
+    def exec_move(self, move):
         '''
         Executes move based on user input, move must match and of the
         strings below otherwise invalid move is printed

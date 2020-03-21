@@ -1,11 +1,25 @@
+"""Neural network class that optimizes using the N.E.A.T algorithm"""
+
 import random
-from NNetwork import node
 import copy
 import sys
- 
+
+from NNetwork import node
+from NNetwork import error
+
 class Network:
-    # Inputs and Outputs have defined numbers, however internals do not and need to be kept track of.
-    # Dictionary to keep track of all internal nodes with the number member as the key and weight as value
+    '''
+    Network class
+    
+    Constructor Args:
+        inputs (list (ints)) - list of inputs to be converted into a list of nodes
+        outputs (list (str)) - list of outputs' actions
+    Raises:
+        None
+    '''
+    # Inputs and Outputs have defined numbers, however internals do not and need to be kept
+    # track of. Dictionary to keep track of all internal nodes with the number member as the
+    # key and weight as value
     internal_nodes_key = dict()
 
     # The next available number to assign to an internal node
@@ -13,13 +27,16 @@ class Network:
 
     # Dictionary for keeping track of all gene codes. 
     # Key is a gene (2 connected nodes) node1.number + " " + node2.number
-    # Value is the innovation number for that gene (first gene discovered is 0, second gene discovered is 1, ...)
+    # Value is the innovation number for that gene (first gene discovered is 0, second
+    # gene discovered is 1, ...)
     gene_to_innovation_key = dict()
 
-    # Reverse key value pair so key and value switch places for quicker lookup for innovation number
+    # Reverse key value pair so key and value switch places for quicker lookup for 
+    # innovation number
     innovation_to_gene_key = dict()
 
-    # The current innovation number for genes. As the list is empty, the next gene to be created will be assigned 0
+    # The current innovation number for genes. As the list is empty, the next gene 
+    # to be created will be assigned 0
     curr_gene_num = 0
 
     # Used to ensure new networks added have the same input size as other networks
@@ -28,9 +45,15 @@ class Network:
     # Used to ensure new networks added have the same outputs as other networks
     outputs = []
 
+    # Constants used for output tuple
+    MAX_NODES = 0
+    ALL_NODES = 1
+
     def __init__(self, inputs, outputs):
         '''
-        Neural network that breeds through taking unique sup-topologies from others within its species
+        Neural network that breeds through taking unique sup-topologies from others within 
+        its species
+
         Args:
             inputs (list (ints)) - list of inputs to be converted into a list of nodes
             outputs (list (str)) - list of outputs' actions
@@ -43,17 +66,20 @@ class Network:
         self.fitness = 0
 
         # Species for the network, initialized to 0.
-        # Species is determined by which move (up, down, left, right) results in the least amount of game endings (a move is selected that doesnt do anything)
+        # Species is determined by which move (up, down, left, right) results in the least amount
+        # of game endings (a move is selected that doesnt do anything)
         self.species = -1
 
-        # Historical Makrings to improve breeding uniqueness so that higher generations dont become replicas of lower generations
+        # Historical Makrings to improve breeding uniqueness so that higher generations dont become
+        # replicas of lower generations
         self.generation = -1
 
         # Input layer of nodes
         self.inputs = [node.Node(value=inputs[x], num=(-1 * x) - 1) for x in range(len(inputs))]
 
         # Output layer of nodes
-        self.outputs = [node.Node(0, desc=outputs[x], num=(-1 * (x + len(inputs)) - 1)) for x in range(len(outputs))]
+        self.outputs = [node.Node(0, desc=outputs[x], num=(-1 * (x + len(inputs)) - 1)) 
+                        for x in range(len(outputs))]
 
         # internal nodes
         self.internal = []
@@ -61,10 +87,15 @@ class Network:
         # Connections (genes) between nodes - a list of lists of length 2
         # Input node as numbered 0 -> len(self.inputs) - 1
         # Output nodes are len(self.inputs) -> len(self.inputs) + len(self.outputs) - 1
-        # Internal nodes are kept track of using a dictionary with keys being the weight of the internal node
+        # Internal nodes are kept track of using a dictionary with keys being the weight of
+        # the internal node
         self.genes = []
 
-        # Error handling for new networks to ensure new networks have identical input and output parameters as other networks
+        # Used to identify the network. User defined variable
+        self.identifier = None
+
+        # Error handling for new networks to ensure new networks have identical input and 
+        # output parameters as other networks
         if Network.internal_nodes_num == 0:
             Network.internal_nodes_num = len(inputs) + len(outputs)
 
@@ -75,15 +106,14 @@ class Network:
             Network.outputs = [x.desc for x in self.outputs]
 
         if Network.input_size != Network.input_size:
-            print("Invalud input length for new network. Exiting")
-            exit(1)
+            print("Invalid input length for new network. Exiting")
+            sys.exit(1)
 
         if Network.outputs != [x.desc for x in self.outputs]:
             print(Network.outputs)
             print(self.outputs)
             print("Invalid outputs for new network. Exiting")
-            exit(1)
-            
+            sys.exit(1)
 
     def feed(self, stimuli=None):
         '''
@@ -97,10 +127,12 @@ class Network:
                 - Whether the choice was random or not
                 - All the nodes sorted by rank
         Raises:
-            None
+            Length error - If the stimuli length is greater than the number of input nodes
         '''
         # If stimuli are given then update the input neurons
         if stimuli != None:
+            if len(stimuli) > Network.input_size:
+                raise error.LengthError
             # Assign values to each input nodes based on stimuli passed in
             for input_node in self.inputs:
                 input_node.value = stimuli[self.inputs.index(input_node)]
@@ -115,7 +147,8 @@ class Network:
             self.reset_nodes(input_node, end=False)
 
         # Find maximum node
-        output_info = self.find_max_output()
+        # Do a deepcopy to preserve results for analysis
+        output_info = copy.deepcopy(self.find_max_output())
 
         # reset internal nodes and outputs
         for input_node in self.inputs:
@@ -159,7 +192,7 @@ class Network:
         # For each starting node (a.k.a - input node) run a DFS style search that resets all values in the network to 0
         for curr_node in start_node.connections:
             # If the node's desc is none then it it an internal node
-            if curr_node.desc == None:
+            if curr_node.desc is None:
                 curr_node.value = 0
             
             # If we want to reset output node values too
@@ -168,17 +201,17 @@ class Network:
 
             # Recursively call itself
             self.reset_nodes(curr_node, end=outputs_too)
-    
+
     def find_max_output(self):
         '''
         Finds the maximum value of all output nodes. Defaults to first if they are all the same
         Args:
             None
         Returns:
-            tuple - (desc (var), length (list), nodes (list)) 
-                - the highest value output node(s)
-                - Whether the choice was random or not
-                - All the nodes sorted by rank
+            (tuple) - ((list(Node)), (list(Node)))
+                - all nodes that had the highest output value. 
+                - All the nodes sorted by output values (max to min). If a tie occurs, the chosen
+                  value is at the front of the list
         Raises:
             None
         '''
@@ -186,22 +219,34 @@ class Network:
         max_node = node.Node(float("-inf"))
         max_nodes = [max_node]
 
+        # Sort the outputs by value, largest value is highest rank
+        all_nodes = copy.deepcopy(self.outputs)
+        all_nodes.sort(key=lambda x: x.value, reverse=True)
+
         # Find the maximum node(s)
-        for output_node in self.outputs:
+        for output_node in all_nodes:
             # Determine the maximum node
             if output_node.value > max_node.value:
                 max_node = output_node
                 max_nodes = [max_node]
 
-            # if there are two or more output nodes that share the same value append them all to the list
+            # if there are two or more output nodes that share the same value append them all
+            # to the list
             elif output_node.value == max_node.value:
                 max_nodes.append(output_node)
 
-        # Sort the outputs by value, largest value is highest rank
-        ranks = copy.deepcopy(self.outputs)
-        ranks.sort(key=lambda x: x.value, reverse=True)
+        max_node = random.choice(max_nodes)
 
-        return max_nodes, len(max_nodes), ranks
+        # Add 1 to get the chosen node up front after sorting
+        max_node.value += 1
+
+        # Sort again so that the chosen value is at the front
+        all_nodes.sort(key=lambda x: x.value, reverse=True)
+
+        # Adjust the chosen node back to its original value
+        max_node.value -= 1
+
+        return max_nodes, all_nodes
 
     def breed_with(self, other_parent):
         '''

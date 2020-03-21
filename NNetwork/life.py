@@ -1,5 +1,6 @@
 import copy
 import sys
+
 from NNetwork import neural_network as network
 
 class Life:
@@ -49,7 +50,8 @@ class Life:
                 #Run the individual through a number of games to get an average fitness
                 for _ in range(RUNS_PER_IND):
                     # Give a unique identifier (An index in the list of members in the population) and pass the network object to the game loop
-                    run_total += game_loop(self.population.index(individual), individual)
+                     game_loop(self.population.index(individual), individual)
+                     run_total += individual.fitness
                 
                 # Assign the average fitness to the network
                 individual.fitness = run_total // RUNS_PER_IND
@@ -277,13 +279,13 @@ class Life:
         Prints all genes across all networks in a formatted manner
         '''
         print("\nGenes:")
-        line_length = 5
+        line_length = 3
         count = 0
         for key in network.Network.innovation_to_gene_key.keys():
             if count == line_length:
-                print("[", key, ": ", network.Network.innovation_to_gene_key[key], "]")
+                print("[ {0:4} : {1:8} ]".format(key, network.Network.innovation_to_gene_key[key]))
                 count = 0
             else:
-                print("[", key, ":", network.Network.innovation_to_gene_key[key], "]", end="\t\t")
+                print("[ {0:4} : {1:8} ]".format(key, network.Network.innovation_to_gene_key[key]), end="\t")
                 count += 1
         print()
