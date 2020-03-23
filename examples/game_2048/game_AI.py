@@ -124,7 +124,7 @@ class GameVisual(Game):
         super().__init__(init_board)
 
         # Set the background of the game
-        self.background_board = pygame.image.load(os.path.join(os.getcwd(), "examples", "game_2048", 
+        self.background_board = pygame.image.load(os.path.join(os.getcwd(), "examples", "game_2048",
                                                                "background_board.png"))
         self.background_boardrect = self.background_board.get_rect()
 

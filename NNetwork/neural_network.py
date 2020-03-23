@@ -10,13 +10,17 @@ from NNetwork import error
 class Network:
     '''
     Network class
-    
+
     Constructor Args:
         inputs (list (ints)) - list of inputs to be converted into a list of nodes
         outputs (list (str)) - list of outputs' actions
     Raises:
         None
     '''
+    # Constants used for output tuple
+    MAX_NODES = 0
+    ALL_NODES = 1
+
     # Inputs and Outputs have defined numbers, however internals do not and need to be kept
     # track of. Dictionary to keep track of all internal nodes with the number member as the
     # key and weight as value
@@ -31,11 +35,11 @@ class Network:
     # gene discovered is 1, ...)
     gene_to_innovation_key = dict()
 
-    # Reverse key value pair so key and value switch places for quicker lookup for 
+    # Reverse key value pair so key and value switch places for quicker lookup for
     # innovation number
     innovation_to_gene_key = dict()
 
-    # The current innovation number for genes. As the list is empty, the next gene 
+    # The current innovation number for genes. As the list is empty, the next gene
     # to be created will be assigned 0
     curr_gene_num = 0
 
@@ -44,10 +48,6 @@ class Network:
 
     # Used to ensure new networks added have the same outputs as other networks
     outputs = []
-
-    # Constants used for output tuple
-    MAX_NODES = 0
-    ALL_NODES = 1
 
     def __init__(self, inputs, outputs):
         '''
@@ -631,18 +631,9 @@ def create_init_population(count, inputs, outputs):
             input_index = random.randint(0, len(inputs) - 1)
 
             # Connect the input node to the output node
-            networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index]) 
+            networks[network_index].inputs[input_index].connections.append(networks[network_index].outputs[output_index])
 
-        # fill in the genes for the network   
+        # fill in the genes for the network
         networks[network_index].update_genes()
 
     return networks
-
-
-
-
-
-
-
-
-    

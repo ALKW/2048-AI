@@ -236,7 +236,7 @@ def draw_network_topology(game_v_obj, screen, individual):
 
 
 ######################## SCRIPT START ##########################
-MAX_GENERATIONS = 10
+MAX_GENERATIONS = 50
 RUNS_PER_IND = 5
 MAX_POPULATION = 100
 MAX_PER_SPECIES = 20
@@ -281,6 +281,6 @@ ALL_LIFE.print_genes()
 ALL_LIFE.print_species_info()
 
 # Generate a snapshot after the current run ends
-GENERATOR = ssgen.Snapshot(ALL_LIFE.population, life.Life.species, 
+GENERATOR = ssgen.Snapshot(ALL_LIFE.population, life.Life.species,
                            network.Network.gene_to_innovation_key)
 GENERATOR.create_snapshot()

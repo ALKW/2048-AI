@@ -30,17 +30,20 @@ class Life:
         # Array of all networks regardless of species
         if population is None:
             self.population = []
-        self.population = population
+        else:
+            self.population = population
 
         # list of lists. each list has a specific list of species
         if species_list is None:
             self.species_list = []
-        self.species_list = species_list
+        else:
+            self.species_list = species_list
 
         # List of top performers from each generation
         if top_performers is None:
             self.top_performers = []
-        self.top_performers = top_performers
+        else:
+            self.top_performers = top_performers
 
     def run(self, game_loop, life_params=(1, 1, 20, 5)):
         '''
@@ -217,11 +220,11 @@ class Life:
         # Get the average fitness for each species
         for species_index in enumerate(species):
             #If there are no individuals of the species, then disregard it
-            if len(species[species_index]) == 0:
+            if len(species[species_index[0]]) == 0:
                 continue
 
             # Compute the average fitness for the species
-            avg_fitness[species_index] = total_fitness[species_index] // len(species[species_index])
+            avg_fitness[species_index[0]] = total_fitness[species_index[0]] // len(species[species_index[0]])
 
         return species, avg_fitness
 
