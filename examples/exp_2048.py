@@ -238,7 +238,10 @@ def draw_network_topology(game_v_obj, screen, individual):
 ######################## SCRIPT START ##########################
 MAX_GENERATIONS = 10
 RUNS_PER_IND = 5
+MAX_POPULATION = 100
+MAX_PER_SPECIES = 20
 NUM_VIS_IND = 1
+LIFE_PARAMS = (MAX_GENERATIONS, RUNS_PER_IND, MAX_POPULATION, MAX_PER_SPECIES)
 
 # Initialize the game
 DUMMY_GAME = game.Game()
@@ -263,7 +266,7 @@ else:
                                                          ["up", "down", "left", "right"])
 
 # Run the training
-ALL_LIFE.run(game_loop, MAX_GENERATIONS=MAX_GENERATIONS, RUNS_PER_IND=RUNS_PER_IND)
+ALL_LIFE.run(game_loop, life_params=LIFE_PARAMS)
 
 # Run the top networks to show off results
 ALL_LIFE.run_visualization(game_loop_vis, amount=NUM_VIS_IND)

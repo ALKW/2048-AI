@@ -112,7 +112,7 @@ class Game:
 
 class GameVisual(Game):
     '''
-    The game object for 2048 that operates in a game loop. Includes visuals and draws user defined 
+    The game object for 2048 that operates in a game loop. Includes visuals and draws user defined
     items as well
 
     Constructor Args:
@@ -192,7 +192,7 @@ class GameVisual(Game):
     def update_board(self, screen, draw_extra, individual):
         '''
         Updates the screen after each move of the board
-        
+
         Args:
             screen - (pygame.screen) - The screen object pygame uses to draw on
             draw_extra - (function) - extra user defined function that draws additional
@@ -254,7 +254,7 @@ class GameVisual(Game):
     def draw_score(self, text_font, screen):
         '''
         Draws the score to the screen
-        
+
         Args:
             textfont - (pygame.font) - The font for the text to be drawn to the screen
         Returns:
