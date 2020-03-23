@@ -1,4 +1,4 @@
-# NEAT-AI Version 2.1
+# NEAT Version 2.1
 
 ## Description
 AI that learned to play 2048 on its own. 
