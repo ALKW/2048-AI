@@ -315,7 +315,7 @@ class Life:
 
         print("--------------------- PRINTING TOP ", amount, "---------------------")
         for individual in self.population[:amount]:
-            print("-----------NETWORK ", self.population.index(individual) + 1,"-------------")
+            print("-----------NETWORK ", self.population.index(individual) + 1, "-------------")
             game_loop(self.population.index(individual), individual)
             print()
             print(individual)
@@ -381,7 +381,7 @@ class Life:
             None
         '''
         print("\nAll Species:")
-        for species in Life.species.keys():
+        for species in Life.species:
             print("Species ", Life.species[species], "\tGenes: ", species, "\tPopulation size: ",
                   len(self.species_list[int(Life.species[species])]))
 
@@ -405,7 +405,7 @@ class Life:
                 print("[ {0:4} : {1:8} ]".format(key, network.Network.innovation_to_gene_key[key]))
                 count = 0
             else:
-                print("[ {0:4} : {1:8} ]".format(key, network.Network.innovation_to_gene_key[key]), 
+                print("[ {0:4} : {1:8} ]".format(key, network.Network.innovation_to_gene_key[key]),
                       end="\t")
                 count += 1
         print()
