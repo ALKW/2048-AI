@@ -4,8 +4,8 @@ import random
 import copy
 import sys
 
-from NNetwork import node
-from NNetwork import error
+from nnetwork import node
+from nnetwork import error
 
 class Network:
     '''

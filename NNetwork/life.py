@@ -1,7 +1,7 @@
 """Builds an ecosystem of networks using Network objects"""
 import sys
 
-from NNetwork import neural_network as network
+from nnetwork import neural_network as network
 
 class Life:
     '''
@@ -84,8 +84,7 @@ class Life:
                 for _ in range(runs_per_indiv):
                     # Give a unique identifier (An index in the list of members in the population)
                     # and pass the network object to the game loop
-                    game_loop(self.population.index(individual), individual)
-                    run_total += individual.fitness
+                    run_total += game_loop(self.population.index(individual), individual)
 
                 # Assign the average fitness to the network
                 individual.fitness = run_total // runs_per_indiv
@@ -112,6 +111,8 @@ class Life:
 
             # IF we reach the last generation, then break
             if iteration == (max_generations - 1):
+                for individual in self.population:
+                    individual.fitness = 0
                 return
             # Otherwise mate and mutate the population by species. Take top 100 to keep
             # population low or whatever custom value the user defines
@@ -119,6 +120,10 @@ class Life:
 
             # Classify each new network species that was added
             self.classify_life()
+
+            # Reset the fitness of each network
+            for individual in self.population:
+                individual.fitness = 0
 
     def mutate_population(self, max_population, max_per_species):
         '''

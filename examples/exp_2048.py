@@ -17,16 +17,16 @@ import sys
 import os
 import pygame.font as font
 
-PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, PARENT_DIR)
+sys.path.append(os.getcwd())
+sys.path.append("..")
 
-import NNetwork.life as life
-import NNetwork.neural_network as network
+import nnetwork.life as life
+import nnetwork.neural_network as network
 
-import Snapshots.snapshotgen as ssgen
-import Snapshots.snapshotparse as sspar
+import snapshots.snapshotgen as ssgen
+import snapshots.snapshotparse as sspar
 
-import examples.game_2048.game_ai as game
+import examples.game_2048.game_AI as game
 
 ########################### HELPER FUNCTIONS ################################
 
@@ -152,7 +152,7 @@ def game_loop(identifier, individual):
         identifier - (int) - identifier of the network. In this case the index in the population
         individual - (Network) - The current neural network being run
     Returns:
-        (function) - The game loop that is executed by the life.run function
+        (int) - The fitness for the network
     Raises:
         None
     '''
@@ -171,7 +171,7 @@ def game_loop_vis(identifier, individual):
         identifier - (int) - identifier of the network. In this case the index in the population
         individual - (Network) - The current neural network being run
     Returns:
-        (function) - The game loop that is executed by the life.run function
+       (int) - The fitness for the network
     Raises:
         None
     '''
